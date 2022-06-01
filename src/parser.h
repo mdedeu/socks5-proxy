@@ -50,7 +50,7 @@ struct parser_definition {
     const unsigned                         states_count;
     /** por cada estado, sus transiciones */
     const struct parser_state_transition **states;
-    /** cantidad de estados por transición */
+    /** cantidad de transiciones por estado */
     const size_t                          *states_n;
 
     /** estado inicial */
