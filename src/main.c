@@ -105,7 +105,12 @@ void tcpConnectionHandler(struct selector_key *key){
         .sin_addr.s_addr = inet_addr("127.0.0.1"),
         .sin_port = htons(OTHER_PORT)};
 
+<<<<<<< HEAD
     connect(serSockFd, (struct sockaddr *) &serSockAddr, sizeof(serSockAddr));
+=======
+    //TODO: do not block  server
+    connect(serSockFd, &serSockAddr, sizeof(serSockAddr));
+>>>>>>> 02700c4ab1aacd2b2c07fc604d2b9be396e2855e
 
     selector_register(key->s, serSockFd, &activeFdHandler, OP_READ | OP_WRITE, key->data);
     printf("Registrado el socket servidor con fd: %d\n", serSockFd);
