@@ -21,11 +21,15 @@ void tcpConnectionHandler(struct selector_key *key);
 void readSocketHandler(struct selector_key *key);
 void writeSocketHandler(struct selector_key *key);
 
-struct buffer_and_fd{
+//Los sockets activos van a compartir buffers con su "par"
+typedef struct bufferAndFd{
     int fd;
     buffer * wBuff;
     buffer * rBuff;
-};
+} bufferAndFd;
+
+//La idea es que se acceda al buffer usando el fd del socket
+bufferAndFd* socksBuffer[1024];
 
 //Handlers estandares para sockets activos y pasivos
 fd_handler passiveFdHandler = {
@@ -44,7 +48,7 @@ fd_handler activeFdHandler = {
 
 
 void readSocketHandler(struct selector_key *key){
-    struct buffer_and_fd * b = (struct buffer_and_fd*)key->data- ;
+    struct bufferAndFd* b = (bufferAndFd*)key->data;
     char temp[1024];
     int nread;
     if( buffer_can_write() ){
@@ -73,6 +77,7 @@ void writeSocketHandler(struct selector_key * key ){
 // Cli <---> Proxy <---> Server
 
 //TODO: ver como manejar errores de las syscalls!!!
+//TODO: ver de reserver un bufferAndFd por cada socket anidando los buffers
 void tcpConnectionHandler(struct selector_key *key){
 
     //Abro socket para comunicarme con el cliente
@@ -144,7 +149,7 @@ int main(){
     size_t  initial_elements = 1 ;
     fd_selector fdSelector = selector_new(initial_elements);
 
-    struct buffer_and_fd newClient;
+    bufferAndFd newClient;
 
     selector_register(fdSelector, masterSocket[0], &passiveFdHandler, OP_READ, &newClient);
     selector_select(fdSelector);
