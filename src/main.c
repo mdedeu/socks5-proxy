@@ -50,7 +50,8 @@ fd_handler activeFdHandler = {
 
 
 void readSocketHandler(struct selector_key *key){
-    snprintf(auxBuff, RW_AMOUNT, "Leo: %s\n");
+    auxBuff[30] = 0;
+    printf("Leo: %s\n", auxBuff);
     int count = recv(key->fd, auxBuff, RW_AMOUNT, MSG_DONTWAIT);
     /*
     struct bufferAndFd* b = (bufferAndFd*)key->data;
@@ -66,7 +67,8 @@ void readSocketHandler(struct selector_key *key){
 
 
 void writeSocketHandler(struct selector_key * key){
-    snprintf(auxBuff, RW_AMOUNT, "Escribo: %s\n");
+    auxBuff[30] = 0;
+    printf("Leo: %s\n", auxBuff);
     int count = send(key->fd, auxBuff, RW_AMOUNT, MSG_DONTWAIT);
 }
 
@@ -90,7 +92,7 @@ void tcpConnectionHandler(struct selector_key *key){
     socklen_t cliSockAddrSize= sizeof(cliSockAddr);
 
     //TODO: asegurar que el accept no bloquee
-    int cliSockFd = accept(key->fd, &cliSockAddr, &cliSockAddrSize);
+    int cliSockFd = accept(key->fd, (struct sockaddr *) &cliSockAddr, &cliSockAddrSize);
 
 
     selector_register(key->s, cliSockFd, &activeFdHandler, OP_READ | OP_WRITE, key->data);
@@ -103,7 +105,7 @@ void tcpConnectionHandler(struct selector_key *key){
         .sin_addr.s_addr = inet_addr("127.0.0.1"),
         .sin_port = htons(OTHER_PORT)};
 
-    connect(serSockFd, &serSockAddr, sizeof(serSockAddr));
+    connect(serSockFd, (struct sockaddr *) &serSockAddr, sizeof(serSockAddr));
 
     selector_register(key->s, serSockFd, &activeFdHandler, OP_READ | OP_WRITE, key->data);
     printf("Registrado el socket servidor con fd: %d\n", serSockFd);
@@ -116,9 +118,6 @@ int main(){
     int masterSocket[2];
     int masterSocketSize=0;
     struct sockaddr_in address;
-
-	fd_set readfds;
-	fd_set writefds;
 
     if( (masterSocket[masterSocketSize] = socket(AF_INET , SOCK_STREAM , 0)) == 0)
     {
