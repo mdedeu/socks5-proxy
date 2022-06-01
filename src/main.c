@@ -12,10 +12,11 @@
 #include "selector.h"
 #include "stm.h"
 #include "buffer.h"
-
 #define MAX_PENDING_CONNECTIONS   3    // un valor bajo, para realizar pruebas
 #define PORT 8888
-#define OTHERPORT 9090
+#define OTHER_PORT 9090
+#define TRUE 1
+#define RW_AMOUNT 30
 
 void tcpConnectionHandler(struct selector_key *key);
 void readSocketHandler(struct selector_key *key);
@@ -30,6 +31,7 @@ typedef struct bufferAndFd{
 
 //La idea es que se acceda al buffer usando el fd del socket
 bufferAndFd* socksBuffer[1024];
+char auxBuff[1024] = {0};
 
 //Handlers estandares para sockets activos y pasivos
 fd_handler passiveFdHandler = {
@@ -48,6 +50,9 @@ fd_handler activeFdHandler = {
 
 
 void readSocketHandler(struct selector_key *key){
+    snprintf(auxBuff, RW_AMOUNT, "Leo: %s\n");
+    int count = recv(key->fd, auxBuff, RW_AMOUNT, MSG_DONTWAIT);
+    /*
     struct bufferAndFd* b = (bufferAndFd*)key->data;
     char temp[1024];
     int nread;
@@ -56,14 +61,14 @@ void readSocketHandler(struct selector_key *key){
         buffer_write(nread,temp);
         selector_register(key->s, newSocket->fd, &readSocketHandler,OP_READ,&newSocket);
     }
+    */
 }
 
 
-void writeSocketHandler(struct selector_key * key ){
-
+void writeSocketHandler(struct selector_key * key){
+    snprintf(auxBuff, RW_AMOUNT, "Escribo: %s\n");
+    int count = send(key->fd, auxBuff, RW_AMOUNT, MSG_DONTWAIT);
 }
-
-
 
 //El cliente se conecta conmigo a traves del socket pasivo tcp (masterSocket)
 //
@@ -87,26 +92,33 @@ void tcpConnectionHandler(struct selector_key *key){
     //TODO: asegurar que el accept no bloquee
     int cliSockFd = accept(key->fd, &cliSockAddr, &cliSockAddrSize);
 
-    //TODO: mirar que hacer con el campo data (el ultimo)
-    selector_register(key->s, cliSockFd, &activeFdHandler, OP_READ | OP_WRITE, NULL);
+
+    selector_register(key->s, cliSockFd, &activeFdHandler, OP_READ | OP_WRITE, key->data);
+    printf("Registrado el socket cliente con fd: %d\n", cliSockFd);
 
 
     //Abro socket para comunicarme con el server
     int serSockFd = socket(AF_INET, SOCK_STREAM, 0);
     struct sockaddr_in serSockAddr = {.sin_family = AF_INET,
         .sin_addr.s_addr = inet_addr("127.0.0.1"),
-        .sin_port = htons(OTHERPORT)};
+        .sin_port = htons(OTHER_PORT)};
 
     connect(serSockFd, &serSockAddr, sizeof(serSockAddr));
 
-    //TODO: mirar que hacer con el campo data (el ultimo)
-    selector_register(key->s, serSockFd, &activeFdHandler, OP_READ | OP_WRITE, NULL);
+    selector_register(key->s, serSockFd, &activeFdHandler, OP_READ | OP_WRITE, key->data);
+    printf("Registrado el socket servidor con fd: %d\n", serSockFd);
 }
 
 
 int main(){
+
+	int opt = TRUE;
     int masterSocket[2];
     int masterSocketSize=0;
+    struct sockaddr_in address;
+
+	fd_set readfds;
+	fd_set writefds;
 
     if( (masterSocket[masterSocketSize] = socket(AF_INET , SOCK_STREAM , 0)) == 0)
     {
@@ -120,8 +132,8 @@ int main(){
 
         //type of socket created
         address.sin_family = AF_INET;
-        address.sin_addr.s_addr = INADDR_ANY;
-        address.sin_port = htons( PORT );
+        address.sin_addr.s_addr = inet_addr("127.0.0.1");
+        address.sin_port = htons(PORT);
 
         // bind the socket to localhost port 8888
         if (bind(masterSocket[masterSocketSize], (struct sockaddr *)&address, sizeof(address))<0)
@@ -140,19 +152,16 @@ int main(){
         }
     }
 
-    buffer * buffer1 ;
-    char bufferArray[1024];
-    buffer_init(&buffer1, 1024, &bufferArray);
-
-
-
     size_t  initial_elements = 1 ;
     fd_selector fdSelector = selector_new(initial_elements);
 
-    bufferAndFd newClient;
+    selector_register(fdSelector, masterSocket[0], &passiveFdHandler, OP_READ, NULL);
 
-    selector_register(fdSelector, masterSocket[0], &passiveFdHandler, OP_READ, &newClient);
-    selector_select(fdSelector);
+    while(1){
+        selector_select(fdSelector);
+    }
+
+
 
     error:
         return -1;
