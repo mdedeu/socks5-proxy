@@ -52,7 +52,7 @@ fd_handler activeFdHandler = {
 void readSocketHandler(struct selector_key *key){
     auxBuff[30] = 0;
     printf("Leo: %s\n", auxBuff);
-    int count = recv(key->fd, auxBuff, RW_AMOUNT, MSG_DONTWAIT);
+    recv(key->fd, auxBuff, RW_AMOUNT, MSG_DONTWAIT);
     /*
     struct bufferAndFd* b = (bufferAndFd*)key->data;
     char temp[1024];
@@ -69,7 +69,7 @@ void readSocketHandler(struct selector_key *key){
 void writeSocketHandler(struct selector_key * key){
     auxBuff[30] = 0;
     printf("Leo: %s\n", auxBuff);
-    int count = send(key->fd, auxBuff, RW_AMOUNT, MSG_DONTWAIT);
+    send(key->fd, auxBuff, RW_AMOUNT, MSG_DONTWAIT);
 }
 
 //El cliente se conecta conmigo a traves del socket pasivo tcp (masterSocket)
@@ -105,12 +105,8 @@ void tcpConnectionHandler(struct selector_key *key){
         .sin_addr.s_addr = inet_addr("127.0.0.1"),
         .sin_port = htons(OTHER_PORT)};
 
-<<<<<<< HEAD
-    connect(serSockFd, (struct sockaddr *) &serSockAddr, sizeof(serSockAddr));
-=======
     //TODO: do not block  server
-    connect(serSockFd, &serSockAddr, sizeof(serSockAddr));
->>>>>>> 02700c4ab1aacd2b2c07fc604d2b9be396e2855e
+    connect(serSockFd, (struct sockaddr *) &serSockAddr, sizeof(serSockAddr));
 
     selector_register(key->s, serSockFd, &activeFdHandler, OP_READ | OP_WRITE, key->data);
     printf("Registrado el socket servidor con fd: %d\n", serSockFd);

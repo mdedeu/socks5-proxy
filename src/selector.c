@@ -9,13 +9,14 @@
 #include <pthread.h>
 
 #include <stdint.h> // SIZE_MAX
-#include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/select.h>
 #include <sys/signal.h>
 #include "selector.h"
+#define  _POSIX_C_SOURCE >= 199506L || _XOPEN_SOURCE >= 500
+
 
 #define N(x) (sizeof(x)/sizeof((x)[0]))
 
@@ -67,7 +68,7 @@ selector_init(const struct selector_init  *c) {
     //  March 24, 2006
     selector_status   ret = SELECTOR_SUCCESS;
     struct sigaction act = {
-        .sa_handler = wake_handler,
+        .sa_handler = wake_handler
     };
 
     // 0. calculamos mascara para evitar que se interrumpa antes de llegar al
