@@ -103,6 +103,7 @@ void tcpConnectionHandler(struct selector_key *key){
         .sin_addr.s_addr = inet_addr("127.0.0.1"),
         .sin_port = htons(OTHER_PORT)};
 
+    //TODO: do not block  server
     connect(serSockFd, &serSockAddr, sizeof(serSockAddr));
 
     selector_register(key->s, serSockFd, &activeFdHandler, OP_READ | OP_WRITE, key->data);
