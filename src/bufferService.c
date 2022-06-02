@@ -100,7 +100,7 @@ int crossLinkBuffers(int fd1, int fd2){
     buffer_init(rBuff, BUFFER_SIZE, rData);
 
     buffers[fd1]->wBuff = wBuff;
-    buffers[fd2]->rBuff = rBuff;
+    buffers[fd1]->rBuff = rBuff;
 
     buffers[fd2]->wBuff = rBuff;
     buffers[fd2]->rBuff = wBuff;

@@ -17,7 +17,7 @@
 #include "bufferService.c"
 
 #define MAX_PENDING_CONNECTIONS   3    // un valor bajo, para realizar pruebas
-#define PORT 8888
+#define PORT 1080
 #define OTHER_PORT 9090
 #define TRUE 1
 #define RW_AMOUNT 30
@@ -114,7 +114,7 @@ void tcpConnectionHandler(struct selector_key *key){
     //TODO: asegurar que el accept no bloquee
     int cliSockFd = accept(key->fd, (struct sockaddr *) &cliSockAddr, &cliSockAddrSize);
 
-    selector_register(key->s, cliSockFd, &activeFdHandler, OP_READ, key->data);
+    selector_register(key->s, cliSockFd, &activeFdHandler, OP_WRITE | OP_READ, key->data);
 
 
     //Abro socket para comunicarme con el server
@@ -126,7 +126,7 @@ void tcpConnectionHandler(struct selector_key *key){
     //TODO: do not block server
     connect(serSockFd, (struct sockaddr *) &serSockAddr, sizeof(serSockAddr));
 
-    selector_register(key->s, serSockFd, &activeFdHandler, OP_WRITE, key->data);
+    selector_register(key->s, serSockFd, &activeFdHandler, OP_READ | OP_WRITE, key->data);
 
     crossLinkBuffers(cliSockFd, serSockFd);
 }
