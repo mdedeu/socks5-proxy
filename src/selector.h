@@ -1,7 +1,6 @@
 #ifndef SELECTOR_H_W50GNLODsARolpHbsDsrvYvMsbT
 #define SELECTOR_H_W50GNLODsARolpHbsDsrvYvMsbT
 
-#include <sys/time.h>
 #include <stdbool.h>
 
 /**
@@ -70,7 +69,7 @@ struct selector_init {
     const int signal;
 
     /** tiempo máximo de bloqueo durante `selector_iteratate' */
-    struct timespec select_timeout;
+    struct timeval  select_timeout;
 };
 
 /** inicializa la librería */

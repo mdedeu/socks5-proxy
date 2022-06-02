@@ -6,12 +6,13 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/types.h>
+#include <signal.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <sys/time.h>
-#include "selector.h"
+#include "selector.c"
 #include "stm.h"
-#include "buffer.h"
+#include "buffer.c"
 #define MAX_PENDING_CONNECTIONS   3    // un valor bajo, para realizar pruebas
 #define PORT 8888
 #define OTHER_PORT 9090
@@ -153,8 +154,17 @@ int main(){
     }
 
     size_t  initial_elements = 1 ;
+
+    double x = 10.1;
+
+    struct timeval   tp;
+    tp.tv_sec = (long) x;
+    tp.tv_usec = (x - tp.tv_sec) * 1000000000L;
+    struct selector_init selector_initializer = {.select_timeout=tp,.signal=SIGALRM};
+    selector_init( &selector_initializer);
     fd_selector fdSelector = selector_new(initial_elements);
 
+    printf("%d",masterSocket[0]);
     selector_register(fdSelector, masterSocket[0], &passiveFdHandler, OP_READ, NULL);
 
     while(1){

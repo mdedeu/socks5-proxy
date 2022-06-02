@@ -15,8 +15,6 @@
 #include <sys/select.h>
 #include <sys/signal.h>
 #include "selector.h"
-#define  _POSIX_C_SOURCE >= 199506L || _XOPEN_SOURCE >= 500
-
 
 #define N(x) (sizeof(x)/sizeof((x)[0]))
 
@@ -145,9 +143,9 @@ struct fdselector {
     fd_set  slave_r,  slave_w;
 
     /** timeout prototipico para usar en select() */
-    struct timespec master_t;
+    struct timeval master_t;
     /** tambien select() puede cambiar el valor */
-    struct timespec slave_t;
+    struct timeval slave_t;
 
     // notificaciónes entre blocking jobs y el selector
     volatile pthread_t      selector_thread;
@@ -293,7 +291,7 @@ selector_new(const size_t initial_elements) {
     if(ret != NULL) {
         memset(ret, 0x00, size);
         ret->master_t.tv_sec  = conf.select_timeout.tv_sec;
-        ret->master_t.tv_nsec = conf.select_timeout.tv_nsec;
+        ret->master_t.tv_usec = conf.select_timeout.tv_usec;
         assert(ret->max_fd == 0);
         ret->resolution_jobs  = 0;
         pthread_mutex_init(&ret->resolution_mutex, 0);

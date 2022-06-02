@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -std=c11 -g -Wall -pedantic -D_POSIX_SOURCE=1
+CFLAGS = -std=c11 -g -Wall -pedantic -D_POSIX_SOURCE=1 -pthread
 OBJS= master.o shmem_posix.o sem.o
 
 
