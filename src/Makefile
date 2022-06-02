@@ -5,15 +5,17 @@ OBJS= master.o shmem_posix.o sem.o
 
 all:  main
 
-main: buffer.o selector.o
+main: buffer selector bufferService
 	$(CC) $(CFLAGS) -o server main.c
 
+bufferService: bufferService.c
+	$(CC) $(CFLAGS) -c bufferService.c
 
-buffer.o:buffer.c
+buffer: buffer.c
 	$(CC) $(CFLAGS) -c buffer.c
 
-selector.o: selector.c
+selector: selector.c
 	$(CC) $(CFLAGS) -c selector.c
 
 clean:
-	rm -f *.o server selector.o buffer.o
+	rm -f *.o server

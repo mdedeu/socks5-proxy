@@ -1,4 +1,5 @@
 #include "bufferService.h"
+#include <stdlib.h>
 #include <stdint.h>
 
 bufferAndFd* buffers[MAX_SIZE] = {NULL};

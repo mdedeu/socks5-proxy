@@ -1,8 +1,7 @@
-#ifndef bufferService.h
-#define bufferService.h
+#ifndef BUFFER_SERVICE_H
+#define BUFFER_SERVICE_H
 
-#include <buffer.h>
-#include <selector.h>
+#include "buffer.h"
 
 #define MAX_SIZE 2048
 #define BUFFER_SIZE 512

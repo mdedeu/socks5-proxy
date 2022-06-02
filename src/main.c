@@ -14,6 +14,7 @@
 #include "stm.h"
 #include "buffer.c"
 #include "bufferService.h"
+#include "bufferService.c"
 
 #define MAX_PENDING_CONNECTIONS   3    // un valor bajo, para realizar pruebas
 #define PORT 8888
@@ -24,15 +25,6 @@
 void tcpConnectionHandler(struct selector_key *key);
 void readSocketHandler(struct selector_key *key);
 void writeSocketHandler(struct selector_key *key);
-
-//Los sockets activos van a compartir buffers con su "par"
-typedef struct bufferAndFd{
-    int fd;
-    buffer * wBuff;
-    buffer * rBuff;
-} bufferAndFd;
-
-//char auxBuff[1024] = {0};
 
 //Handlers estandares para sockets activos y pasivos
 fd_handler passiveFdHandler = {
