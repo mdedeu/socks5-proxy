@@ -52,9 +52,13 @@ void readSocketHandler(struct selector_key *key){
 
     buffer * writeBuffer = bufferAndFd->wBuff;
 
+    if(!buffer_can_write(writeBuffer))
+        return;
+
     buffer_compact(writeBuffer);
     uint8_t * writePtr = buffer_write_ptr(writeBuffer, &readAmount);
-    recv(key->fd, writePtr, readAmount, MSG_DONTWAIT);
+    ssize_t readBytes = recv(key->fd, writePtr, readAmount, MSG_DONTWAIT);
+    buffer_write_adv(writeBuffer, readBytes);
 
     /*
     struct bufferAndFd* b = (bufferAndFd*)key->data;
@@ -78,8 +82,12 @@ void writeSocketHandler(struct selector_key * key){
 
     buffer * readBuffer = bufferAndFd->rBuff;
 
+    if(!buffer_can_read(readBuffer))
+        return;
+
     uint8_t * readPtr = buffer_read_ptr(readBuffer, &writeAmount);
-    send(key->fd, readPtr, writeAmount, MSG_DONTWAIT);
+    ssize_t writtenBytes = send(key->fd, readPtr, writeAmount, MSG_DONTWAIT);
+    buffer_read_adv(readBuffer, writtenBytes);
     buffer_compact(readBuffer);
 
 }
