@@ -51,8 +51,19 @@ fd_handler activeFdHandler = {
 
 
 void readSocketHandler(struct selector_key *key){
-    auxBuff[30] = 0;
-    recv(key->fd, auxBuff, RW_AMOUNT, MSG_DONTWAIT);
+
+    bufferAndFd * bufferAndFd;
+    size_t readAmount;
+
+    if(( bufferAndFd = getBufferAndFd(key->fd) ) == NULL)
+        return;
+
+    buffer * writeBuffer = bufferAndFd->wBuff;
+
+    buffer_compact(writeBuffer);
+    uint8_t * writePtr = buffer_write_ptr(writeBuffer, &readAmount);
+    recv(key->fd, writePtr, readAmount, MSG_DONTWAIT);
+
     /*
     struct bufferAndFd* b = (bufferAndFd*)key->data;
     char temp[1024];
@@ -67,8 +78,18 @@ void readSocketHandler(struct selector_key *key){
 
 
 void writeSocketHandler(struct selector_key * key){
-    auxBuff[30] = 0;
-    send(key->fd, auxBuff, RW_AMOUNT, MSG_DONTWAIT);
+    bufferAndFd * bufferAndFd;
+    size_t writeAmount;
+
+    if(( bufferAndFd = getBufferAndFd(key->fd) ) == NULL)
+        return;
+
+    buffer * readBuffer = bufferAndFd->rBuff;
+
+    uint8_t * readPtr = buffer_read_ptr(readBuffer, &writeAmount);
+    send(key->fd, readPtr, writeAmount, MSG_DONTWAIT);
+    buffer_compact(readBuffer);
+
 }
 
 //El cliente se conecta conmigo a traves del socket pasivo tcp (masterSocket)
@@ -92,7 +113,6 @@ void tcpConnectionHandler(struct selector_key *key){
 
     //TODO: asegurar que el accept no bloquee
     int cliSockFd = accept(key->fd, (struct sockaddr *) &cliSockAddr, &cliSockAddrSize);
-
 
     selector_register(key->s, cliSockFd, &activeFdHandler, OP_READ, key->data);
 
