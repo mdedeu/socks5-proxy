@@ -52,7 +52,6 @@ fd_handler activeFdHandler = {
 
 void readSocketHandler(struct selector_key *key){
     auxBuff[30] = 0;
-    printf("Leo: %s\n", auxBuff);
     recv(key->fd, auxBuff, RW_AMOUNT, MSG_DONTWAIT);
     /*
     struct bufferAndFd* b = (bufferAndFd*)key->data;
@@ -69,7 +68,6 @@ void readSocketHandler(struct selector_key *key){
 
 void writeSocketHandler(struct selector_key * key){
     auxBuff[30] = 0;
-    printf("Leo: %s\n", auxBuff);
     send(key->fd, auxBuff, RW_AMOUNT, MSG_DONTWAIT);
 }
 
@@ -96,8 +94,7 @@ void tcpConnectionHandler(struct selector_key *key){
     int cliSockFd = accept(key->fd, (struct sockaddr *) &cliSockAddr, &cliSockAddrSize);
 
 
-    selector_register(key->s, cliSockFd, &activeFdHandler, OP_READ | OP_WRITE, key->data);
-    printf("Registrado el socket cliente con fd: %d\n", cliSockFd);
+    selector_register(key->s, cliSockFd, &activeFdHandler, OP_READ, key->data);
 
 
     //Abro socket para comunicarme con el server
@@ -109,8 +106,7 @@ void tcpConnectionHandler(struct selector_key *key){
     //TODO: do not block  server
     connect(serSockFd, (struct sockaddr *) &serSockAddr, sizeof(serSockAddr));
 
-    selector_register(key->s, serSockFd, &activeFdHandler, OP_READ | OP_WRITE, key->data);
-    printf("Registrado el socket servidor con fd: %d\n", serSockFd);
+    selector_register(key->s, serSockFd, &activeFdHandler, OP_WRITE, key->data);
 }
 
 
@@ -153,8 +149,6 @@ int main(){
         }
     }
 
-    size_t  initial_elements = 1 ;
-
     double x = 10.1;
 
     struct timeval   tp;
@@ -162,9 +156,8 @@ int main(){
     tp.tv_usec = (x - tp.tv_sec) * 1000000000L;
     struct selector_init selector_initializer = {.select_timeout=tp,.signal=SIGALRM};
     selector_init( &selector_initializer);
-    fd_selector fdSelector = selector_new(initial_elements);
+    fd_selector fdSelector = selector_new(0);
 
-    printf("%d",masterSocket[0]);
     selector_register(fdSelector, masterSocket[0], &passiveFdHandler, OP_READ, NULL);
 
     while(1){

@@ -16,4 +16,4 @@ selector.o: selector.c
 	$(CC) $(CFLAGS) -c selector.c
 
 clean:
-	rm -f *.o view main selector.o buffer.o
+	rm -f *.o server selector.o buffer.o

@@ -342,7 +342,7 @@ selector_register(fd_selector        s,
     }
     // 1. tenemos espacio?
     size_t ufd = (size_t)fd;
-    if(ufd > s->fd_size) {
+    if(ufd >= s->fd_size) {
         ret = ensure_capacity(s, ufd);
         if(SELECTOR_SUCCESS != ret) {
             goto finally;
@@ -464,7 +464,7 @@ handle_iteration(fd_selector s) {
                     }
                 }
             }
-            if(FD_ISSET(i, &s->slave_w)) {
+            if(FD_ISSET(item->fd, &s->slave_w)) {
                 if(OP_WRITE & item->interest) {
                     if(0 == item->handler->handle_write) {
                         assert(("OP_WRITE arrived but no handler. bug!" == 0));
@@ -552,7 +552,7 @@ selector_select(fd_selector s) {
                 for(int i = 0 ; i < s->max_fd; i++) {
                     if(FD_ISSET(i, &s->master_r)|| FD_ISSET(i, &s->master_w)) {
                         if(-1 == fcntl(i, F_GETFD, 0)) {
-                            fprintf(stderr, "Bad descriptor detected: %d\n", i);
+                            //fprintf(stderr, "Bad descriptor detected: %d\n", i);
                         }
                     }
                 }
