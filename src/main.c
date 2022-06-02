@@ -60,16 +60,6 @@ void readSocketHandler(struct selector_key *key){
     ssize_t readBytes = recv(key->fd, writePtr, readAmount, MSG_DONTWAIT);
     buffer_write_adv(writeBuffer, readBytes);
 
-    /*
-    struct bufferAndFd* b = (bufferAndFd*)key->data;
-    char temp[1024];
-    int nread;
-    if( buffer_can_write() ){
-        nread = recv(b->fd,temp,1024,MSG_DONTWAIT);
-        buffer_write(nread,temp);
-        selector_register(key->s, newSocket->fd, &readSocketHandler,OP_READ,&newSocket);
-    }
-    */
 }
 
 
