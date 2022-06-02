@@ -13,6 +13,8 @@
 #include "selector.c"
 #include "stm.h"
 #include "buffer.c"
+#include "bufferService.h"
+
 #define MAX_PENDING_CONNECTIONS   3    // un valor bajo, para realizar pruebas
 #define PORT 8888
 #define OTHER_PORT 9090
@@ -30,9 +32,7 @@ typedef struct bufferAndFd{
     buffer * rBuff;
 } bufferAndFd;
 
-//La idea es que se acceda al buffer usando el fd del socket
-bufferAndFd* socksBuffer[1024];
-char auxBuff[1024] = {0};
+//char auxBuff[1024] = {0};
 
 //Handlers estandares para sockets activos y pasivos
 fd_handler passiveFdHandler = {
@@ -103,12 +103,13 @@ void tcpConnectionHandler(struct selector_key *key){
         .sin_addr.s_addr = inet_addr("127.0.0.1"),
         .sin_port = htons(OTHER_PORT)};
 
-    //TODO: do not block  server
+    //TODO: do not block server
     connect(serSockFd, (struct sockaddr *) &serSockAddr, sizeof(serSockAddr));
 
     selector_register(key->s, serSockFd, &activeFdHandler, OP_WRITE, key->data);
-}
 
+    crossLinkBuffers(cliSockFd, serSockFd);
+}
 
 int main(){
 
@@ -150,12 +151,12 @@ int main(){
     }
 
     double x = 10.1;
-
-    struct timeval   tp;
+    struct timeval tp;
     tp.tv_sec = (long) x;
     tp.tv_usec = (x - tp.tv_sec) * 1000000000L;
-    struct selector_init selector_initializer = {.select_timeout=tp,.signal=SIGALRM};
+    struct selector_init selector_initializer = {.select_timeout = tp, .signal = SIGALRM};
     selector_init( &selector_initializer);
+
     fd_selector fdSelector = selector_new(0);
 
     selector_register(fdSelector, masterSocket[0], &passiveFdHandler, OP_READ, NULL);
@@ -163,8 +164,6 @@ int main(){
     while(1){
         selector_select(fdSelector);
     }
-
-
 
     error:
         return -1;
