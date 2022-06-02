@@ -18,14 +18,10 @@ int linkBuffer(int fd);
 
 int unlinkBuffer(int fd);
 
+int unlinkCrossedBuffers(int fd1, int fd2);
+
 int crossLinkBuffers(int fd1, int fd2);
 
-buffer * getWriteBuffer();
-
-buffer * getReadBuffer();
-
-int getFd();
-
-int getLinkedFd();
+bufferAndFd * getBufferAndFd(int fd);
 
 #endif

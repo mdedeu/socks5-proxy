@@ -1,9 +1,12 @@
 #include "bufferService.h"
 #include <stdint.h>
 
-bufferAndFd* buffers[MAX_SIZE] = {0};
+bufferAndFd* buffers[MAX_SIZE] = {NULL};
 
 int linkBuffer(int fd){
+    if(fd < 0 || fd >= MAX_SIZE)
+        return -1;
+
     if(buffers[fd] != NULL)
         return -1;
 
@@ -26,11 +29,55 @@ int linkBuffer(int fd){
     return 0;
 }
 
-int unlinkBufferFor(int fd){
+int unlinkBuffer(int fd){
+    if(fd < 0 || fd >= MAX_SIZE || buffers[fd]->linkedFd != -1)
+        return -1;
 
+    if(buffers[fd] == NULL)
+        return 0;
+    
+    free(buffers[fd]->wBuff->data);
+    free(buffers[fd]->rBuff->data);
+
+    free(buffers[fd]->wBuff);
+    free(buffers[fd]->rBuff);
+
+    free(buffers[fd]);
+
+    buffers[fd] = NULL;
+
+    return 0;
+}
+
+int unlinkCrossedBuffers(int fd1, int fd2){
+    if(fd1 < 0 || fd2 < 0 || fd1 >= MAX_SIZE || fd2 >= MAX_SIZE)
+        return -1;
+
+    if(buffers[fd1] == NULL || buffers[fd2] == NULL)
+        return -1;
+
+    if(buffers[fd1]->linkedFd != fd2 || buffers[fd2]->linkedFd != fd1)
+        return -1;
+    
+    free(buffers[fd1]->wBuff->data);
+    free(buffers[fd1]->rBuff->data);
+
+    free(buffers[fd1]->wBuff);
+    free(buffers[fd1]->rBuff);
+
+    free(buffers[fd1]);
+    free(buffers[fd2]);
+
+    buffers[fd1] = NULL;
+    buffers[fd2] = NULL;
+
+    return 0;
 }
 
 int crossLinkBuffers(int fd1, int fd2){
+    if(fd1 < 0 || fd2 < 0 || fd1 >= MAX_SIZE || fd2 >= MAX_SIZE)
+        return -1;
+
     if(buffers[fd1] != NULL || buffers[fd2] != NULL)
         return -1;
 
@@ -60,20 +107,8 @@ int crossLinkBuffers(int fd1, int fd2){
     return 0;
 }
 
-buffer * getWriteBuffer(int fd){
-    if(fd < 0 || buffers[fd] == NULL)
+bufferAndFd * getBufferAndFd(int fd){
+    if(fd < 0 || fd >= MAX_SIZE || buffers[fd] == NULL)
         return NULL;
-    return buffers[fd]->wBuff;
-}
-
-buffer * getReadBuffer(int fd){
-    if(fd < 0 || buffers[fd] == NULL)
-        return NULL;
-    return buffers[fd]->rBuff;
-}
-
-int getLinkedFd(int fd){
-    if(fd < 0 || buffers[fd] == NULL)
-        return NULL;
-    return buffers[fd]->linkedFd;
+    return buffers[fd];
 }
