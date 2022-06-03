@@ -2,27 +2,10 @@
 #include "parser.c"
 #include <stdio.h>
 #include <unistd.h>
+#include "sock_request_parser.h"
 #define IPV4SIZE 4
 #define IPV6SIZE 16
 #define N(x) (sizeof(x)/sizeof((x)[0]))
-
-
-struct sock_request_message{
-    uint8_t  version;
-    uint8_t cmd;
-    uint8_t atyp;
-    uint8_t  * ipv4;
-    uint8_t * ipv6 ;
-    uint8_t * address;
-    uint8_t * port;
-    uint8_t addrlen;
-    uint8_t addr_character_read;
-    uint8_t ipv4_character_read;
-    uint8_t ipv6_character_read;
-    uint8_t  port_character_read;
-    struct parser * using_parser;
-};
-
 
 
 enum state_and_events{

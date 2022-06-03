@@ -1,3 +1,6 @@
+#ifndef SOCK_CLIENT_H
+#define SOCK_CLIENT_H
+
 #include <stdint.h>
 #define BUFFER_SIZE 2048
 
@@ -16,7 +19,8 @@ typedef struct sock_client{
 }
 sock_client;
 
-
 struct sock_client * init_new_client_connection(int fd);
 
 void destroy_sock_client(struct sock_client * sock_client);
+
+#endif
