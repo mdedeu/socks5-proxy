@@ -1,5 +1,12 @@
 #include "stm.c"
 #include <string.h>
+#include "sock_hello_parser.c"
+#include "selector.h"
+#include <sys/types.h>
+#include <sys/socket.h>
+#include "bufferService.h"
+
+#define READ_AMOUNT 512
 
 enum sock_state{
     TCP_CONNECTED,
@@ -9,20 +16,56 @@ enum sock_state{
     CONNECTED
 };
 
+fd_handler on_tcp_connected_fd_handler= {
+        .handle_read = NULL,
+        .handle_write = &on_tcp_connected_handler_write,
+        .handle_block = NULL,
+        .handle_close = NULL 
+};
+
 
 //return the new state if corresponding
 //should read from the fd associated (key->fd) and give the data read to the corresponding parser.
 // How to save the parser for the current client??
-static unsigned on_tcp_connected_handler_read(struct selector_key * key);
+static unsigned on_tcp_connected_handler_read(struct selector_key * key){
+
+    key->data = init_sock_hello_parser();
+
+    char aux_buff[READ_AMOUNT];
+    int read_amount = recv(key->fd, aux_buff, READ_AMOUNT, MSG_DONTWAIT);
+
+    bool finished = feed_sock_hello_parser((struct sock_hello_message *) key->data, aux_buff, read_amount);
+
+    selector_register(key->s, key->fd, &on_tcp_connected_fd_handler, OP_WRITE, key->data);
+}
+
 static unsigned hello_sock_received_handler_read(struct selector_key * key);
-static unsigned  authenticated_handler_read(struct selector_key * key);
+static unsigned authenticated_handler_read(struct selector_key * key);
 static unsigned connect_sock_received_handler_read(struct selector_key * key);
 static unsigned connected_handler_read(struct selector_key * key);
 
 //return the new state if corresponding
-static unsigned on_tcp_connected_handler_write(struct selector_key * key);
+static unsigned on_tcp_connected_handler_write(struct selector_key * key){
+
+    bufferAndFd * bufferAndFd;
+    size_t writeAmount;
+
+    if(( bufferAndFd = getBufferAndFd(key->fd) ) == NULL)
+        return TCP_CONNECTED;
+
+    buffer * readBuffer = bufferAndFd->rBuff;
+
+    if(!buffer_can_read(readBuffer))
+        return TCP_CONNECTED;
+
+    uint8_t * readPtr = buffer_read_ptr(readBuffer, &writeAmount);
+    ssize_t writtenBytes = send(key->fd, readPtr, writeAmount, MSG_DONTWAIT);
+    buffer_read_adv(readBuffer, writtenBytes);
+    buffer_compact(readBuffer);
+}
+
 static unsigned hello_sock_received_handler_write(struct selector_key * key);
-static unsigned  authenticated_handler_write(struct selector_key * key);
+static unsigned authenticated_handler_write(struct selector_key * key);
 static unsigned connect_sock_received_handler_write(struct selector_key * key);
 static unsigned connected_handler_write(struct selector_key * key);
 

@@ -27,6 +27,8 @@ int linkBuffer(int fd){
     buffers[fd]->wBuff = wBuff;
     buffers[fd]->rBuff = rBuff;
 
+    buffers[fd]->stm = init_proxy_state_machine();
+
     return 0;
 }
 
@@ -42,6 +44,8 @@ int unlinkBuffer(int fd){
 
     free(buffers[fd]->wBuff);
     free(buffers[fd]->rBuff);
+
+    destroy_sock_state(buffers[fd]->stm);
 
     free(buffers[fd]);
 

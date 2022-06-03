@@ -105,7 +105,7 @@ struct sock_hello_message * init_sock_hello_parser(){
     return new_sock_hello_message;
 }
 
-void feed_sock_authentication_parser(struct sock_hello_message * sock_data ,char * input,int input_size){
+bool feed_sock_hello_parser(struct sock_hello_message * sock_data ,char * input,int input_size){
     const struct parser_event * current_event;
     for(int i = 0 ; i < input_size  && (sock_data->using_parser->state != END  ); i++){
         current_event = parser_feed(sock_data->using_parser,input[i]);
@@ -128,9 +128,12 @@ void feed_sock_authentication_parser(struct sock_hello_message * sock_data ,char
         if(current_event->type ==ERROR_FOUND_EVENT)
             break;
     }
+    if(sock_data->using_parser->state == END)
+        return true;
+    return false;
 }
 
-void close_sock_authentication_parser(struct sock_hello_message *  current_data){
+void close_sock_hello_parser(struct sock_hello_message *  current_data){
     parser_destroy(current_data->using_parser);
     free(current_data->methods);
     free(current_data);
@@ -141,9 +144,9 @@ void close_sock_authentication_parser(struct sock_hello_message *  current_data)
 //int main(){
 //    struct sock_hello_message * sock =init_sock_hello_parser();
 //    char input[]={5,2,1,2,};
-////    feed_sock_authentication_parser(sock,input,sizeof (input));
+////    feed_sock_hello_parser(sock,input,sizeof (input));
 //    for(int i = 0 ; i < sizeof (input);i++){
-//        feed_sock_authentication_parser(sock,input+i,1);
+//        feed_sock_hello_parser(sock,input+i,1);
 //        sleep(5);
 //    }
 //    printf("version: %d\n",sock->version);
@@ -152,7 +155,7 @@ void close_sock_authentication_parser(struct sock_hello_message *  current_data)
 //        printf("method %d\n",sock->methods[j]);
 //
 //    //    printf("methods %s\n",sock->username);
-//    close_sock_authentication_parser(sock);
+//    close_sock_hello_parser(sock);
 //
 //}
 
