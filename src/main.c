@@ -28,12 +28,13 @@ void writeSocketHandler(struct selector_key *key);
 
 //Handlers estandares para sockets activos y pasivos
 fd_handler passiveFdHandler = {
-    .handle_read = &tcpConnectionHandler,
-    .handle_write = NULL,
-    .handle_block = NULL,
-    .handle_close = NULL
+        .handle_read = &tcpConnectionHandler,
+        .handle_write = NULL,
+        .handle_block = NULL,
+        .handle_close = NULL
 };
 
+//to be replaced by the state machine methods
 fd_handler activeFdHandler = {
     .handle_read = &readSocketHandler,
     .handle_write = &writeSocketHandler,
@@ -104,6 +105,8 @@ void tcpConnectionHandler(struct selector_key *key){
     //TODO: asegurar que el accept no bloquee
     int cliSockFd = accept(key->fd, (struct sockaddr *) &cliSockAddr, &cliSockAddrSize);
 
+
+    //TODO: create the state machine of the client and assign its methods as fd_handlers
     selector_register(key->s, cliSockFd, &activeFdHandler, OP_WRITE | OP_READ, key->data);
 
 
@@ -116,6 +119,7 @@ void tcpConnectionHandler(struct selector_key *key){
     //TODO: do not block server
     connect(serSockFd, (struct sockaddr *) &serSockAddr, sizeof(serSockAddr));
 
+    //this only receives data, do not need an associated state machine
     selector_register(key->s, serSockFd, &activeFdHandler, OP_READ | OP_WRITE, key->data);
 
     crossLinkBuffers(cliSockFd, serSockFd);

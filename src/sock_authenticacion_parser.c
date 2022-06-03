@@ -186,22 +186,3 @@ void close_sock_authentication_parser(struct sock_authentication_message *  curr
     free(current_data);
 }
 
-
-
-
-
-
-
-
-int main(){
-    struct sock_authentication_message * sock = init_sock_authentication_parser();
-    char input[]={'5',2,'t','u',3,'r','c','o'};
-    feed_sock_authentication_parser(sock,input,sizeof (input));
-    printf("version: %d\n",sock->version);
-    printf("username_length: %d\n",sock->username_length);
-    printf("username: %s\n",sock->username);
-    printf("password_length: %d\n",sock->password_length);
-    printf("password: %s\n",sock->password);
-    close_sock_authentication_parser(sock);
-
-}
