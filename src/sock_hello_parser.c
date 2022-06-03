@@ -1,18 +1,4 @@
-#include <stdint.h>
-#include "parser.c"
-#include <stdio.h>
-#include <unistd.h>
-#define N(x) (sizeof(x)/sizeof((x)[0]))
-
-struct sock_hello_message{
-    uint8_t  version;
-    uint8_t nmethods;
-    uint8_t * methods;
-    uint8_t last_method_added;
-    struct parser * using_parser;
-};
-
-
+#include "sock_hello_parser.h"
 
 enum states_and_events{
     INITIAL_STATE,
@@ -139,23 +125,4 @@ void close_sock_hello_parser(struct sock_hello_message *  current_data){
     free(current_data);
 }
 
-
-
-//int main(){
-//    struct sock_hello_message * sock =init_sock_hello_parser();
-//    char input[]={5,2,1,2,};
-////    feed_sock_hello_parser(sock,input,sizeof (input));
-//    for(int i = 0 ; i < sizeof (input);i++){
-//        feed_sock_hello_parser(sock,input+i,1);
-//        sleep(5);
-//    }
-//    printf("version: %d\n",sock->version);
-//    printf("nmethods: %d\n",sock->nmethods);
-//    for(int j = 0 ; j < sock->nmethods ; j++)
-//        printf("method %d\n",sock->methods[j]);
-//
-//    //    printf("methods %s\n",sock->username);
-//    close_sock_hello_parser(sock);
-//
-//}
 

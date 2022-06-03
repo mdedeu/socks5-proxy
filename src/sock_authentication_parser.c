@@ -1,19 +1,6 @@
-#include <stdint.h>
-#include "parser.c"
-#include <stdio.h>
-#define N(x) (sizeof(x)/sizeof((x)[0]))
+#include "sock_authentication_parser.h"
 
 
-struct sock_authentication_message{
-    uint8_t  version;
-    uint8_t  username_length;
-    uint8_t username_characters_read;
-    char * username;
-    uint8_t  password_length;
-    uint8_t password_characters_read ;
-    char * password;
-    struct parser * using_parser;
-};
 
 enum states_and_events{
     INITIAL_STATE,

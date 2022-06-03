@@ -1,6 +1,4 @@
 #include "general_handlers.h"
-#include "sock_client.h"
-#include "proxy_state_machine.c"
 
 void socks5_read(struct selector_key * key){
     sock_client * current_client = (sock_client* ) key->data;

@@ -1,9 +1,4 @@
 #include "client_request_processor.h"
-#include "sock_client.h"
-#include "buffer.h"
-#DEFINE USERNAME_AUTHENTICATION 2
-#DEFINE VERSION 5
-#DEFINE NON_METHODS_ACCEPTED 255
 
 
 void process_hello_message(struct sock_hello_message data, struct selector_key * key){

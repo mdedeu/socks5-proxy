@@ -1,5 +1,8 @@
+#ifndef
 #include "selector.h"
-
+#include "general_handlers.h"
+#include "sock_client.h"
+#include "proxy_state_machine.c"
 static const struct fd_handler socks5_handler = {
         .handle_read = socks5_read,
         .handle_write = socks5_write,
@@ -13,4 +16,4 @@ void socks5_read(struct selector_key * key);
 void socks5_write(struct selector_key * key);
 void socks5_block(struct selector_key * key);
 void socks5_close(struct selector_key * key);
-
+#endif
