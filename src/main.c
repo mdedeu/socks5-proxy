@@ -15,6 +15,8 @@
 #include "buffer.c"
 #include "bufferService.h"
 #include "bufferService.c"
+#include "sock_client.h"
+#include "general_handlers.h"
 
 #define MAX_PENDING_CONNECTIONS   3    // un valor bajo, para realizar pruebas
 #define PORT 1080
@@ -36,10 +38,10 @@ fd_handler passiveFdHandler = {
 
 //to be replaced by the state machine methods
 fd_handler activeFdHandler = {
-    .handle_read = &readSocketHandler,
-    .handle_write = &writeSocketHandler,
-    .handle_block = NULL,
-    .handle_close = NULL
+    .handle_read = &socks5_read,
+    .handle_write = &socks5_write,
+    .handle_block = &socks5_block,
+    .handle_close = &socks5_close
 };
 
 
@@ -105,24 +107,23 @@ void tcpConnectionHandler(struct selector_key *key){
     //TODO: asegurar que el accept no bloquee
     int cliSockFd = accept(key->fd, (struct sockaddr *) &cliSockAddr, &cliSockAddrSize);
 
+    struct sock_client * new_client = init_new_client_connection(cliSockFd);
+    selector_register(key->s, cliSockFd, &activeFdHandler, OP_READ, new_client );
 
-    //TODO: create the state machine of the client and assign its methods as fd_handlers
-    selector_register(key->s, cliSockFd, &activeFdHandler, OP_WRITE | OP_READ, key->data);
 
-
-    //Abro socket para comunicarme con el server
-    int serSockFd = socket(AF_INET, SOCK_STREAM, 0);
-    struct sockaddr_in serSockAddr = {.sin_family = AF_INET,
-        .sin_addr.s_addr = inet_addr("127.0.0.1"),
-        .sin_port = htons(OTHER_PORT)};
-
-    //TODO: do not block server
-    connect(serSockFd, (struct sockaddr *) &serSockAddr, sizeof(serSockAddr));
-
-    //this only receives data, do not need an associated state machine
-    selector_register(key->s, serSockFd, &activeFdHandler, OP_READ | OP_WRITE, key->data);
-
-    crossLinkBuffers(cliSockFd, serSockFd);
+//    //Abro socket para comunicarme con el server
+//    int serSockFd = socket(AF_INET, SOCK_STREAM, 0);
+//    struct sockaddr_in serSockAddr = {.sin_family = AF_INET,
+//        .sin_addr.s_addr = inet_addr("127.0.0.1"),
+//        .sin_port = htons(OTHER_PORT)};
+//
+//    //TODO: do not block server
+//    connect(serSockFd, (struct sockaddr *) &serSockAddr, sizeof(serSockAddr));
+//
+//    //this only receives data, do not need an associated state machine
+//    selector_register(key->s, serSockFd, &activeFdHandler, OP_READ | OP_WRITE, key->data);
+//
+//    crossLinkBuffers(cliSockFd, serSockFd);
 }
 
 int main(){

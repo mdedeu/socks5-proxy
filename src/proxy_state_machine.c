@@ -5,6 +5,10 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include "bufferService.h"
+#include "sock_client.h"
+#include "client_request_processor.h"
+#define HELLO_REQUEST_LENGTH 2
+
 
 #define READ_AMOUNT 512
 
@@ -28,15 +32,21 @@ fd_handler on_tcp_connected_fd_handler= {
 //should read from the fd associated (key->fd) and give the data read to the corresponding parser.
 // How to save the parser for the current client??
 static unsigned on_tcp_connected_handler_read(struct selector_key * key){
-
-    key->data = init_sock_hello_parser();
-
     char aux_buff[READ_AMOUNT];
-    int read_amount = recv(key->fd, aux_buff, READ_AMOUNT, MSG_DONTWAIT);
-
-    bool finished = feed_sock_hello_parser((struct sock_hello_message *) key->data, aux_buff, read_amount);
-
-    selector_register(key->s, key->fd, &on_tcp_connected_fd_handler, OP_WRITE, key->data);
+    sock_client * client_data = (sock_client * )key->data;
+    uint8_t  available_space ;
+    buffer_write_ptr(client_data->write_buffer,&available_space);
+    if(available_space >= HELLO_SOCK_RECEIVED){
+        int read_amount = recv(key->fd, aux_buff, READ_AMOUNT, MSG_DONTWAIT);
+        bool finished = feed_sock_hello_parser((struct sock_hello_message *) (client_data->current_parser), aux_buff, read_amount);
+        if(!finished)
+            return TCP_CONNECTED;
+        else{
+            process_hello_message(client_data->current_parser,key);
+            selector_set_interest_key(key, OP_WRITE);
+            return HELLO_SOCK_RECEIVED;
+        }
+    }
 }
 
 static unsigned hello_sock_received_handler_read(struct selector_key * key);
@@ -47,7 +57,7 @@ static unsigned connected_handler_read(struct selector_key * key);
 //return the new state if corresponding
 static unsigned on_tcp_connected_handler_write(struct selector_key * key){
 
-    bufferAndFd * bufferAndFd;
+
     size_t writeAmount;
 
     if(( bufferAndFd = getBufferAndFd(key->fd) ) == NULL)
