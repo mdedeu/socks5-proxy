@@ -20,12 +20,6 @@ enum sock_state{
     CONNECTED
 };
 
-fd_handler on_tcp_connected_fd_handler= {
-        .handle_read = NULL,
-        .handle_write = &on_tcp_connected_handler_write,
-        .handle_block = NULL,
-        .handle_close = NULL 
-};
 
 
 //return the new state if corresponding
@@ -56,22 +50,15 @@ static unsigned connected_handler_read(struct selector_key * key);
 
 //return the new state if corresponding
 static unsigned on_tcp_connected_handler_write(struct selector_key * key){
-
-
-    size_t writeAmount;
-
-    if(( bufferAndFd = getBufferAndFd(key->fd) ) == NULL)
+    sock_client * client_data = (sock_client * ) key->data;
+    if(!buffer_can_read(client_data->write_buffer))
         return TCP_CONNECTED;
-
-    buffer * readBuffer = bufferAndFd->rBuff;
-
-    if(!buffer_can_read(readBuffer))
-        return TCP_CONNECTED;
-
-    uint8_t * readPtr = buffer_read_ptr(readBuffer, &writeAmount);
-    ssize_t writtenBytes = send(key->fd, readPtr, writeAmount, MSG_DONTWAIT);
-    buffer_read_adv(readBuffer, writtenBytes);
-    buffer_compact(readBuffer);
+    size_t write_amount;
+    uint8_t  * reading_since = buffer_read_ptr(client_data->write_buffer,&write_amount);
+    ssize_t written_bytes = send(client_data->fd, reading_since, write_amount, MSG_DONTWAIT);
+    buffer_read_adv(client_data->write_buffer, written_bytes);
+    buffer_compact(client_data->write_buffer);
+    selector_set_interest_key(key, OP_READ);
 }
 
 static unsigned hello_sock_received_handler_write(struct selector_key * key);
