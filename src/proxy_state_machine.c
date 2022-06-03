@@ -35,16 +35,16 @@ static struct state_definition connected_state = {.state=CONNECTED,.on_read_read
 
 static struct state_definition states[]={tcp_connected_state,hello_sock_received_state,authenticated_state,connect_sock_received_state,connected_state};
 
-struct state_machine sock_client_machine={
+static struct state_machine sock_client_machine={
         .initial=TCP_CONNECTED,
         .states=states,
         .max_state = N(states)
 };
 
 struct state_machine * init_proxy_state_machine(){
-    struct state_machine  * current = malloc(sizeof (struct state_machine));
-    memcpy(current,&sock_client_machine,sizeof (sizeof(struct state_machine)));
-    return current;
+    struct state_machine * aux = malloc(sizeof (state_machine));
+    memcpy(aux,&sock_client_machine,sizeof (state_machine));
+    struct state_machine  * current = stm_init(&aux);
 }
 
 void destroy_sock_state(struct state_machine * sock_machine){
