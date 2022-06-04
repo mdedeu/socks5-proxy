@@ -1,5 +1,13 @@
 #include "proxy_state_machine.h"
-
+#include "stm.h"
+#include <string.h>
+#include "sock_hello_parser.h"
+#include "selector.h"
+#include <sys/types.h>
+#include <sys/socket.h>
+#include "bufferService.h"
+#include "client_request_processor.h"
+#include "sock_client.h"
 
 //return the new state if corresponding
 //should read from the fd associated (key->fd) and give the data read to the corresponding parser.
@@ -11,12 +19,12 @@ static unsigned on_tcp_connected_handler_read(struct selector_key *key) {
     buffer_write_ptr(client_data->write_buffer, &available_space);
     if (available_space >= HELLO_SOCK_RECEIVED) {
         int read_amount = recv(key->fd, aux_buff, READ_AMOUNT, MSG_DONTWAIT);
-        bool finished = feed_sock_hello_parser((struct sock_hello_message *) (client_data->current_parser), aux_buff,
+        bool finished = feed_sock_hello_parser((struct sock_hello_message *) (client_data->current_parser.hello_message), aux_buff,
                                                read_amount);
         if (!finished)
             return TCP_CONNECTED;
         else {
-            process_hello_message(client_data->current_parser, key);
+            process_hello_message((struct sock_hello_message) *(client_data->current_parser.hello_message), key);
             selector_set_interest_key(key, OP_WRITE);
             return HELLO_SOCK_RECEIVED;
         }
@@ -38,7 +46,7 @@ static unsigned on_tcp_connected_handler_write(struct selector_key *key) {
         return TCP_CONNECTED;
     size_t write_amount;
     uint8_t *reading_since = buffer_read_ptr(client_data->write_buffer, &write_amount);
-    ssize_t written_bytes = send(client_data->fd, reading_since, write_amount, MSG_DONTWAIT);
+    ssize_t written_bytes = send(client_data->client_fd, reading_since, write_amount, MSG_DONTWAIT);
     buffer_read_adv(client_data->write_buffer, written_bytes);
     buffer_compact(client_data->write_buffer);
     selector_set_interest_key(key, OP_READ);
@@ -76,7 +84,10 @@ static struct state_machine sock_client_machine = {
 struct state_machine *init_proxy_state_machine() {
     struct state_machine *aux = malloc(sizeof(state_machine));
     memcpy(aux, &sock_client_machine, sizeof(state_machine));
-    struct state_machine *current = stm_init(&aux);
+    //struct state_machine *current = stm_init(&aux);
+    //TODO: mirar si esto esta bien
+    stm_init(aux);
+    return aux;
 }
 
 void destroy_sock_state(struct state_machine *sock_machine) {
