@@ -1,6 +1,8 @@
 #ifndef SOCK_CLIENT_H
 #define SOCK_CLIENT_H
-
+#include "sock_client.h"
+#include <stdlib.h>
+#include "proxy_state_machine.c"
 #include <stdint.h>
 #define BUFFER_SIZE 2048
 

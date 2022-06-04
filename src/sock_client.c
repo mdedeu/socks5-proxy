@@ -1,6 +1,5 @@
 #include "sock_client.h"
-#include <stdlib.h>
-#include "proxy_state_machine.c"
+
 struct sock_client * init_new_client_connection(int fd){
     sock_client  * new_client = malloc(sizeof (sock_client));
 //    if(new_client == NULL)

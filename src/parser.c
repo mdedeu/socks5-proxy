@@ -1,19 +1,14 @@
-#include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-
 #include "parser.h"
 
 /* CDT del parser */
 struct parser {
     /** tipificación para cada caracter */
-    const unsigned     *classes;
+    const unsigned *classes;
     /** definición de estados */
     const struct parser_definition *def;
 
     /* estado actual */
-    unsigned            state;
+    unsigned state;
 
     /* evento que se retorna */
     struct parser_event e1;

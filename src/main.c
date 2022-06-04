@@ -10,11 +10,11 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <sys/time.h>
-#include "selector.c"
+#include "selector.h"
 #include "stm.h"
-#include "buffer.c"
+#include "buffer.h"
 #include "bufferService.h"
-#include "bufferService.c"
+#include "bufferService.h"
 #include "sock_client.h"
 #include "general_handlers.h"
 
