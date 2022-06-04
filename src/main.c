@@ -111,7 +111,7 @@ void tcpConnectionHandler(struct selector_key *key){
     int cliSockFd = accept(key->fd, (struct sockaddr *) &cliSockAddr, &cliSockAddrSize);
 
     struct sock_client * new_client = init_new_client_connection(cliSockFd);
-    selector_register(key->s, cliSockFd, &activeFdHandler, OP_READ, new_client );
+    selector_register(key->s, cliSockFd, &activeFdHandler, OP_READ, new_client);
 
 
 //    //Abro socket para comunicarme con el server

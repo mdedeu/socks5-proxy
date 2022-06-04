@@ -12,6 +12,7 @@ struct sock_client * init_new_client_connection(int fd){
     new_client->read_buffer = temp_read;
     new_client->write_buffer = temp_write;
     new_client->current_parser.hello_message = init_sock_hello_parser();
+    return new_client;
 }
 
 void destroy_sock_client(struct sock_client * sock_client){

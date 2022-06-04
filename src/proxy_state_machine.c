@@ -18,9 +18,10 @@ static unsigned on_tcp_connected_handler_read(struct selector_key *key) {
         else {
             process_hello_message(client_data->current_parser.hello_message, key);
             selector_set_interest_key(key, OP_WRITE);
-            return HELLO_SOCK_RECEIVED;
+            return TCP_CONNECTED;
         }
     }
+    return TCP_CONNECTED;
 }
 
 //static unsigned hello_sock_received_handler_read(struct selector_key *key);
@@ -42,6 +43,7 @@ static unsigned on_tcp_connected_handler_write(struct selector_key *key) {
     buffer_read_adv(client_data->write_buffer, written_bytes);
     buffer_compact(client_data->write_buffer);
     selector_set_interest_key(key, OP_READ);
+    return HELLO_SOCK_RECEIVED;
 }
 
 //static unsigned hello_sock_received_handler_write(struct selector_key *key);
