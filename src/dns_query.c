@@ -1,5 +1,7 @@
 #include "dns_query.h"
 
+
+
  void * request_resolving_blocking(void * data ) {
     struct selector_key * key = (struct selector_key*) data;
     struct sock_client *  sock_client_information  = ( struct sock_client * ) key ->data;
