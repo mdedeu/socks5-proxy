@@ -6,6 +6,4 @@
 #include <stdio.h>
 #include "sock_client.h"
 
-
-
-static void * request_resolving_blocking(void * data ) ;
+ void * request_resolving_blocking(void * data ) ;

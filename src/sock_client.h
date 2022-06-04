@@ -1,10 +1,14 @@
 #ifndef SOCK_CLIENT_H
 #define SOCK_CLIENT_H
-
 #include "buffer.h"
 #include <stdlib.h>
 #include "proxy_state_machine.h"
 #include <stdint.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+
 #define BUFFER_SIZE 2048
 
 typedef struct sock_client{
@@ -21,7 +25,6 @@ typedef struct sock_client{
     } current_parser;
 
     struct addrinfo * origin_resolutions;
-
     struct addrinfo * current_origin_resolution;
 
     struct sockaddr_storage origin_address;

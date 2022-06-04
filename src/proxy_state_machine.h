@@ -22,7 +22,6 @@
 #include <netinet/in.h>
 #include <netdb.h>
 
-
 enum sock_state {
     TCP_CONNECTED,
     HELLO_SOCK_RECEIVED,

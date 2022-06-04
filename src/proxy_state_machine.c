@@ -68,7 +68,7 @@ static unsigned authenticated_handler_read(struct selector_key *key){
 
 }
 
-static unsigned ready_to_connect_on_arrival(struct selector_key * key ){
+static void ready_to_connect_on_arrival(unsigned state , struct selector_key * key ){
     sock_client * client_information  = (sock_client*) key->data;
 
     int server_socket_fd;
@@ -82,8 +82,6 @@ static unsigned ready_to_connect_on_arrival(struct selector_key * key ){
     selector_fd_set_nio(server_socket_fd);
     client_information->origin_fd = connect(server_socket_fd,(struct sockaddr *) &(client_information->origin_address), sizeof (struct sockaddr_in));
     selector_register(key->s, server_socket_fd, &socks5_handler,OP_WRITE, key);
-
-    return READY_TO_CONNECT;
 }
 
 static unsigned ready_to_connect_block_handler(struct selector_key * key){
@@ -107,6 +105,7 @@ static unsigned  ready_to_connect_write_handle(struct selector_key * key){
         }
         return WRITING_REPLY;
     }
+    return WRITING_REPLY;
 }
 //static unsigned connect_sock_received_handler_read(struct selector_key *key);
 //
@@ -153,16 +152,16 @@ static unsigned hello_sock_received_handler_write(struct selector_key *key){
 
 }
 
-static unsigned authenticated_handler_write(struct selector_key *key);
+//static unsigned authenticated_handler_write(struct selector_key *key);
 //static unsigned connect_sock_received_handler_write(struct selector_key *key);
 //
 //static unsigned connected_handler_write(struct selector_key *key);
 
 
 static const struct state_definition tcp_connected_state = {.state=TCP_CONNECTED, .on_read_ready=on_tcp_connected_handler_read, .on_write_ready=on_tcp_connected_handler_write,.on_departure=on_tcp_connected_departure};
-static const struct state_definition hello_sock_received_state = {.state=HELLO_SOCK_RECEIVED, .on_read_ready=hello_sock_received_handler_read, .on_write_ready=hello_sock_received_handler_write};
-static const struct state_definition authenticated_state = {.state=AUTHENTICATED, .on_read_ready=authenticated_handler_read, .on_write_ready=authenticated_handler_write};
-static const struct state_definition ready_to_connect = {.state=READY_TO_CONNECT, .on_block_ready=ready_to_connect_block_handler, .on_arrival=ready_to_connect_on_arrival};
+static const struct state_definition hello_sock_received_state = {.state=HELLO_SOCK_RECEIVED, .on_read_ready=hello_sock_received_handler_read, .on_write_ready=hello_sock_received_handler_write,.on_departure=on_hello_sock_departure};
+static const struct state_definition authenticated_state = {.state=AUTHENTICATED, .on_read_ready=authenticated_handler_read};
+static const struct state_definition ready_to_connect = {.state=READY_TO_CONNECT, .on_block_ready=ready_to_connect_block_handler, .on_write_ready=ready_to_connect_write_handle,.on_arrival=ready_to_connect_on_arrival};
 
 //static struct state_definition connect_sock_received_state = {.state=CONNECT_SOCK_RECEIVED, .on_read_ready=connect_sock_received_handler_read, .on_write_ready=connect_sock_received_handler_write};
 //static struct state_definition connected_state = {.state=CONNECTED, .on_read_ready=connected_handler_read, .on_write_ready=connected_handler_write};
@@ -170,7 +169,8 @@ static const struct state_definition ready_to_connect = {.state=READY_TO_CONNECT
 static const struct state_definition states[] = {
     tcp_connected_state,
     hello_sock_received_state,
-    authenticated_state
+    authenticated_state,
+    ready_to_connect
 //    {.state=AUTHENTICATED, .on_read_ready=authenticated_handler_read, .on_write_ready=authenticated_handler_write},
 //    {.state=CONNECT_SOCK_RECEIVED, .on_read_ready=connect_sock_received_handler_read, .on_write_ready=connect_sock_received_handler_write},
 //    {.state=CONNECTED, .on_read_ready=connected_handler_read, .on_write_ready=connected_handler_write}

@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -std=c11 -g -Wall -pedantic -D_POSIX_SOURCE=1 -pthread
+CFLAGS = -std=gnu11 -g -Wall -pedantic -D_POSIX_SOURCE=1 -pthread
 OBJ=client_request_processor.o buffer.o selector.o sock_authentication_parser.o sock_hello_parser.o sock_request_parser.o proxy_state_machine.o sock_client.o stm.o bufferService.o general_handlers.o parser.o
 all: clean main
 
