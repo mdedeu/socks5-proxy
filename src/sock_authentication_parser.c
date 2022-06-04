@@ -1,6 +1,23 @@
 #include "sock_authentication_parser.h"
 
+enum states_and_events{
+    INITIAL_STATE,
+    VERSION_READ,
+    ULEN_READ,
+    READING_USERNAME,
+    FINISH_USERNAME,
+    PLEN_READ,
+    READING_PASSWORD,
+    END,
 
+    VERSION_READ_EVENT,
+    ULEN_READ_EVENT,
+    USERNAME_READ_EVENT,
+    PLEN_READ_EVENT,
+    READING_PASSWORD_EVENT,
+    END_REACH_EVENT,
+    ERROR_FOUND_EVENT
+};
 
 void check_version(struct  parser_event * event , uint8_t c){
     event->type = VERSION_READ_EVENT;

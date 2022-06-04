@@ -1,5 +1,36 @@
 #include "sock_request_parser.h"
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
 
+enum state_and_events{
+    INITIAL_STATE,
+    VERSION_READ,
+    CMD_READ,
+    RSV_READ,
+    IPV4_ATYP_READ,
+    IPV6_ATYP_READ,
+    ADDR_ATYP_READ,
+    ADDRLEN_READ,
+    ADDR_READING,
+    IPV4_READING,
+    IPV6_READING,
+    PORT_READING,
+    END,
+
+    VERSION_READ_EVENT,
+    CMD_READ_EVENT,
+    RSV_READ_EVENT,
+    READ_IPV4_ATYP_EVENT,
+    READ_IPV6_ATYP_EVENT,
+    READ_ADDR_ATYP_EVENT,
+    IPV4_READING_EVENT,
+    IPV6_READING_EVENT,
+    ADDR_LEN_READING_EVENT,
+    ADDR_READING_EVENT,
+    PORT_READING_EVENT,
+    ERROR_FOUND_EVENT
+};
 
 void read_version(struct  parser_event * event , uint8_t c){
     event->type = VERSION_READ_EVENT;

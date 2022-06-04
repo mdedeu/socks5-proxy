@@ -16,8 +16,12 @@
 #include "bufferService.h"
 #include "sock_client.h"
 #include "general_handlers.h"
+#include "proxy_state_machine.h"
+#include "sock_hello_parser.h"
+#include "sock_request_parser.h"
+#include "sock_authentication_parser.h"
 
-#define MAX_PENDING_CONNECTIONS   3    // un valor bajo, para realizar pruebas
+#define MAX_PENDING_CONNECTIONS 3    // un valor bajo, para realizar pruebas
 #define PORT 1080
 #define OTHER_PORT 9090
 #define TRUE 1

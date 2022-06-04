@@ -1,6 +1,20 @@
 #include "sock_hello_parser.h"
 
 
+enum states_and_events{
+    INITIAL_STATE,
+    VERSION_READ,
+    NMETHODS_READ,
+    READING_METHODS,
+    END,
+
+    VERSION_READ_EVENT,
+    NMETHODS_READ_EVENT,
+    METHODS_READ_EVENT,
+    END_REACH_EVENT,
+    ERROR_FOUND_EVENT
+};
+
 
 void read_version(struct  parser_event * event , uint8_t c){
     event->type = VERSION_READ_EVENT;
