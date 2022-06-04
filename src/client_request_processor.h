@@ -12,6 +12,9 @@
 #include <netinet/in.h>
 #include "dns_query.h"
 #include "sock_client.h"
+#include "sock_authentication_parser.h"
+#include "sock_request_parser.h"
+#include "sock_hello_parser.h"
 
 
 #define USERNAME_AUTHENTICATION 2
