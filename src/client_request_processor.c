@@ -50,15 +50,32 @@ void process_request_message(struct sock_request_message *  data, struct selecto
     sock_client * client_information = (sock_client * ) key ;
     client_information->origin_port = data->port ;
     if(data->atyp == IPV4ADDRESS) {
-        client_information->origin_address = data->ipv4 ;
+        struct sockaddr_in * addr;
+
+        addr->sin_addr.s_addr = *((uint64_t *) data->ipv4);
+        addr->sin_family = AF_INET;
+        addr->sin_port = data->port;
+
+        client_information->origin_address = *((struct sockaddr_storage*) addr);
+
         client_information -> origin_address_length = IPV4SIZE ;
     }else if (data->atyp == IPV6ADDRESS){
-        client_information->origin_address = data->ipv6;
+        struct sockaddr_in * addr;
+
+        addr->sin_addr.s_addr = *((uint64_t *) data->ipv6);
+        addr->sin_addr.s_addr <<= 64;
+        addr->sin_addr.s_addr = *((uint64_t *) data->ipv6+4);
+
+        addr->sin_family = AF_INET6;
+        addr->sin_port = data->port;
+
+        client_information->origin_address = *((struct sockaddr_storage*) addr);
+
         client_information-> origin_address_length = IPV6SIZE ;
     }
     else if(data->atyp == DOMAIN_NAME){
         struct selector_key  * thread_copy = malloc(sizeof (struct selector_key));
-        memcpy(thread_copy,key,sizeof (selector_key));
+        memcpy(thread_copy,key,sizeof(struct selector_key));
         //validate
         pthread_t tid ;
         pthread_create(&tid,0,request_resolving_blocking,thread_copy);

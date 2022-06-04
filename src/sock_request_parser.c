@@ -37,61 +37,61 @@ static void request_read_version(struct  parser_event * event , uint8_t c){
     event->data[0]=c;
     event->n=1;
 }
-void read_cmd(struct  parser_event * event , uint8_t c){
+static void read_cmd(struct  parser_event * event , uint8_t c){
     event->type = CMD_READ_EVENT;
     event->data[0]=c;
     event->n=1;
 }
 
-void read_rsv(struct  parser_event * event , uint8_t c){
+static void read_rsv(struct  parser_event * event , uint8_t c){
     event->type = RSV_READ_EVENT;
 //    event->data[0]=c;
 //    event->n=1;
 }
 
-void read_ipv4_atyp(struct  parser_event * event , uint8_t c){
+static void read_ipv4_atyp(struct  parser_event * event , uint8_t c){
     event->type = READ_IPV4_ATYP_EVENT;
     event->data[0]=c;
     event->n=1;
 }
-void read_ipv6_atyp(struct  parser_event * event , uint8_t c){
+static void read_ipv6_atyp(struct  parser_event * event , uint8_t c){
     event->type = READ_IPV6_ATYP_EVENT;
     event->data[0]=c;
     event->n=1;
 }
-void read_address_atyp(struct  parser_event * event , uint8_t c){
+static void read_address_atyp(struct  parser_event * event , uint8_t c){
     event->type = READ_ADDR_ATYP_EVENT;
     event->data[0]=c;
     event->n=1;
 }
 
 
-void reading_ipv4(struct  parser_event * event , uint8_t c){
+static void reading_ipv4(struct  parser_event * event , uint8_t c){
     event->type = IPV4_READING_EVENT;
     event->data[0]=c;
     event->n=1;
 }
-void reading_ipv6(struct  parser_event * event , uint8_t c){
+static void reading_ipv6(struct  parser_event * event , uint8_t c){
     event->type = IPV6_READING_EVENT;
     event->data[0]=c;
     event->n=1;
 }
 
 
-void read_addr_len(struct  parser_event * event , uint8_t c){
+static void read_addr_len(struct  parser_event * event , uint8_t c){
     event->type = ADDR_LEN_READING_EVENT;
     event->data[0]=c;
     event->n=1;
 }
 
-void reading_addr(struct  parser_event * event , uint8_t c){
+static void reading_addr(struct  parser_event * event , uint8_t c){
     event->type = ADDR_READING_EVENT;
     event->data[0]=c;
     event->n=1;
 }
 
 
-void reading_port(struct  parser_event * event , uint8_t c){
+static void reading_port(struct  parser_event * event , uint8_t c){
     event->type = PORT_READING_EVENT;
     event->data[0]=c;
     event->n=1;
@@ -187,63 +187,52 @@ static struct parser_definition sock_parser_definition={
         .states_n=sock_request_parser_transitions_count
 };
 
-struct sock_request_message * init_sock_request_parser(){
-    struct sock_request_message * new_sock_request_message = malloc(sizeof (struct sock_request_message));
-    struct parser * sock_request_parser = parser_init(parser_no_classes(),&sock_parser_definition);
-    new_sock_request_message->using_parser = sock_request_parser;
-    new_sock_request_message->addr_character_read=0;
-    new_sock_request_message->ipv4_character_read=0;
-    new_sock_request_message->ipv6_character_read = 0;
-    new_sock_request_message->port_character_read = 0;
-    return new_sock_request_message;
-}
-
-void handle_version_read_event(struct sock_request_message * sock_data ,uint8_t current_character){
+static void handle_version_read_event(struct sock_request_message * sock_data ,uint8_t current_character){
     sock_data->version = current_character;
 }
-void handle_cmd_read_event(struct sock_request_message * sock_data ,uint8_t current_character){
+static void handle_cmd_read_event(struct sock_request_message * sock_data ,uint8_t current_character){
     if(current_character == 1 )
         sock_data->cmd = current_character;
     else
         sock_data->using_parser->state = END;
 }
-void handle_ipv4_atyp_read_event(struct sock_request_message * sock_data ,uint8_t current_character){
+static void handle_ipv4_atyp_read_event(struct sock_request_message * sock_data ,uint8_t current_character){
     if(current_character != 1 )
         sock_data->using_parser->state = END;
     else sock_data->ipv4 = malloc(IPV4SIZE);
 }
-void handle_ipv6_atyp_read_event(struct sock_request_message * sock_data ,uint8_t current_character){
+static void handle_ipv6_atyp_read_event(struct sock_request_message * sock_data ,uint8_t current_character){
     if(current_character != 4 )
         sock_data->using_parser->state = END;
     else sock_data->ipv4 = malloc(IPV6SIZE);
 
 }
-void handle_addr_atyp_read_event(struct sock_request_message * sock_data ,uint8_t current_character){
+static void handle_addr_atyp_read_event(struct sock_request_message * sock_data ,uint8_t current_character){
     if(current_character != 3)
         sock_data -> using_parser -> state = END;
 }
-void handle_addrlen_read_event(struct sock_request_message * sock_data ,uint8_t current_character) {
+static void handle_addrlen_read_event(struct sock_request_message * sock_data ,uint8_t current_character) {
     sock_data->address = malloc(current_character);
 }
-void handle_ipv4_reading_event(struct sock_request_message * sock_data , uint8_t current_character){
+static void handle_ipv4_reading_event(struct sock_request_message * sock_data , uint8_t current_character){
     sock_data->ipv4[sock_data->ipv4_character_read] = current_character;
     sock_data->ipv4_character_read++;
     if(sock_data->ipv4_character_read == IPV4SIZE)
         sock_data->using_parser->state=PORT_READING;
 }
-void handle_ipv6_reading_event(struct sock_request_message * sock_data ,uint8_t current_character){
+static void handle_ipv6_reading_event(struct sock_request_message * sock_data ,uint8_t current_character){
     sock_data->ipv6[sock_data->ipv6_character_read] = current_character;
     sock_data->ipv6_character_read++;
     if(sock_data->ipv6_character_read == IPV6SIZE)
         sock_data->using_parser->state=PORT_READING;
 }
-void handle_addr_reading_event(struct sock_request_message * sock_data ,uint8_t current_character){
+static void handle_addr_reading_event(struct sock_request_message * sock_data ,uint8_t current_character){
     sock_data->address[sock_data->addr_character_read] = current_character;
     sock_data->addr_character_read++;
     if(sock_data->addr_character_read == sock_data->addrlen)
         sock_data->using_parser->state = PORT_READING;
 }
-void handle_port_reading_event(struct sock_request_message * sock_data ,uint8_t current_character){
+static void handle_port_reading_event(struct sock_request_message * sock_data ,uint8_t current_character){
     if(sock_data->port_character_read == 0 ){
         sock_data->port= malloc(2);
         sock_data->port[0]=current_character;
@@ -268,7 +257,7 @@ struct sock_request_message * init_sock_request_parser(){
 }
 
 
-void feed_sock_request_parser(struct sock_request_message * sock_data ,char * input,int input_size){
+bool feed_sock_request_parser(struct sock_request_message * sock_data ,char * input,int input_size){
     const struct parser_event * current_event;
     for(int i = 0 ; i < input_size  && (sock_data->using_parser->state != END  ); i++){
         current_event = parser_feed(sock_data->using_parser,input[i]);
@@ -312,6 +301,9 @@ void feed_sock_request_parser(struct sock_request_message * sock_data ,char * in
             break;
         }
     }
+    if(sock_data->using_parser->state == END)
+        return true;
+    return false;
 }
 
 void  close_sock_request_parser(struct sock_request_message * message){
