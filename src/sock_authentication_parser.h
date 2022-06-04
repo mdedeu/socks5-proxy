@@ -19,7 +19,7 @@ struct sock_authentication_message{
 };
 
 struct sock_authentication_message * init_sock_authentication_parser();
-void feed_sock_authentication_parser(struct sock_authentication_message * sock_data ,char * input,int input_size);
+bool feed_sock_authentication_parser(struct sock_authentication_message * sock_data ,char * input,int input_size);
 void close_sock_authentication_parser(struct sock_authentication_message *  current_data);
 
 #endif

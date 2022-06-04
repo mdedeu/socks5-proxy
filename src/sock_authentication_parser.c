@@ -132,7 +132,7 @@ struct sock_authentication_message * init_sock_authentication_parser(){
     return new_sock_authentication_message;
 }
 
- void feed_sock_authentication_parser(struct sock_authentication_message * sock_data ,char * input,int input_size){
+ bool feed_sock_authentication_parser(struct sock_authentication_message * sock_data ,char * input,int input_size){
     const struct parser_event * current_event;
     for(int i = 0 ; i < input_size  && (sock_data->using_parser->state != END  ); i++){
         current_event = parser_feed(sock_data->using_parser,input[i]);
@@ -161,6 +161,10 @@ struct sock_authentication_message * init_sock_authentication_parser(){
         if(current_event->type ==ERROR_FOUND_EVENT)
             break;
     }
+
+    if((sock_data->using_parser->state != END  ))
+        return false;
+    else return true;
 }
 
 void close_sock_authentication_parser(struct sock_authentication_message *  current_data){

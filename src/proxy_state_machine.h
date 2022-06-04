@@ -1,7 +1,8 @@
 #ifndef PROXY_STATE_MACHINE_H
 #define PROXY_STATE_MACHINE_H
 
-#define HELLO_REQUEST_LENGTH 2
+#define HELLO_ANSWER_LENGTH 2
+#define AUTHENTICATION_ANSWER_LENGTH 2
 #define READ_AMOUNT 512
 #include "stm.h"
 #include <string.h>
@@ -12,6 +13,7 @@
 #include "bufferService.h"
 #include "client_request_processor.h"
 #include "sock_client.h"
+#include "sock_authentication_parser.h"
 
 enum sock_state {
     TCP_CONNECTED,
