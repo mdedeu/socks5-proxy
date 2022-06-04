@@ -21,6 +21,6 @@ void socks5_block(struct selector_key * key){
 void socks5_close(struct selector_key * key){
     sock_client * current_client = (sock_client* ) key->data;
     struct state_machine * associated_state_machine = current_client->client_state_machine ;
-    const enum sock_state new_state = stm_handler_close(associated_state_machine,key);
+    stm_handler_close(associated_state_machine,key);
     //check for error
 }
