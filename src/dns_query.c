@@ -17,7 +17,7 @@
     };
     char buff[7];
     snprintf(buff, sizeof (buff),"%d", ntohs(request_message->port));
-    getaddrinfo(sock_client_information->current_parser.request_message->address,buff,&hints,&sock_client_information->origin_resolutions)
+    getaddrinfo(sock_client_information->current_parser.request_message->address,buff,&hints,&sock_client_information->origin_resolutions);
     selector_notify_block(data->s, data->fd);
     free(data);
     return 0;

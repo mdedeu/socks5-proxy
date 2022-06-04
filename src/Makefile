@@ -1,9 +1,9 @@
 CC = gcc
-CFLAGS = -std=gnu11 -g -Wall -pedantic -D_POSIX_SOURCE=1 -pthread
+CFLAGS = -std=gnu11 -g -Wall -pedantic -D_POSIX_SOURCE=1 -pthread -D_GNU_SOURCE
 OBJ=client_request_processor.o buffer.o selector.o sock_authentication_parser.o sock_hello_parser.o sock_request_parser.o proxy_state_machine.o sock_client.o stm.o bufferService.o general_handlers.o parser.o
 all: clean main
 
-main: client_request_processor.o buffer.o selector.o sock_authentication_parser.o sock_hello_parser.o sock_request_parser.o proxy_state_machine.o sock_client.o stm.o bufferService.o general_handlers.o parser.o
+main: dns_query.o client_request_processor.o buffer.o selector.o sock_authentication_parser.o sock_hello_parser.o sock_request_parser.o proxy_state_machine.o sock_client.o stm.o bufferService.o general_handlers.o parser.o
 	$(CC) $(CFLAGS) -o server main.c $(OBJ)
 
 bufferService.o: bufferService.c
@@ -41,6 +41,10 @@ parser.o: parser.c
 
 client_request_processor.o : client_request_processor.c
 	$(CC) $(CFLAGS) -c client_request_processor.c
+
+dns_query.o: dns_query.c
+	$(CC) $(CFLAGS) -c dns_query.c
+
 
 
 clean:
