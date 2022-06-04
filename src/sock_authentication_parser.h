@@ -7,8 +7,6 @@
 #include <stdlib.h>
 #define N(x) (sizeof(x)/sizeof((x)[0]))
 
-
-
 enum states_and_events{
     INITIAL_STATE,
     VERSION_READ,

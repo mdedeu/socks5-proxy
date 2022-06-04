@@ -15,7 +15,7 @@
 static unsigned on_tcp_connected_handler_read(struct selector_key *key) {
     char aux_buff[READ_AMOUNT];
     sock_client *client_data = (sock_client *) key->data;
-    uint8_t available_space;
+    size_t available_space;
     buffer_write_ptr(client_data->write_buffer, &available_space);
     if (available_space >= HELLO_SOCK_RECEIVED) {
         int read_amount = recv(key->fd, aux_buff, READ_AMOUNT, MSG_DONTWAIT);
@@ -24,7 +24,7 @@ static unsigned on_tcp_connected_handler_read(struct selector_key *key) {
         if (!finished)
             return TCP_CONNECTED;
         else {
-            process_hello_message((struct sock_hello_message) *(client_data->current_parser.hello_message), key);
+            process_hello_message(*(client_data->current_parser.hello_message), key);
             selector_set_interest_key(key, OP_WRITE);
             return HELLO_SOCK_RECEIVED;
         }

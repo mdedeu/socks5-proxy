@@ -1,5 +1,6 @@
 #ifndef SOCK_CLIENT_H
 #define SOCK_CLIENT_H
+
 #include "sock_client.h"
 #include <stdlib.h>
 #include "proxy_state_machine.h"
@@ -18,7 +19,7 @@ typedef struct sock_client{
         struct sock_request_message *  request_message;
         struct sock_authentication_message * authentication_message;
     } current_parser;
-}sock_client;
+} sock_client;
 
 struct sock_client * init_new_client_connection(int fd);
 

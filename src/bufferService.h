@@ -7,7 +7,6 @@
 #include "proxy_state_machine.c"
 
 #define MAX_SIZE 2048
-#define BUFFER_SIZE 512
 
 typedef struct bufferAndFd{
     int fd;

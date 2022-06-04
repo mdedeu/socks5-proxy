@@ -1,5 +1,6 @@
 #ifndef SOCK_HELLO_PARSER_H
 #define SOCK_HELLO_PARSER_H
+
 #include <stdint.h>
 #include "parser.h"
 #include <stdio.h>

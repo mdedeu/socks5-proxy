@@ -278,21 +278,21 @@ void  close_sock_request_parser(struct sock_request_message * message){
     free(message);
 }
 
-int main(){
-    struct sock_request_message * sock =init_sock_request_parser();
-    char input[]={5,1,0,1,192,168,143,3,80,80};
-//    feed_sock_authentication_parser(sock,input,sizeof (input));
-    for(int i = 0 ; i < sizeof (input);i++){
-        feed_sock_authentication_parser(sock,input+i,1);
-//        sleep(5);
-    }
-    printf("version: %d\n",sock->version);
-    printf("cmd: %d\n",sock->cmd);
-    printf("atyp: %d\n",sock->atyp);
-    for(int i = 0 ; i < IPV4SIZE; i++)
-        printf("ip: %d\n",sock->ipv4[i]);
-    for(int j = 0 ; j <2 ; j++)
-        printf("port: %d\n",sock->port[j]);
-    close_sock_request_parser(sock);
+// int main(){
+//     struct sock_request_message * sock =init_sock_request_parser();
+//     char input[]={5,1,0,1,192,168,143,3,80,80};
+// //    feed_sock_authentication_parser(sock,input,sizeof (input));
+//     for(int i = 0 ; i < sizeof (input);i++){
+//         feed_sock_authentication_parser(sock,input+i,1);
+// //        sleep(5);
+//     }
+//     printf("version: %d\n",sock->version);
+//     printf("cmd: %d\n",sock->cmd);
+//     printf("atyp: %d\n",sock->atyp);
+//     for(int i = 0 ; i < IPV4SIZE; i++)
+//         printf("ip: %d\n",sock->ipv4[i]);
+//     for(int j = 0 ; j <2 ; j++)
+//         printf("port: %d\n",sock->port[j]);
+//     close_sock_request_parser(sock);
 
-}
+// }

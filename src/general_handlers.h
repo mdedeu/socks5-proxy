@@ -14,7 +14,6 @@ static const struct fd_handler socks5_handler = {
 
 };
 
-
 void socks5_read(struct selector_key * key);
 void socks5_write(struct selector_key * key);
 void socks5_block(struct selector_key * key);
