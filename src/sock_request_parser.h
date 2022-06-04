@@ -66,8 +66,8 @@ void handle_addr_reading_event(struct sock_request_message * sock_data ,uint8_t 
 
 void handle_port_reading_event(struct sock_request_message * sock_data ,uint8_t current_character);
 
+struct sock_request_message * init_sock_request_parser();
 void feed_sock_request_parser(struct sock_request_message * sock_data ,char * input,int input_size);
-
 void close_sock_request_parser(struct sock_request_message * message);
 
 #endif
