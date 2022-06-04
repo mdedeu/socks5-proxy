@@ -3,7 +3,7 @@ CFLAGS = -std=c11 -g -Wall -pedantic -D_POSIX_SOURCE=1 -pthread
 
 all: main
 
-main: buffer.o selector.o sock_authentication_parser.o sock_hello_parser.o sock_request_parser.o proxy_state_machine.o sock_client.o stm.o bufferService.o general_handlers.o
+main: buffer.o selector.o sock_authentication_parser.o sock_hello_parser.o sock_request_parser.o proxy_state_machine.o sock_client.o stm.o bufferService.o general_handlers.o parser.o
 	$(CC) $(CFLAGS) -o server main.c
 
 bufferService.o: bufferService.c
@@ -35,16 +35,9 @@ general_handlers.o: general_handlers.c
 
 stm.o: stm.c
 	$(CC) $(CFLAGS) -c stm.c
+	
+parser.o: parser.c
+	$(CC) $(CFLAGS) -c parser.c
 
-
-
-
-
-
-
-
-
-
-sock_authentication_parser.c:
 clean:
 	rm -f *.o server
