@@ -4,7 +4,7 @@
 #include "buffer.h"
 #include "stm.h"
 #include "parser.h"
-#include "proxy_state_machine.c"
+#include "proxy_state_machine.h"
 
 #define MAX_SIZE 2048
 
