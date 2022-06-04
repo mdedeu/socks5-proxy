@@ -76,7 +76,7 @@ void process_request_message(struct sock_request_message *  data, struct selecto
         memcpy(thread_copy,key,sizeof(struct selector_key));
         //validate
         pthread_t tid ;
-        pthread_create(&tid,0,request_resolving_blocking,thread_copy);
+        pthread_create(&tid,0,&request_resolving_blocking,thread_copy);
     }
 }
 
