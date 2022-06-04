@@ -54,13 +54,18 @@ static unsigned connected_handler_write(struct selector_key *key);
 
 
 static struct state_definition tcp_connected_state = {.state=TCP_CONNECTED, .on_read_ready=on_tcp_connected_handler_read, .on_write_ready=on_tcp_connected_handler_write};
-static struct state_definition hello_sock_received_state = {.state=HELLO_SOCK_RECEIVED, .on_read_ready=hello_sock_received_state, .on_write_ready=hello_sock_received_handler_write};
+static struct state_definition hello_sock_received_state = {.state=HELLO_SOCK_RECEIVED, .on_read_ready=hello_sock_received_handler_read, .on_write_ready=hello_sock_received_handler_write};
 static struct state_definition authenticated_state = {.state=AUTHENTICATED, .on_read_ready=authenticated_handler_read, .on_write_ready=authenticated_handler_write};
 static struct state_definition connect_sock_received_state = {.state=CONNECT_SOCK_RECEIVED, .on_read_ready=connect_sock_received_handler_read, .on_write_ready=connect_sock_received_handler_write};
 static struct state_definition connected_state = {.state=CONNECTED, .on_read_ready=connected_handler_read, .on_write_ready=connected_handler_write};
 
-static struct state_definition states[] = {tcp_connected_state, hello_sock_received_state, authenticated_state,
-                                           connect_sock_received_state, connected_state};
+static struct state_definition states[] = {
+    {.state=TCP_CONNECTED, .on_read_ready=on_tcp_connected_handler_read, .on_write_ready=on_tcp_connected_handler_write},
+    {.state=HELLO_SOCK_RECEIVED, .on_read_ready=hello_sock_received_handler_read, .on_write_ready=hello_sock_received_handler_write},
+    {.state=AUTHENTICATED, .on_read_ready=authenticated_handler_read, .on_write_ready=authenticated_handler_write},
+    {.state=CONNECT_SOCK_RECEIVED, .on_read_ready=connect_sock_received_handler_read, .on_write_ready=connect_sock_received_handler_write},
+    {.state=CONNECTED, .on_read_ready=connected_handler_read, .on_write_ready=connected_handler_write}
+};
 
 static struct state_machine sock_client_machine = {
         .initial=TCP_CONNECTED,
