@@ -1,7 +1,7 @@
 #ifndef SOCK_CLIENT_H
 #define SOCK_CLIENT_H
 
-#include "sock_client.h"
+#include "buffer.h"
 #include <stdlib.h>
 #include "proxy_state_machine.h"
 #include <stdint.h>

@@ -1,11 +1,9 @@
 CC = gcc
 CFLAGS = -std=c11 -g -Wall -pedantic -D_POSIX_SOURCE=1 -pthread
-OBJS= master.o shmem_posix.o sem.o
-
 
 all: main
 
-main: buffer selector sock_authentication_parser sock_hello_parser sock_request_parser proxy_state_machine sock_client stm
+main: buffer selector sock_authentication_parser sock_hello_parser sock_request_parser proxy_state_machine sock_client stm bufferService general_handlers
 	$(CC) $(CFLAGS) -o server main.c
 
 bufferService: bufferService.c
@@ -31,6 +29,9 @@ proxy_state_machine: proxy_state_machine.c
 
 sock_client: sock_client.c
 	$(CC) $(CFLAGS) -c sock_client.c
+
+general_handlers: general_handlers.c
+	$(CC) $(CFLAGS) -c general_handlers.c
 
 stm: stm.c
 	$(CC) $(CFLAGS) -c stm.c

@@ -1,6 +1,7 @@
 #include "bufferService.h"
 #include <stdlib.h>
 #include <stdint.h>
+#include "sock_client.h"
 
 bufferAndFd* buffers[MAX_SIZE] = {NULL};
 
