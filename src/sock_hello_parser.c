@@ -16,7 +16,7 @@ enum states_and_events{
 };
 
 
-void read_version(struct  parser_event * event , uint8_t c){
+void hello_read_version(struct  parser_event * event , uint8_t c){
     event->type = VERSION_READ_EVENT;
     event->data[0]=c;
     event->n=1;
@@ -32,16 +32,16 @@ void read_method(struct parser_event * event , uint8_t c){
     event->n=1;
 }
 
-void handle_version_read_event(struct sock_hello_message * current_data,uint8_t version ){
+static void handle_version_read_event(struct sock_hello_message * current_data,uint8_t version ){
     current_data->version = version;
 }
 
-void handle_nmethods_read_event(struct sock_hello_message * current_data,uint8_t nmethods ){
+static void handle_nmethods_read_event(struct sock_hello_message * current_data,uint8_t nmethods ){
     current_data->nmethods = nmethods;
     current_data->methods= malloc(nmethods);
 }
 
-void handle_method_read_event(struct sock_hello_message * current_data , uint8_t method){
+static void handle_method_read_event(struct sock_hello_message * current_data , uint8_t method){
     //finish if reading username/authentication method
     current_data->methods[current_data->last_method_added] = method;
     current_data->last_method_added ++ ;
@@ -53,7 +53,7 @@ void handle_method_read_event(struct sock_hello_message * current_data , uint8_t
 
 
 static struct parser_state_transition initial_state_transitions[] ={
-        {.when=ANY,.dest=VERSION_READ,.act1=read_version}
+        {.when=ANY,.dest=VERSION_READ,.act1=hello_read_version}
 };
 static  struct parser_state_transition version_read_transitions[]={
         {.when=ANY,.dest=NMETHODS_READ,.act1=read_nmethods}

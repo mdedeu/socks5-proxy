@@ -1,13 +1,5 @@
 #include "proxy_state_machine.h"
-#include "stm.h"
-#include <string.h>
-#include "sock_hello_parser.h"
-#include "selector.h"
-#include <sys/types.h>
-#include <sys/socket.h>
-#include "bufferService.h"
-#include "client_request_processor.h"
-#include "sock_client.h"
+
 
 //return the new state if corresponding
 //should read from the fd associated (key->fd) and give the data read to the corresponding parser.
@@ -24,20 +16,20 @@ static unsigned on_tcp_connected_handler_read(struct selector_key *key) {
         if (!finished)
             return TCP_CONNECTED;
         else {
-            process_hello_message(*(client_data->current_parser.hello_message), key);
+            process_hello_message(client_data->current_parser.hello_message, key);
             selector_set_interest_key(key, OP_WRITE);
             return HELLO_SOCK_RECEIVED;
         }
     }
 }
 
-static unsigned hello_sock_received_handler_read(struct selector_key *key);
-
-static unsigned authenticated_handler_read(struct selector_key *key);
-
-static unsigned connect_sock_received_handler_read(struct selector_key *key);
-
-static unsigned connected_handler_read(struct selector_key *key);
+//static unsigned hello_sock_received_handler_read(struct selector_key *key);
+//
+//static unsigned authenticated_handler_read(struct selector_key *key);
+//
+//static unsigned connect_sock_received_handler_read(struct selector_key *key);
+//
+//static unsigned connected_handler_read(struct selector_key *key);
 
 //return the new state if corresponding
 static unsigned on_tcp_connected_handler_write(struct selector_key *key) {
@@ -52,27 +44,27 @@ static unsigned on_tcp_connected_handler_write(struct selector_key *key) {
     selector_set_interest_key(key, OP_READ);
 }
 
-static unsigned hello_sock_received_handler_write(struct selector_key *key);
-
-static unsigned authenticated_handler_write(struct selector_key *key);
-
-static unsigned connect_sock_received_handler_write(struct selector_key *key);
-
-static unsigned connected_handler_write(struct selector_key *key);
+//static unsigned hello_sock_received_handler_write(struct selector_key *key);
+//
+//static unsigned authenticated_handler_write(struct selector_key *key);
+//
+//static unsigned connect_sock_received_handler_write(struct selector_key *key);
+//
+//static unsigned connected_handler_write(struct selector_key *key);
 
 
 static struct state_definition tcp_connected_state = {.state=TCP_CONNECTED, .on_read_ready=on_tcp_connected_handler_read, .on_write_ready=on_tcp_connected_handler_write};
-static struct state_definition hello_sock_received_state = {.state=HELLO_SOCK_RECEIVED, .on_read_ready=hello_sock_received_handler_read, .on_write_ready=hello_sock_received_handler_write};
-static struct state_definition authenticated_state = {.state=AUTHENTICATED, .on_read_ready=authenticated_handler_read, .on_write_ready=authenticated_handler_write};
-static struct state_definition connect_sock_received_state = {.state=CONNECT_SOCK_RECEIVED, .on_read_ready=connect_sock_received_handler_read, .on_write_ready=connect_sock_received_handler_write};
-static struct state_definition connected_state = {.state=CONNECTED, .on_read_ready=connected_handler_read, .on_write_ready=connected_handler_write};
+//static struct state_definition hello_sock_received_state = {.state=HELLO_SOCK_RECEIVED, .on_read_ready=hello_sock_received_handler_read, .on_write_ready=hello_sock_received_handler_write};
+//static struct state_definition authenticated_state = {.state=AUTHENTICATED, .on_read_ready=authenticated_handler_read, .on_write_ready=authenticated_handler_write};
+//static struct state_definition connect_sock_received_state = {.state=CONNECT_SOCK_RECEIVED, .on_read_ready=connect_sock_received_handler_read, .on_write_ready=connect_sock_received_handler_write};
+//static struct state_definition connected_state = {.state=CONNECTED, .on_read_ready=connected_handler_read, .on_write_ready=connected_handler_write};
 
 static struct state_definition states[] = {
     {.state=TCP_CONNECTED, .on_read_ready=on_tcp_connected_handler_read, .on_write_ready=on_tcp_connected_handler_write},
-    {.state=HELLO_SOCK_RECEIVED, .on_read_ready=hello_sock_received_handler_read, .on_write_ready=hello_sock_received_handler_write},
-    {.state=AUTHENTICATED, .on_read_ready=authenticated_handler_read, .on_write_ready=authenticated_handler_write},
-    {.state=CONNECT_SOCK_RECEIVED, .on_read_ready=connect_sock_received_handler_read, .on_write_ready=connect_sock_received_handler_write},
-    {.state=CONNECTED, .on_read_ready=connected_handler_read, .on_write_ready=connected_handler_write}
+//    {.state=HELLO_SOCK_RECEIVED, .on_read_ready=hello_sock_received_handler_read, .on_write_ready=hello_sock_received_handler_write},
+//    {.state=AUTHENTICATED, .on_read_ready=authenticated_handler_read, .on_write_ready=authenticated_handler_write},
+//    {.state=CONNECT_SOCK_RECEIVED, .on_read_ready=connect_sock_received_handler_read, .on_write_ready=connect_sock_received_handler_write},
+//    {.state=CONNECTED, .on_read_ready=connected_handler_read, .on_write_ready=connected_handler_write}
 };
 
 static struct state_machine sock_client_machine = {

@@ -5,6 +5,7 @@
 #include "general_handlers.h"
 #include "sock_client.h"
 #include "proxy_state_machine.h"
+#include "client_request_processor.h"
 #include <stddef.h>
 
 void socks5_read(struct selector_key * key);

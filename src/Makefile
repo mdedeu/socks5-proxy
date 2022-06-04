@@ -1,10 +1,10 @@
 CC = gcc
 CFLAGS = -std=c11 -g -Wall -pedantic -D_POSIX_SOURCE=1 -pthread
-
+OBJ=client_request_processor.o buffer.o selector.o sock_authentication_parser.o sock_hello_parser.o sock_request_parser.o proxy_state_machine.o sock_client.o stm.o bufferService.o general_handlers.o parser.o
 all: main
 
-main: buffer.o selector.o sock_authentication_parser.o sock_hello_parser.o sock_request_parser.o proxy_state_machine.o sock_client.o stm.o bufferService.o general_handlers.o parser.o
-	$(CC) $(CFLAGS) -o server main.c
+main: client_request_processor.o buffer.o selector.o sock_authentication_parser.o sock_hello_parser.o sock_request_parser.o proxy_state_machine.o sock_client.o stm.o bufferService.o general_handlers.o parser.o
+	$(CC) $(CFLAGS) -o server main.c $(OBJ)
 
 bufferService.o: bufferService.c
 	$(CC) $(CFLAGS) -c bufferService.c
@@ -38,6 +38,10 @@ stm.o: stm.c
 	
 parser.o: parser.c
 	$(CC) $(CFLAGS) -c parser.c
+
+client_request_processor.o : client_request_processor.c
+	$(CC) $(CFLAGS) -c client_request_processor.c
+
 
 clean:
 	rm -f *.o server

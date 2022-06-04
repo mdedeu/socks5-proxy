@@ -19,42 +19,42 @@ enum states_and_events{
     ERROR_FOUND_EVENT
 };
 
-void check_version(struct  parser_event * event , uint8_t c){
+ void check_version(struct  parser_event * event , uint8_t c){
     event->type = VERSION_READ_EVENT;
     event->data[0]=c;
     event->n=1;
 }
-void save_username_length(struct parser_event * event , uint8_t c){
+  void save_username_length(struct parser_event * event , uint8_t c){
     event->type = ULEN_READ_EVENT;
     event->data[0]=c;
     event->n=1;
 }
-void save_username_character(struct parser_event * event , uint8_t c){
+  void save_username_character(struct parser_event * event , uint8_t c){
     event->type = USERNAME_READ_EVENT;
     event->data[0]=c;
     event->n=1;
 }
-void save_password_length(struct parser_event * event , uint8_t c){
+  void save_password_length(struct parser_event * event , uint8_t c){
     event->type = PLEN_READ_EVENT;
     event->data[0]=c;
     event->n=1;
 }
-void save_password_character(struct parser_event * event , uint8_t c){
+  void save_password_character(struct parser_event * event , uint8_t c){
     event->type = READING_PASSWORD_EVENT;
     event->data[0]=c;
     event->n=1;
 }
 
-void handle_version_read_event(struct sock_authentication_message * current_data,uint8_t version ){
+static void handle_version_read_event(struct sock_authentication_message * current_data,uint8_t version ){
     current_data->version = version;
 }
 
-void handle_ulen_read_event(struct sock_authentication_message * current_data,uint8_t username_length ){
+static void handle_ulen_read_event(struct sock_authentication_message * current_data,uint8_t username_length ){
     current_data->username_length = username_length;
     current_data->username= malloc(current_data->username_length + 1 );
 }
 
-void handle_username_read_event(struct sock_authentication_message * current_data , uint8_t username_character){
+static void handle_username_read_event(struct sock_authentication_message * current_data , uint8_t username_character){
     current_data->username[current_data->username_characters_read] = username_character;
     current_data->username_characters_read ++ ;
     if(current_data->username_characters_read == current_data->username_length){
@@ -63,12 +63,12 @@ void handle_username_read_event(struct sock_authentication_message * current_dat
     }
 }
 
-void handle_plen_read_event(struct sock_authentication_message * current_data,uint8_t password_length ){
+static void handle_plen_read_event(struct sock_authentication_message * current_data,uint8_t password_length ){
     current_data->password_length = password_length;
     current_data->password= malloc(current_data->password_length + 1);
 }
 
-void handle_password_read_event(struct sock_authentication_message * current_data , uint8_t password_character){
+static void handle_password_read_event(struct sock_authentication_message * current_data , uint8_t password_character){
     current_data->password[current_data->password_characters_read] = password_character;
     current_data->password_characters_read ++ ;
     if(current_data->password_characters_read == current_data->password_length){

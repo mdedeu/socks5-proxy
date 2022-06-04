@@ -32,7 +32,7 @@ enum state_and_events{
     ERROR_FOUND_EVENT
 };
 
-void read_version(struct  parser_event * event , uint8_t c){
+static void request_read_version(struct  parser_event * event , uint8_t c){
     event->type = VERSION_READ_EVENT;
     event->data[0]=c;
     event->n=1;
@@ -99,7 +99,7 @@ void reading_port(struct  parser_event * event , uint8_t c){
 
 
 static struct parser_state_transition initial_state_transitions[] ={
-        {.when=ANY,.dest=VERSION_READ,.act1=read_version}
+        {.when=ANY,.dest=VERSION_READ,.act1=request_read_version}
 };
 
 static struct parser_state_transition version_read_transitions[] ={
@@ -257,7 +257,7 @@ void handle_port_reading_event(struct sock_request_message * sock_data ,uint8_t 
 
 
 
-void feed_sock_authentication_parser(struct sock_request_message * sock_data ,char * input,int input_size){
+void feed_sock_request_parser(struct sock_request_message * sock_data ,char * input,int input_size){
     const struct parser_event * current_event;
     for(int i = 0 ; i < input_size  && (sock_data->using_parser->state != END  ); i++){
         current_event = parser_feed(sock_data->using_parser,input[i]);
