@@ -2,7 +2,7 @@
 #include "selector.h"
 #include "general_handlers.h"
 #include "sock_client.h"
-#include "proxy_state_machine.c"
+#include "proxy_state_machine.h"
 static const struct fd_handler socks5_handler = {
         .handle_read = socks5_read,
         .handle_write = socks5_write,
