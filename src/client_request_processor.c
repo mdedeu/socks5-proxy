@@ -26,7 +26,6 @@ void process_hello_message(struct sock_hello_message * data, struct selector_key
         buffer_write(client_data->write_buffer, USERNAME_AUTHENTICATION);
     else{
         buffer_write(client_data->write_buffer, NON_METHODS_ACCEPTED);
-        //todo: close the connection as the rfc said.
     }
 }
 
@@ -40,15 +39,30 @@ void process_authentication_message(struct sock_authentication_message * data, s
     buffer_write(client_data->write_buffer,VERSION);
     if(valid_user)
         buffer_write(client_data->write_buffer, VALID_USER);
-    else
+    else         //todo: close the connection as the rfc said.
         buffer_write(client_data->write_buffer, NO_VALID_USER);
-
-
-
-
-
 }
 
-void process_request_message(struct sock_request_message *  data, struct selector_key * key);
+void process_request_message(struct sock_request_message *  data, struct selector_key * key){
+    if(data->cmd != CONNECT_COMMAND) //invalid command
+        return ;
+
+    sock_client * client_information = (sock_client * ) key ;
+    client_information->origin_port = data->port ;
+    if(data->atyp == IPV4ADDRESS) {
+        client_information->origin_address = data->ipv4 ;
+        client_information -> origin_address_length = IPV4SIZE ;
+    }else if (data->atyp == IPV6ADDRESS){
+        client_information->origin_address = data->ipv6;
+        client_information-> origin_address_length = IPV6SIZE ;
+    }
+    else if(data->atyp == DOMAIN_NAME){
+        struct selector_key  * thread_copy = malloc(sizeof (struct selector_key));
+        memcpy(thread_copy,key,sizeof (selector_key));
+        //validate
+        pthread_t tid ;
+        pthread_create(&tid,0,request_resolving_blocking,thread_copy);
+    }
+}
 
 

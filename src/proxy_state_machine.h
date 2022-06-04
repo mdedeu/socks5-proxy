@@ -3,6 +3,7 @@
 
 #define HELLO_ANSWER_LENGTH 2
 #define AUTHENTICATION_ANSWER_LENGTH 2
+#define REQUEST_CONNECT_ANSWER 20
 #define READ_AMOUNT 512
 #include "stm.h"
 #include <string.h>
@@ -14,12 +15,16 @@
 #include "client_request_processor.h"
 #include "sock_client.h"
 #include "sock_authentication_parser.h"
+#include "sock_request_parser.h"
+#include "general_handlers.h"
 
 enum sock_state {
     TCP_CONNECTED,
     HELLO_SOCK_RECEIVED,
     AUTHENTICATED,
     CONNECT_SOCK_RECEIVED,
+    READY_TO_CONNECT,
+    WRITING_REPLY,
     CONNECTED
 };
 

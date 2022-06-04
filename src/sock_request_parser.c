@@ -256,6 +256,17 @@ void handle_port_reading_event(struct sock_request_message * sock_data ,uint8_t 
 }
 
 
+struct sock_request_message * init_sock_request_parser(){
+    struct sock_request_message * new_sock_request_message = malloc(sizeof (struct sock_request_message));
+    struct parser * sock_request_parser = parser_init(parser_no_classes(),&sock_parser_definition);
+    new_sock_request_message->using_parser = sock_request_parser;
+    new_sock_request_message->port_character_read=0;
+    new_sock_request_message->ipv6_character_read=0;
+    new_sock_request_message->ipv4_character_read=0;
+    new_sock_request_message->addr_character_read=0;
+    return new_sock_request_message;
+}
+
 
 void feed_sock_request_parser(struct sock_request_message * sock_data ,char * input,int input_size){
     const struct parser_event * current_event;
