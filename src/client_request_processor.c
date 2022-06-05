@@ -56,7 +56,9 @@ void process_request_message(struct sock_request_message *  data, struct selecto
 
         addr->sin_addr.s_addr = *((uint64_t *) data->ipv4);
         addr->sin_family = AF_INET;
-        addr->sin_port = (uint16_t)*data->port;
+        addr->sin_port = data->port[0];
+        addr->sin_port <<= 8;
+        addr->sin_port = data->port[1];
 
         client_information->origin_address = *((struct sockaddr_storage*) addr);
 
@@ -66,7 +68,9 @@ void process_request_message(struct sock_request_message *  data, struct selecto
         memcpy(addr->sin6_addr.__in6_u.__u6_addr8 ,data->ipv6,IPV6SIZE);
 
         addr->sin6_family = AF_INET6;
-        addr->sin6_port =(uint16_t )* data->port;
+        addr->sin6_port = data->port[0];
+        addr->sin6_port <<= 8;
+        addr->sin6_port = data->port[1];
 
         client_information->origin_address = *((struct sockaddr_storage*) addr);
 
