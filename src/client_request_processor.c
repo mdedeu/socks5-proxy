@@ -63,9 +63,8 @@ void process_request_message(struct sock_request_message *  data, struct selecto
         client_information -> origin_address_length = IPV4SIZE ;
     }else if (data->atyp == IPV6ADDRESS){
         struct sockaddr_in6 * addr = malloc(sizeof (struct sockaddr_in6));
-
-
         memcpy(addr->sin6_addr.__in6_u.__u6_addr8 ,data->ipv6,IPV6SIZE);
+
         addr->sin6_family = AF_INET6;
         addr->sin6_port =(uint16_t )* data->port;
 
