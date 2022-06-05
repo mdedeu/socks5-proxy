@@ -199,17 +199,24 @@ static void handle_cmd_read_event(struct sock_request_message * sock_data ,uint8
 static void handle_ipv4_atyp_read_event(struct sock_request_message * sock_data ,uint8_t current_character){
     if(current_character != 1 )
         sock_data->using_parser->state = END;
-    else sock_data->ipv4 = malloc(IPV4SIZE);
+    else {
+        sock_data->atyp = 1 ;
+        sock_data->ipv4 = malloc(IPV4SIZE);
+    }
 }
 static void handle_ipv6_atyp_read_event(struct sock_request_message * sock_data ,uint8_t current_character){
     if(current_character != 4 )
         sock_data->using_parser->state = END;
-    else sock_data->ipv4 = malloc(IPV6SIZE);
+    else{
+        sock_data->atyp = 4 ;
+        sock_data->ipv6 = malloc(IPV6SIZE);
+    }
 
 }
 static void handle_addr_atyp_read_event(struct sock_request_message * sock_data ,uint8_t current_character){
     if(current_character != 3)
         sock_data -> using_parser -> state = END;
+    else sock_data->atyp = 3;
 }
 static void handle_addrlen_read_event(struct sock_request_message * sock_data ,uint8_t current_character) {
     sock_data->address = malloc(current_character);
