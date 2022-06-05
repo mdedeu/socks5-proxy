@@ -5,6 +5,7 @@
 #define AUTHENTICATION_ANSWER_LENGTH 2
 #define REQUEST_CONNECT_ANSWER 20
 #define READ_AMOUNT 512
+#include <errno.h>
 #include "stm.h"
 #include <string.h>
 #include "sock_hello_parser.h"

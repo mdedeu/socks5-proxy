@@ -26,11 +26,15 @@
 #define IPV6ADDRESS 4
 #define DOMAIN_NAME 3
 #define CONNECT_COMMAND 1
+#define HOST_UNREACHABLE 4
+#define SUCCEEDED 0
 
 
 
 void process_hello_message(struct sock_hello_message * data, struct selector_key * key);
 void process_authentication_message(struct sock_authentication_message * data, struct selector_key * key);
 void process_request_message(struct sock_request_message  * data, struct selector_key * key);
+void generate_request_answer(struct sock_request_message * data ,struct  selector_key * key);
+
 
 #endif

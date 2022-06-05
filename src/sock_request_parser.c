@@ -260,6 +260,8 @@ struct sock_request_message * init_sock_request_parser(){
     new_sock_request_message->ipv6_character_read=0;
     new_sock_request_message->ipv4_character_read=0;
     new_sock_request_message->addr_character_read=0;
+    new_sock_request_message->answer_buffer = malloc(sizeof (buffer));
+    buffer_init(new_sock_request_message->answer_buffer,1024,new_sock_request_message->raw_buffer);
     return new_sock_request_message;
 }
 
@@ -316,6 +318,7 @@ bool feed_sock_request_parser(struct sock_request_message * sock_data ,char * in
 void  close_sock_request_parser(struct sock_request_message * message){
     //ipv or addres, port
     free(message->port);
+    free(message->answer_buffer);
     free(message);
 }
 
