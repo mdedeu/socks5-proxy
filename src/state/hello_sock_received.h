@@ -1,5 +1,5 @@
 #ifndef HELLO_SOCK_RECEIVED_H
-#define
+#define HELLO_SOCK_RECEIVED_H
 #include "proxy_state_machine.h"
 
 void on_hello_sock_departure(const unsigned int leaving_state, struct selector_key *key);

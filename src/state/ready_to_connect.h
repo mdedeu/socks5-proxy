@@ -1,5 +1,5 @@
 #ifndef READY_TO_CONNECT_H
-#define
+#define READY_TO_CONNECT_H
 #include "proxy_state_machine.h"
 
 void ready_to_connect_on_arrival(unsigned state , struct selector_key * key );

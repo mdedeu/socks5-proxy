@@ -1,5 +1,5 @@
 #ifndef WRITING_REPLY_H
-#define
+#define WRITING_REPLY_H
 #include "proxy_state_machine.h"
 
 void writing_reply_on_arrival(unsigned state , struct selector_key * key );
