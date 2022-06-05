@@ -18,8 +18,13 @@
         .ai_addr  =NULL,
         .ai_next = NULL,
     };
-    char buff[7];
-    snprintf(buff, sizeof (buff),"%d", ntohs((uint16_t)*request_message->port));
+
+    uint16_t  port;
+     port = request_message->port[0];
+     port <<= 8;
+     port += request_message->port[1];
+     char buff[7];
+    snprintf(buff, sizeof (buff),"%d", port);
     getaddrinfo((char * )sock_client_information->current_parser.request_message->address,buff,&hints,&sock_client_information->origin_resolutions);
     selector_notify_block(key->s, key->fd);
     free(data);

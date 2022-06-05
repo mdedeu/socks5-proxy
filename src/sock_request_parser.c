@@ -220,6 +220,7 @@ static void handle_addr_atyp_read_event(struct sock_request_message * sock_data 
 }
 static void handle_addrlen_read_event(struct sock_request_message * sock_data ,uint8_t current_character) {
     sock_data->address = malloc(current_character);
+    sock_data->addrlen = current_character;
 }
 static void handle_ipv4_reading_event(struct sock_request_message * sock_data , uint8_t current_character){
     sock_data->ipv4[sock_data->ipv4_character_read] = current_character;

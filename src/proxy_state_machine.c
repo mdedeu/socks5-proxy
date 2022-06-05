@@ -90,11 +90,10 @@ static void ready_to_connect_on_arrival(unsigned state , struct selector_key * k
 static unsigned ready_to_connect_block_handler(struct selector_key * key){
     sock_client  * client_information = (sock_client * ) key ->data ;
     struct addrinfo * current  = client_information->current_origin_resolution == NULL ? client_information->origin_resolutions : client_information->current_origin_resolution;
-    int server_socket = socket(current->ai_family,current->ai_socktype,current->ai_protocol);
-    selector_fd_set_nio(server_socket);
-    client_information->origin_fd = server_socket;
-    connect(server_socket, current->ai_addr,current->ai_addrlen);
-    selector_register(key->s, server_socket, &socks5_handler,OP_WRITE, client_information);
+    client_information->origin_fd = socket(current->ai_family,current->ai_socktype,current->ai_protocol);
+    selector_fd_set_nio(client_information->origin_fd );
+    connect(client_information->origin_fd , current->ai_addr,current->ai_addrlen);
+    selector_register(key->s, client_information->origin_fd , &socks5_handler,OP_WRITE, client_information);
     return READY_TO_CONNECT;
 }
 
