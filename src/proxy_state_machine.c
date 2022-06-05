@@ -99,15 +99,14 @@ static unsigned ready_to_connect_block_handler(struct selector_key * key){
 
 
 static unsigned  ready_to_connect_write_handle(struct selector_key * key){
-        struct sock_client  * client_information = (struct sock_client * )key->data;
+    struct sock_client  * client_information = (struct sock_client * )key->data;
     getsockopt(client_information->origin_fd,SOL_SOCKET,SO_ERROR,NULL,0);
     if( errno == ENOTCONN) {
         if(client_information->current_origin_resolution->ai_next != NULL){
-            selector_unregister_fd(key->s,client_information->origin_fd);
+            selector_unregister_fd(key->s,client_information->origin_fd); //todo: implement close on ready_to_connect
             close(client_information->origin_fd);
             return ready_to_connect_block_handler(key);
-        }
-        return WRITING_REPLY;
+        } else return CLOSING_CONNECTION;
     }
     return WRITING_REPLY;
 }
