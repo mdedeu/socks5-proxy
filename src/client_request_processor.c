@@ -106,7 +106,7 @@ void generate_request_answer(struct sock_request_message * data ,struct  selecto
     if(data->atyp == IPV4ADDRESS){
         struct sockaddr_in client_info_ipv4 = *((struct sockaddr_in *) &address_info);
         memcpy(writing_direction,&client_info_ipv4.sin_addr.s_addr,IPV4SIZE);
-        buffer_read_adv(data->answer_buffer,IPV4SIZE);
+        buffer_write_adv(data->answer_buffer,IPV4SIZE);
         uint8_t significant = (client_info_ipv4.sin_port>>8);
         uint8_t insignificant =(client_info_ipv4.sin_port & 255);
         buffer_write(data->answer_buffer,significant);
@@ -115,7 +115,7 @@ void generate_request_answer(struct sock_request_message * data ,struct  selecto
     }else{
         struct sockaddr_in6  client_info_ipv6 =*( (struct sockaddr_in6 *) &address_info);
         memcpy(writing_direction,client_info_ipv6.sin6_addr.__in6_u.__u6_addr8,IPV6SIZE);
-        buffer_read_adv(data->answer_buffer,IPV6SIZE);
+        buffer_write_adv(data->answer_buffer,IPV6SIZE);
         uint8_t significant = (client_info_ipv6.sin6_port>>8);
         uint8_t insignificant =(client_info_ipv6.sin6_port & 255);
         buffer_write(data->answer_buffer,significant);
