@@ -49,7 +49,7 @@ void process_request_message(struct sock_request_message *  data, struct selecto
     if(data->cmd != CONNECT_COMMAND) //invalid command
         return ;
 
-    sock_client * client_information = (sock_client * ) key ;
+    sock_client * client_information = (sock_client * ) key ->data;
 //    client_information->origin_port = (uint16_t*)data->port ;
     if(data->atyp == IPV4ADDRESS) {
         struct sockaddr_in * addr = malloc(sizeof (struct sockaddr_in)) ;
