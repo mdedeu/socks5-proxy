@@ -54,13 +54,13 @@ void process_request_message(struct sock_request_message *  data, struct selecto
     if(data->atyp == IPV4ADDRESS) {
         struct sockaddr_in * addr = malloc(sizeof (struct sockaddr_in)) ;
 
-        addr->sin_addr.s_addr = *((uint64_t *) data->ipv4);
+        addr->sin_addr.s_addr = *((uint32_t *) data->ipv4);
         addr->sin_family = AF_INET;
         addr->sin_port = data->port[0];
         addr->sin_port <<= 8;
         addr->sin_port += data->port[1];
         addr->sin_port = htons(addr->sin_port);
-        client_information->origin_address = *((struct sockaddr_storage*) addr);
+        client_information->origin_address = ((struct sockaddr_storage*) addr);
 
         client_information -> origin_address_length = IPV4SIZE ;
     }else if (data->atyp == IPV6ADDRESS){
@@ -73,7 +73,7 @@ void process_request_message(struct sock_request_message *  data, struct selecto
         addr->sin6_port += data->port[1];
         addr->sin6_port = htons(addr->sin6_port);
 
-        client_information->origin_address = *((struct sockaddr_storage*) addr);
+        client_information->origin_address = ((struct sockaddr_storage*) addr);
 
         client_information-> origin_address_length = IPV6SIZE ;
     }

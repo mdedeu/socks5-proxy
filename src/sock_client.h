@@ -27,7 +27,7 @@ typedef struct sock_client{
     struct addrinfo * origin_resolutions;
     struct addrinfo * current_origin_resolution;
 
-    struct sockaddr_storage origin_address;
+    struct sockaddr_storage * origin_address;
     socklen_t  origin_address_length;
     uint16_t  origin_port;
 //    int origin_port;

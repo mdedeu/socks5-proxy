@@ -29,7 +29,8 @@ enum sock_state {
     AUTHENTICATED,
     READY_TO_CONNECT,
     WRITING_REPLY,
-    CONNECTED
+    CONNECTED,
+    CLOSING_CONNECTION
 };
 
 struct state_machine *init_proxy_state_machine();
