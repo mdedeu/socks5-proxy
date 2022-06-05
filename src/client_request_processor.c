@@ -58,8 +58,8 @@ void process_request_message(struct sock_request_message *  data, struct selecto
         addr->sin_family = AF_INET;
         addr->sin_port = data->port[0];
         addr->sin_port <<= 8;
-        addr->sin_port = data->port[1];
-
+        addr->sin_port += data->port[1];
+        addr->sin_port = htons(addr->sin_port);
         client_information->origin_address = *((struct sockaddr_storage*) addr);
 
         client_information -> origin_address_length = IPV4SIZE ;
@@ -70,7 +70,8 @@ void process_request_message(struct sock_request_message *  data, struct selecto
         addr->sin6_family = AF_INET6;
         addr->sin6_port = data->port[0];
         addr->sin6_port <<= 8;
-        addr->sin6_port = data->port[1];
+        addr->sin6_port += data->port[1];
+        addr->sin6_port = htons(addr->sin6_port);
 
         client_information->origin_address = *((struct sockaddr_storage*) addr);
 

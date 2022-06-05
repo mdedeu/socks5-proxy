@@ -97,8 +97,8 @@ static unsigned ready_to_connect_block_handler(struct selector_key * key){
 
 
 static unsigned  ready_to_connect_write_handle(struct selector_key * key){
-    if(key->fd < 0) {
         struct sock_client  * client_information = (struct sock_client * )key->data;
+    if(client_information->origin_fd < 0) {
         if(client_information->current_origin_resolution->ai_next != NULL){
             selector_unregister_fd(key->s,client_information->origin_fd);
             close(client_information->origin_fd);
