@@ -262,20 +262,19 @@ static unsigned hello_sock_received_handler_write(struct selector_key *key){
 }
 
 
-static unsigned  closing_connection_on_departure(struct selector_key * key){
-    sock_client *client_information = (sock_client *) key->data;
+static unsigned  closing_connection_on_departure(const unsigned state ,struct selector_key * key){
+    close(key->fd);
+    return CLOSING_CONNECTION;
+}
+
+static unsigned closing_connection_on_arrival(const unsigned state ,struct selector_key * key ){
+    selector_unregister_fd(key->s,key->fd);
+    sock_client * client_information = (sock_client*) key->data;
     if(key->fd == client_information->origin_fd)
         selector_unregister_fd(key->s,client_information->client_fd);
     else
         selector_unregister_fd(key->s,client_information->origin_fd);
-    close(client_information->origin_fd);
-    close(client_information->client_fd);
     destroy_sock_client(client_information);
-    return CLOSING_CONNECTION;
-}
-
-static unsigned closing_connection_on_arrival(struct selector_key * key ){
-    selector_unregister_fd(key->s,key->fd);
     return CLOSING_CONNECTION;
 }
 

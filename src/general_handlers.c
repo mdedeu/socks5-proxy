@@ -1,6 +1,5 @@
 #include "general_handlers.h"
 
-static void check_close_resources(sock_client * client_information,struct selector_key * key);
 
 void socks5_read(struct selector_key * key){
     sock_client * current_client = (sock_client* ) key->data;
