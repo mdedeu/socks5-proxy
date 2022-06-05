@@ -1,5 +1,6 @@
 #ifndef CONNECTED_H
-#define
+#define CONNECTED_H
+
 #include "proxy_state_machine.h"
 
 void connected_on_arrival(unsigned  state , struct selector_key * key);
