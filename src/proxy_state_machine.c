@@ -143,11 +143,19 @@ static unsigned  connected_read_handler(struct  selector_key * key){
 
     uint8_t * writing_direction =    buffer_write_ptr(current_buffer,&available_write);
     ssize_t read_amount = recv(key->fd,writing_direction,available_write,MSG_DONTWAIT);
+    if(!read_amount){
+        selector_unregister_fd(key->s,client_information->origin_fd);
+        selector_unregister_fd(key->s,client_information->client_fd);
+        close(client_information->origin_fd);
+        close(client_information->client_fd);
+    }
     buffer_write_adv(current_buffer,read_amount);
 
 
 
-    if(key->fd == client_information->origin_fd )
+
+
+    if(read_amount > 0 &&key->fd == client_information->origin_fd )
         selector_set_interest(key->s,client_information->client_fd,OP_READ|OP_WRITE);
     else
         selector_set_interest(key->s,client_information->origin_fd,OP_READ|OP_WRITE) ;
