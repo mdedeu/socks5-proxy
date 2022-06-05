@@ -121,6 +121,8 @@ static void writing_reply_on_arrival(unsigned state , struct selector_key * key 
 
 static void connected_on_arrival(unsigned  state , struct selector_key * key){
     struct sock_client  * client_information = (struct sock_client * )key->data;
+    buffer_reset(client_information->write_buffer);
+    buffer_reset(client_information->read_buffer);
     close_sock_request_parser(client_information->current_parser.request_message);
     selector_set_interest(key->s,client_information->client_fd,OP_READ);
     selector_set_interest(key->s,client_information->origin_fd,OP_READ);
@@ -143,7 +145,13 @@ static unsigned  connected_read_handler(struct  selector_key * key){
     ssize_t read_amount = recv(key->fd,writing_direction,available_write,MSG_DONTWAIT);
     buffer_write_adv(current_buffer,read_amount);
 
-    selector_set_interest_key(key,OP_READ|OP_WRITE);
+
+
+    if(key->fd == client_information->origin_fd )
+        selector_set_interest(key->s,client_information->client_fd,OP_READ|OP_WRITE);
+    else
+        selector_set_interest(key->s,client_information->origin_fd,OP_READ|OP_WRITE) ;
+
     return CONNECTED;
 }
 
@@ -160,8 +168,12 @@ static unsigned connected_write_handler(struct selector_key * key ){
         return CONNECTED;
 
     uint8_t  * reading_direction = buffer_read_ptr(current_buffer,&available_write);
-    ssize_t read_amount = send(key->fd,reading_direction,available_write,MSG_DONTWAIT);
-    buffer_read_adv(current_buffer,read_amount);
+    ssize_t write_amount = send(key->fd,reading_direction,available_write,MSG_DONTWAIT);
+    buffer_read_adv(current_buffer,write_amount);
+
+    if(available_write == write_amount)
+        selector_set_interest_key(key,OP_READ);
+
 
     return CONNECTED;
 
