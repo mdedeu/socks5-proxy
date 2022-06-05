@@ -119,6 +119,55 @@ static void writing_reply_on_arrival(unsigned state , struct selector_key * key 
     selector_set_interest(key->s,client_information->client_fd,OP_WRITE);
 }
 
+static void connected_on_arrival(unsigned  state , struct selector_key * key){
+    struct sock_client  * client_information = (struct sock_client * )key->data;
+    close_sock_request_parser(client_information->current_parser.request_message);
+    selector_set_interest(key->s,client_information->client_fd,OP_READ);
+    selector_set_interest(key->s,client_information->origin_fd,OP_READ);
+
+}
+
+static unsigned  connected_read_handler(struct  selector_key * key){
+    struct sock_client  * client_information = (struct sock_client * )key->data;
+    size_t  available_write;
+    buffer * current_buffer;
+    if(key->fd == client_information->origin_fd )
+        current_buffer = client_information->read_buffer;
+    else
+        current_buffer=client_information->write_buffer;
+
+   if(!buffer_can_write(current_buffer))
+       return CONNECTED;
+
+    uint8_t * writing_direction =    buffer_write_ptr(current_buffer,&available_write);
+    ssize_t read_amount = recv(key->fd,writing_direction,available_write,MSG_DONTWAIT);
+    buffer_write_adv(current_buffer,read_amount);
+
+    selector_set_interest_key(key,OP_READ|OP_WRITE);
+    return CONNECTED;
+}
+
+static unsigned connected_write_handler(struct selector_key * key ){
+    struct sock_client  * client_information = (struct sock_client * )key->data;
+    size_t  available_write;
+    buffer * current_buffer;
+    if(key->fd == client_information->origin_fd )
+        current_buffer = client_information->write_buffer;
+    else
+        current_buffer=client_information->read_buffer;
+
+    if(!buffer_can_read(current_buffer))
+        return CONNECTED;
+
+    uint8_t  * reading_direction = buffer_read_ptr(current_buffer,&available_write);
+    ssize_t read_amount = send(key->fd,reading_direction,available_write,MSG_DONTWAIT);
+    buffer_read_adv(current_buffer,read_amount);
+
+    return CONNECTED;
+
+}
+
+
 
 static unsigned  writing_reply_write_handler(struct selector_key * key){
     struct sock_client  * client_information = (struct sock_client * )key->data;
@@ -210,19 +259,16 @@ static const struct state_definition hello_sock_received_state = {.state=HELLO_S
 static const struct state_definition authenticated_state = {.state=AUTHENTICATED, .on_read_ready=authenticated_handler_read};
 static const struct state_definition ready_to_connect = {.state=READY_TO_CONNECT, .on_block_ready=ready_to_connect_block_handler, .on_write_ready=ready_to_connect_write_handle,.on_arrival=ready_to_connect_on_arrival};
 static const struct state_definition writing_reply = {.state=WRITING_REPLY, .on_write_ready=writing_reply_write_handler,.on_arrival=writing_reply_on_arrival};
+static const struct state_definition connected = {.state=CONNECTED, .on_write_ready=connected_write_handler,.on_arrival=connected_on_arrival,.on_read_ready=connected_read_handler};
 
-//static struct state_definition connect_sock_received_state = {.state=CONNECT_SOCK_RECEIVED, .on_read_ready=connect_sock_received_handler_read, .on_write_ready=connect_sock_received_handler_write};
-//static struct state_definition connected_state = {.state=CONNECTED, .on_read_ready=connected_handler_read, .on_write_ready=connected_handler_write};
 
 static const struct state_definition states[] = {
     tcp_connected_state,
     hello_sock_received_state,
     authenticated_state,
     ready_to_connect,
-    writing_reply
-//    {.state=AUTHENTICATED, .on_read_ready=authenticated_handler_read, .on_write_ready=authenticated_handler_write},
-//    {.state=CONNECT_SOCK_RECEIVED, .on_read_ready=connect_sock_received_handler_read, .on_write_ready=connect_sock_received_handler_write},
-//    {.state=CONNECTED, .on_read_ready=connected_handler_read, .on_write_ready=connected_handler_write}
+    writing_reply,
+    connected
 };
 
 static struct state_machine sock_client_machine = {
