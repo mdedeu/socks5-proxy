@@ -2,7 +2,7 @@
 #define SOCK_CLIENT_H
 #include "buffer.h"
 #include <stdlib.h>
-#include "proxy_state_machine.h"
+#include "state/proxy_state_machine.h"
 #include <stdint.h>
 #include <sys/types.h>
 #include <sys/socket.h>

@@ -2,7 +2,7 @@
 #define CLIENT_REQUEST_PROCESSOR_H
 
 #include "selector.h"
-#include "sock_hello_parser.h"
+#include "parsing/sock_hello_parser.h"
 #include "client_request_processor.h"
 #include "sock_client.h"
 #include "buffer.h"
@@ -12,9 +12,9 @@
 #include <netinet/in.h>
 #include "dns_query.h"
 #include "sock_client.h"
-#include "sock_authentication_parser.h"
-#include "sock_request_parser.h"
-#include "sock_hello_parser.h"
+#include "parsing/sock_authentication_parser.h"
+#include "parsing/sock_request_parser.h"
+#include "parsing/sock_hello_parser.h"
 
 
 #define USERNAME_AUTHENTICATION 2

@@ -8,20 +8,28 @@
 #include <errno.h>
 #include "stm.h"
 #include <string.h>
-#include "sock_hello_parser.h"
-#include "selector.h"
+#include "../parsing/sock_hello_parser.h"
+#include "../selector.h"
 #include <sys/types.h>
 #include <sys/socket.h>
-#include "bufferService.h"
-#include "client_request_processor.h"
-#include "sock_client.h"
-#include "sock_authentication_parser.h"
-#include "sock_request_parser.h"
-#include "general_handlers.h"
+#include "../bufferService.h"
+#include "../client_request_processor.h"
+#include "../sock_client.h"
+#include "../parsing/sock_authentication_parser.h"
+#include "../parsing/sock_request_parser.h"
+#include "../general_handlers.h"
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+//states handlers
+#include "tcp_connected.h"
+#include "hello_sock_received.h"
+#include "authenticated.h"
+#include "ready_to_connect.h"
+#include "writing_reply.h"
+#include "connected.h"
+#include "closing_connection.h"
 
 enum sock_state {
     TCP_CONNECTED,

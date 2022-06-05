@@ -2,9 +2,9 @@
 #define BUFFER_SERVICE_H
 
 #include "buffer.h"
-#include "stm.h"
-#include "parser.h"
-#include "proxy_state_machine.h"
+#include "state/stm.h"
+#include "parsing/parser.h"
+#include "state/proxy_state_machine.h"
 
 #define MAX_SIZE 2048
 
