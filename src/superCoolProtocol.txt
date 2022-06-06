@@ -1,4 +1,4 @@
-    Socks5d Proxy Monitoring And Configuration Protocol
+Socks5d Proxy Monitoring And Configuration Protocol
 
 Acknowledgments
 
@@ -82,22 +82,25 @@ The keywords MUST, MUST NOT, SHOULD, SHOULD NOT, MAY in this document will be in
 
         The associated METHODS for the Query ACTION (X'D0') are:
 
-            o   X'01'   Get Total Historic Connections
-            o   X'02'   Get Current Connections
-            o   X'03'   Get Max. Concurrent Connections
-            o   X'04'   Get Total Bytes Sent
-            o   X'05'   Get Total Bytes Received
-            o   X'06'   Get Number of Users Connected  
+            o   X'01'   Get Total Historic Connections - returns value on success, in 4 bytes. 
+            o   X'02'   Get Current Connections - returns value on success, in 4 bytes.
+            o   X'03'   Get Max. Concurrent Connections - returns value on success, in 4 bytes. 
+            o   X'04'   Get Total Bytes Sent - returns value on success, in 4 bytes. 
+            o   X'05'   Get Total Bytes Received - returns value on success, in 4 bytes. 
+            o   X'06'   Get Number of Users Connected - returns value on success, in 4 bytes. 
+            o   X'07'   Get Maximum Buffer Size - returns value on success, in 4 bytes. 
           
         On the other hand, methods associated with the Modification ACTION are meant to modify the Server configuration. These methods do take parameters, whose syntax is described on Section 5. 
 
         The associated METHODS for the Modification ACTION (X'BE') are:
 
-            o   X'00'   Add User
-            o   X'01'   Remove User
-            o   X'02'   Enable Password Spoofing
-            o   X'03'   Disable Password Spoofing
-            o   X'04'   Change Buffer Size
+            o   X'00'   Add User - returns 0 on success in 1 byte.
+            o   X'01'   Remove User - returns 0 on success in 1 byte.
+            o   X'02'   Enable Password Spoofing - returns 0 on success in 1 byte.
+            o   X'03'   Disable Password Spoofing - returns 0 on success in 1 byte.
+            o   X'04'   Change Buffer Size - returns 0 on success in 1 byte.
+
+
 
     4.2 General Response Structure
 
@@ -112,7 +115,15 @@ The keywords MUST, MUST NOT, SHOULD, SHOULD NOT, MAY in this document will be in
         If an invalid ACTION or METHOD is sent to the Server, the Server MUST respond with the RLEN field set to X'00' and the first and only byte of the response field set to the error code:
             o   X'00'   Invalid Action
             o   X'01'   Invalid Method
+            o   X'02'   User already registered 
+            o   X'03'   User removal unsuccessful
+            o   X'04'   Invalid Buffer Size
 
+        If a valid ACTION and METHOD is sent to the Server, the Server MUST respond with the following structure:
+
+            o The fields ACTION and METHOD are those of the orginal request.
+            o The field RLEN is set to the length of the response, X'01' unless otherwise specified. 
+            o The field RESPONSE is set to the response of the Server of length 4 unless otherwise specified. 
 
 5. Modification
 
@@ -165,88 +176,19 @@ The keywords MUST, MUST NOT, SHOULD, SHOULD NOT, MAY in this document will be in
                 The PCOL field contains a 1 byte which represents the protocol for which we are spoofing passwords. In this version of the procotol (X'01'), the only possible value is X'00' , representing the POP3 protocol.
 
         5.1.5 Change Buffer Size
-                        +--------+--------+---------+
-                        | ACTION | METHOD |  NSIZE  |
-                        +--------+--------+---------+
-                        |  X'BE' |  X'03' |    1    |
-                        +--------+--------+---------+
 
-                        The NSIZE field contains a 1 byte which represents the length of the new buffer. 
+                +--------+--------+---------+
+                | ACTION | METHOD |  NSIZE  |
+                +--------+--------+---------+
+                |  X'BE' |  X'03' |    2    |
+                +--------+--------+---------+
 
-    5.2 Responses
+                The NSIZE field contains 2 bytes which represents the length of the new buffer. 
 
-        5.2.1 Add User
+        5.2 Response
+        
+            The Modification Requests follow the General Response Structure detailed in Section 4.2. In case of errors, RLEN field MUST be X'00'.
 
-            +--------+--------+--------+----------+
-            | ACTION | METHOD |  RLEN  | RESPONSE | 
-            +--------+--------+--------+----------+
-            | X'BE'  |  X'00' |   1    |     1    |
-            +--------+--------+--------+----------+
-
-            The RLEN field contains 1 byte indicating the response length.
-            The RESPONSE  field contains 1 byte indicating the result of the Modification ACTION(X'BE'). 
-            The possible values for RESPONSE field are:
-                o User added succesfully - X'00' 
-                o User already registered - X'01'
-
-
-        5.2.2 Remove User
-
-            +--------+--------+--------+----------+
-            | ACTION | METHOD |  RLEN  | RESPONSE | 
-            +--------+--------+--------+----------+
-            | X'BE'  |  X'01' |   1    |    1     |
-            +--------+--------+--------+----------+
-
-            The RLEN field contains 1 byte indicating the response length.
-            The RESPONSE  field contains 1 byte indicating the result of the Modification ACTION(X'BE'). 
-            The possible values for RESPONSE field are:
-                o User removed succesfully - X'00' 
-                o User does not exists - X'01'
-
-
-        5.2.3 Enable Password Spoofing
-
-            +--------+--------+--------+----------+
-            | ACTION | METHOD |  RLEN  | RESPONSE | 
-            +--------+--------+--------+----------+
-            | X'BE'  |  X'02' |   1    |    1     |
-            +--------+--------+--------+----------+
-
-            The RLEN field contains 1 byte indicating the response length.
-            The RESPONSE  field contains 1 byte indicating the result of the Modification ACTION(X'BE'). 
-            The possible values for RESPONSE field are:
-                o Spoofing activated - X'00' 
-                o Spoofing already activated - X'01'
-
-        5.2.4 Disable Password Spoofing
-
-            +--------+--------+--------+----------+
-            | ACTION | METHOD |  RLEN  | RESPONSE | 
-            +--------+--------+--------+----------+
-            | X'BE'  |  X'03' |   1    |    1     |
-            +--------+--------+--------+----------+
-
-            The RLEN field contains 1 byte indicating the response length.
-            The RESPONSE  field contains 1 byte indicating the result of the Modification ACTION(X'BE'). 
-            The possible values for RESPONSE field are:
-                o Spoofing deactivated - X'00' 
-                o Spoofing already deactivated - X'01'
-
-        5.2.5 Change Buffer Size
-
-            +--------+--------+--------+----------+
-            | ACTION | METHOD |  RLEN  | RESPONSE | 
-            +--------+--------+--------+----------+
-            | X'BE'  |  X'03' |   1    |    1     |
-            +--------+--------+--------+----------+
-
-            The RLEN field contains 1 byte indicating the response length.
-            The RESPONSE  field contains 1 byte indicating the result of the Modification ACTION(X'BE'). 
-            The possible values for RESPONSE field are:
-                o Buffer changed successfully - X'00' 
-                o Invalid Buffer Size - X'01'
-                
 6. Querying
 
     6.1 Requests
