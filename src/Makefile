@@ -1,6 +1,11 @@
 CC = gcc
 CFLAGS = -std=gnu11 -g -Wall -pedantic -D_POSIX_SOURCE=1 -pthread -D_GNU_SOURCE
-OBJ= client_request_processor.o buffer.o selector.o parsing/sock_authentication_parser.o parsing/sock_hello_parser.o parsing/sock_request_parser.o state/proxy_state_machine.o sock_client.o state/stm.o bufferService.o general_handlers.o parsing/parser.o dns_query.o main.o state/authenticated.o state/closing_connection.o state/connected.o state/hello_sock_received.o state/ready_to_connect.o state/tcp_connected.o state/writing_reply.o
+
+OBJ_DIR = ../obj
+STATE_DIR = state
+PARSE_DIR = parsing
+
+OBJ= client_request_processor.o buffer.o selector.o $(PARSE_DIR)/sock_authentication_parser.o $(PARSE_DIR)/sock_hello_parser.o $(PARSE_DIR)/sock_request_parser.o $(STATE_DIR)/proxy_state_machine.o sock_client.o $(STATE_DIR)/stm.o bufferService.o general_handlers.o $(PARSE_DIR)/parser.o dns_query.o main.o $(STATE_DIR)/authenticated.o $(STATE_DIR)/closing_connection.o $(STATE_DIR)/connected.o $(STATE_DIR)/hello_sock_received.o $(STATE_DIR)/ready_to_connect.o $(STATE_DIR)/tcp_connected.o $(STATE_DIR)/writing_reply.o
 
 all: $(OBJ)
 	$(CC) $(CFLAGS) -o server $(OBJ)
