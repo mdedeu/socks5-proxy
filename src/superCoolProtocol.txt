@@ -1,0 +1,119 @@
+    Socks5d Proxy Monitoring And Configuration Protocol
+
+Acknowledgments
+
+    This memo describes a protocol that was designed for the University Subject 'Protocolos de Comunicación'.  The key contributors are:
+    Marcos Dedeu, Gonzalo Beade, Santiago Hadad y Salvador Castagnino. 
+
+1.Terminology
+
+The keywords MUST, MUST NOT, SHOULD, SHOULD NOT, MAY in this document will be interpreted as described in RFC 2119.
+ 
+2. Introduction
+
+    The goal of this protocol is to provide an interface for interacting with a running Socks5d Server. The client MAY ask for:
+        o A list of historical connections
+        o A list of concurrent connections
+        o Amounts of bytes transferred
+    The client SHOULD also be able to modify information or properties of the server on runtime, such as adding or deleting users, setting up password sniffing for at least POP3 protocol and modifying the timeout limit.
+    In order to maintain security, authentication with the server upon connection is required. 
+    Once authenticated, the connection follows a Request/Response structure, where the client makes the requests, and the Server processes and responds.
+
+2. Connection and Authentication
+
+   2.1. Connection
+        When a SCTP-based Client wishes to establish a connection to the socks5d Server it MUST open a SCTP connection to the appropriate port on the server system. The Socks5d Administration service is conventionally located on port 8080.
+        
+   2.2. Authentication
+        Once the connection with the socks5d server has started, the client produces an authentication request:
+
+                +----------+------+----------+---------+----------+
+                |   VER    | ULEN |  UNAME   | PASSLEN |  PASS    |
+                +----------+------+----------+---------+----------+
+                |     2    |  1   | 1 to 255 |    1    | 1 to 255 |
+                +----------+------+----------+---------+----------+
+        
+        The Ver field contains the current version of the negotiation, which is X'0xFEED'(2 bytes). 
+        The ULEN field contains a 1 byte unsigned integer which represents the length of the UNAME field that follows.
+        The UNAME field contains the username as known to the Server. Only the ASCII charset is supported.
+        The PASSLEN field contains a 1 byte unsigned integer which represents the length of the PASS field that follows. 
+        The PASSWD field contains the password associated with the given UNAME. Only the ASCII charset is supported.
+
+        The server verifies the supplied UNAME and PASS, and if corresponds to a user with administrator privileges it sends the following response: 
+                
+                                +-----+--------+
+                                | VER | STATUS |
+                                +-----+--------+
+                                |  2  |   2    |
+                                +-----+--------+
+
+        A STATUS field of X'C001' indicates the authentication was successful.
+        A STATUS field of X'4B1D' indicates the authentication failed.
+        A STATUS field of X'BEEF' indicates invalid version
+        
+        If the server returns a failure status, it MUST close the connection.
+
+        If the server returns a success status, then the session is fully established.
+
+3. General Request and Response Structure
+
+    Once the client is authenticated, the following messages will follow Request/Response structure.
+    The client sends a Request and the server answers with a corresponding Response message.
+
+    All messages from now on include the fields ACTION and METHOD which are 1 byte long. 
+    
+    In the Request, these fields are the ones which indicate the server the action it must perform, the other fields are just arguments of that action.
+
+    In the Response, the ACTION and METHOD fields MUST match the ones from their corresponding Request, unless an error ocurred.
+
+    The values currently defined as ACTION are:
+
+        o   X'D0'   Query
+        o   X'BE'   Modification
+        o   X'FF'   Invalid ACTION
+
+    Each ACTION has a set of methods associated with it.
+    
+    Methods associated with the Query ACTION are meant as data retrieval methods, meaning they won't affect the state of the server. 
+
+    On the other hand, the primary function of methods
+    associated with the Modification ACTION is to modify the Server configuration.
+
+    The associated METHODS for the Query ACTION are:
+
+        o   X'00'   List Users
+        o   X'01'   Get Total Historic Connections
+        o   X'02'   Get Current Connections
+        o   X'03'   Get Max. Concurrent Connections
+        o   X'04'   Get Total Bytes Sent
+        o   X'05'   Get Total Bytes Received
+        o   X'06'   Get Number of Users Connected
+        o   X'07'   Get Total User Count     
+        o   X'08'   Get Selector Timeout 
+        o   X'09'   Get Connection Timeout
+        o   X'0A'   Get User Total Current Connections
+        o   X'F0'   Query Error
+        o   X'FF'   Invalid METHOD
+
+
+    The associated METHODS for the Modification ACTION are:
+
+        o   X'00'   Add User
+        o   X'01'   Remove User
+        o   X'02'   Enable/Disable Password Spoofing
+        o   X'03'   Set Selector Timeout
+        o   X'04'   Set Connection Timeout
+        o   X'FF'   Invalid ACTION
+
+    If an invalid ACTION or METHOD is sent to the Server, the Server MUST respond with the message:
+
+        +--------+--------+
+        | ACTION | SERVER |
+        +--------+--------+
+        |   1    |  1     |
+        +--------+--------+
+    
+    If and invalid ACTION is sent in the Request, both ACTION and METHOD will have the value X'FF' in the Response.
+    If a valid ACTION and an invalid METHOD (for that ACTION) is sent in the Request, the Response will have the ACTION field set with the same value as in the Request, and the METHOD field set with the value X'FF'.
+
+    The values X'FF' and X'F0' for ACTION and METHOD SHOULD never be included in a Request message, as they are reserved to notify errors.
