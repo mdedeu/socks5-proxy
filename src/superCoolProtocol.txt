@@ -15,7 +15,7 @@ The keywords MUST, MUST NOT, SHOULD, SHOULD NOT, MAY in this document will be in
         o A list of historical connections
         o A list of concurrent connections
         o Amounts of bytes transferred
-    The client SHOULD also be able to modify information or properties of the server on runtime, such as adding or deleting users, setting up password sniffing for at least POP3 protocol and modifying the timeout limit.
+    The client SHOULD also be able to modify information or properties of the server on runtime, such as adding or deleting users, setting up password sniffing for at least POP3 protocol and modifying the buffer size.
     In order to maintain security, authentication with the server upon connection is required. 
     Once authenticated, the connection follows a Request/Response structure, where the client makes the requests, and the Server processes and responds.
 
