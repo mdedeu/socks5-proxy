@@ -3,7 +3,7 @@
 Acknowledgments
 
     This memo describes a protocol that was designed for the University Subject 'Protocolos de Comunicación'.  The key contributors are:
-    Marcos Dedeu, Gonzalo Beade, Santiago Hadad y Salvador Castagnino. 
+    Marcos Dedeu, Gonzalo Beade, Santiago Hadad and Salvador Castagnino. 
 
 1.Terminology
 
@@ -19,101 +19,241 @@ The keywords MUST, MUST NOT, SHOULD, SHOULD NOT, MAY in this document will be in
     In order to maintain security, authentication with the server upon connection is required. 
     Once authenticated, the connection follows a Request/Response structure, where the client makes the requests, and the Server processes and responds.
 
-2. Connection and Authentication
+3. Connection and Authentication
 
-   2.1. Connection
-        When a SCTP-based Client wishes to establish a connection to the socks5d Server it MUST open a SCTP connection to the appropriate port on the server system. The Socks5d Administration service is conventionally located on port 8080.
+   3.1. Connection
+        When a TCP-based Client wishes to establish a connection to the socks5d Server it MUST open a TCP connection to the appropriate port on the server system. The Socks5d Administration service is conventionally located on port 42069.
         
-   2.2. Authentication
+   3.2. Authentication
         Once the connection with the socks5d server has started, the client produces an authentication request:
 
                 +----------+------+----------+---------+----------+
                 |   VER    | ULEN |  UNAME   | PASSLEN |  PASS    |
                 +----------+------+----------+---------+----------+
-                |     2    |  1   | 1 to 255 |    1    | 1 to 255 |
+                |   X'01'  |  1   | 1 to 255 |    1    | 1 to 255 |
                 +----------+------+----------+---------+----------+
         
-        The Ver field contains the current version of the negotiation, which is X'0xFEED'(2 bytes). 
-        The ULEN field contains a 1 byte unsigned integer which represents the length of the UNAME field that follows.
+        The Ver field contains the current version of the negotiation, which is X'01'(1 byte). 
+        The ULEN field contains a 1 byte which represents the length of the UNAME field that follows.
         The UNAME field contains the username as known to the Server. Only the ASCII charset is supported.
-        The PASSLEN field contains a 1 byte unsigned integer which represents the length of the PASS field that follows. 
+        The PASSLEN field contains a 1 byte  which represents the length of the PASS field that follows. 
         The PASSWD field contains the password associated with the given UNAME. Only the ASCII charset is supported.
 
-        The server verifies the supplied UNAME and PASS, and if corresponds to a user with administrator privileges it sends the following response: 
+        The server verifies the supplied UNAME and PASS, and if it corresponds to a user with administrator privileges it sends the following response: 
                 
-                                +-----+--------+
-                                | VER | STATUS |
-                                +-----+--------+
-                                |  2  |   2    |
-                                +-----+--------+
+                                +--------+
+                                | STATUS |
+                                +--------+
+                                |    2   |
+                                +--------+
 
         A STATUS field of X'C001' indicates the authentication was successful.
         A STATUS field of X'4B1D' indicates the authentication failed.
-        A STATUS field of X'BEEF' indicates invalid version
         
         If the server returns a failure status, it MUST close the connection.
 
         If the server returns a success status, then the session is fully established.
 
-3. General Request and Response Structure
+4. General Request and Response Structure
 
     Once the client is authenticated, the following messages will follow Request/Response structure.
     The client sends a Request and the server answers with a corresponding Response message.
 
     All messages from now on include the fields ACTION and METHOD which are 1 byte long. 
-    
-    In the Request, these fields are the ones which indicate the server the action it must perform, the other fields are just arguments of that action.
 
-    In the Response, the ACTION and METHOD fields MUST match the ones from their corresponding Request, unless an error ocurred.
+    4.1. General Request Structure
 
-    The values currently defined as ACTION are:
+        In the Request, these fields are the ones which indicate the server the action it must perform, the other fields are just arguments of that action.
 
-        o   X'D0'   Query
-        o   X'BE'   Modification
-        o   X'FF'   Invalid ACTION
+            +--------+--------+
+            | ACTION | METHOD |
+            +--------+--------+
+            |   1    |    1   |
+            +--------+--------+
+        
+        The values currently defined as ACTION are:
 
-    Each ACTION has a set of methods associated with it.
-    
-    Methods associated with the Query ACTION are meant as data retrieval methods, meaning they won't affect the state of the server. 
+            o   X'D0'   Query - Request that does not modify the state of the server.
+            o   X'BE'   Modification - Request that modifies the state of the server.
 
-    On the other hand, the primary function of methods
-    associated with the Modification ACTION is to modify the Server configuration.
+        Each ACTION has a set of methods associated with it. 
 
-    The associated METHODS for the Query ACTION are:
+        Methods associated with the Query ACTION are meant as data retrieval methods, meaning they won't affect the state of the server. These methods do not take any parameters, they are merely getters.
 
-        o   X'00'   List Users
-        o   X'01'   Get Total Historic Connections
-        o   X'02'   Get Current Connections
-        o   X'03'   Get Max. Concurrent Connections
-        o   X'04'   Get Total Bytes Sent
-        o   X'05'   Get Total Bytes Received
-        o   X'06'   Get Number of Users Connected
-        o   X'07'   Get Total User Count     
-        o   X'08'   Get Selector Timeout 
-        o   X'09'   Get Connection Timeout
-        o   X'0A'   Get User Total Current Connections
-        o   X'F0'   Query Error
-        o   X'FF'   Invalid METHOD
+        The associated METHODS for the Query ACTION (X'D0') are:
+
+            o   X'01'   Get Total Historic Connections
+            o   X'02'   Get Current Connections
+            o   X'03'   Get Max. Concurrent Connections
+            o   X'04'   Get Total Bytes Sent
+            o   X'05'   Get Total Bytes Received
+            o   X'06'   Get Number of Users Connected  
+          
+        On the other hand, methods associated with the Modification ACTION are meant to modify the Server configuration. These methods do take parameters, whose syntax is described on Section 5. 
+
+        The associated METHODS for the Modification ACTION (X'BE') are:
+
+            o   X'00'   Add User
+            o   X'01'   Remove User
+            o   X'02'   Enable Password Spoofing
+            o   X'03'   Disable Password Spoofing
+            o   X'04'   Change Buffer Size
+
+    4.2 General Response Structure
+
+        In the Response, the ACTION and METHOD fields MUST match the ones from their corresponding Request. The RLEN field is a byte representing the length of the response or 0 in case of error. 
+            
+            +--------+--------+--------+----------+
+            | ACTION | METHOD |  RLEN  | RESPONSE | 
+            +--------+--------+--------+----------+
+            |   1    |   1    |   1    | 1 to 255 |
+            +--------+--------+--------+----------+
+
+        If an invalid ACTION or METHOD is sent to the Server, the Server MUST respond with the RLEN field set to X'00' and the first and only byte of the response field set to the error code:
+            o   X'00'   Invalid Action
+            o   X'01'   Invalid Method
 
 
-    The associated METHODS for the Modification ACTION are:
+5. Modification
 
-        o   X'00'   Add User
-        o   X'01'   Remove User
-        o   X'02'   Enable/Disable Password Spoofing
-        o   X'03'   Set Selector Timeout
-        o   X'04'   Set Connection Timeout
-        o   X'FF'   Invalid ACTION
+    For each of the associated methods of the Modification ACTION (X'BE'), the structure is defined as:
 
-    If an invalid ACTION or METHOD is sent to the Server, the Server MUST respond with the message:
+    5.1 Requests
 
-        +--------+--------+
-        | ACTION | SERVER |
-        +--------+--------+
-        |   1    |  1     |
-        +--------+--------+
-    
-    If and invalid ACTION is sent in the Request, both ACTION and METHOD will have the value X'FF' in the Response.
-    If a valid ACTION and an invalid METHOD (for that ACTION) is sent in the Request, the Response will have the ACTION field set with the same value as in the Request, and the METHOD field set with the value X'FF'.
+        5.1.1 Add User
 
-    The values X'FF' and X'F0' for ACTION and METHOD SHOULD never be included in a Request message, as they are reserved to notify errors.
+                +--------+--------+--------+----------+---------+----------+
+                | ACTION | METHOD |  ULEN  |  UNAME   | PASSLEN |   PASS   |
+                +--------+--------+--------+----------+---------+----------+
+                |  X'BE' |  X'00' |   1    | 1 to 255 |    1    | 1 to 255 |
+                +--------+--------+--------+----------+---------+----------+
+
+                The ULEN field contains a 1 byte which represents the length of the UNAME field that follows.
+                The UNAME field contains the username as known to the Server. Only the ASCII charset is supported.
+                The PASSLEN field contains a 1 byte  which represents the length of the PASS field that follows. 
+                The PASSWD field contains the password associated with the given UNAME. Only the ASCII charset is supported.
+
+        5.1.2 Remove User
+
+                +--------+--------+--------+----------+
+                | ACTION | METHOD |  ULEN  |  UNAME   |
+                +--------+--------+--------+----------+
+                |  X'BE' |  X'01' |   1    | 1 to 255 |
+                +--------+--------+--------+----------+
+
+                The ULEN field contains a 1 byte which represents the length of the UNAME field that follows.
+                The UNAME field contains the username as known to the Server. Only the ASCII charset is supported.
+
+        5.1.3 Enable Password Spoofing
+
+                +--------+--------+--------+
+                | ACTION | METHOD |  PCOL  |
+                +--------+--------+--------+
+                |  X'BE' |  X'02' |   1    |
+                +--------+--------+--------+
+
+                The PCOL field contains a 1 byte which represents the protocol for which we are spoofing passwords. In this version of the procotol (X'01'), the only possible value is X'00' , representing the POP3 protocol.
+
+        5.1.4 Disable Password Spoofing
+
+                +--------+--------+--------+
+                | ACTION | METHOD |  PCOL  |
+                +--------+--------+--------+
+                |  X'BE' |  X'03' |   1    |
+                +--------+--------+--------+
+
+                The PCOL field contains a 1 byte which represents the protocol for which we are spoofing passwords. In this version of the procotol (X'01'), the only possible value is X'00' , representing the POP3 protocol.
+
+        5.1.5 Change Buffer Size
+                        +--------+--------+---------+
+                        | ACTION | METHOD |  NSIZE  |
+                        +--------+--------+---------+
+                        |  X'BE' |  X'03' |    1    |
+                        +--------+--------+---------+
+
+                        The NSIZE field contains a 1 byte which represents the length of the new buffer. 
+
+    5.2 Responses
+
+        5.2.1 Add User
+
+            +--------+--------+--------+----------+
+            | ACTION | METHOD |  RLEN  | RESPONSE | 
+            +--------+--------+--------+----------+
+            | X'BE'  |  X'00' |   1    |     1    |
+            +--------+--------+--------+----------+
+
+            The RLEN field contains 1 byte indicating the response length.
+            The RESPONSE  field contains 1 byte indicating the result of the Modification ACTION(X'BE'). 
+            The possible values for RESPONSE field are:
+                o User added succesfully - X'00' 
+                o User already registered - X'01'
+
+
+        5.2.2 Remove User
+
+            +--------+--------+--------+----------+
+            | ACTION | METHOD |  RLEN  | RESPONSE | 
+            +--------+--------+--------+----------+
+            | X'BE'  |  X'01' |   1    |    1     |
+            +--------+--------+--------+----------+
+
+            The RLEN field contains 1 byte indicating the response length.
+            The RESPONSE  field contains 1 byte indicating the result of the Modification ACTION(X'BE'). 
+            The possible values for RESPONSE field are:
+                o User removed succesfully - X'00' 
+                o User does not exists - X'01'
+
+
+        5.2.3 Enable Password Spoofing
+
+            +--------+--------+--------+----------+
+            | ACTION | METHOD |  RLEN  | RESPONSE | 
+            +--------+--------+--------+----------+
+            | X'BE'  |  X'02' |   1    |    1     |
+            +--------+--------+--------+----------+
+
+            The RLEN field contains 1 byte indicating the response length.
+            The RESPONSE  field contains 1 byte indicating the result of the Modification ACTION(X'BE'). 
+            The possible values for RESPONSE field are:
+                o Spoofing activated - X'00' 
+                o Spoofing already activated - X'01'
+
+        5.2.4 Disable Password Spoofing
+
+            +--------+--------+--------+----------+
+            | ACTION | METHOD |  RLEN  | RESPONSE | 
+            +--------+--------+--------+----------+
+            | X'BE'  |  X'03' |   1    |    1     |
+            +--------+--------+--------+----------+
+
+            The RLEN field contains 1 byte indicating the response length.
+            The RESPONSE  field contains 1 byte indicating the result of the Modification ACTION(X'BE'). 
+            The possible values for RESPONSE field are:
+                o Spoofing deactivated - X'00' 
+                o Spoofing already deactivated - X'01'
+
+        5.2.5 Change Buffer Size
+
+            +--------+--------+--------+----------+
+            | ACTION | METHOD |  RLEN  | RESPONSE | 
+            +--------+--------+--------+----------+
+            | X'BE'  |  X'03' |   1    |    1     |
+            +--------+--------+--------+----------+
+
+            The RLEN field contains 1 byte indicating the response length.
+            The RESPONSE  field contains 1 byte indicating the result of the Modification ACTION(X'BE'). 
+            The possible values for RESPONSE field are:
+                o Buffer changed successfully - X'00' 
+                o Invalid Buffer Size - X'01'
+                
+6. Querying
+
+    6.1 Requests
+
+        The Querying Requests follow the General Requests Structure detailed in Section 4.1. In case of errors, RLEN field MUST be X'00'.
+
+    6.2 Response
+
+        The Querying requests follow the General Response Structure detailed in Section 4.2. In case of errors, RLEN field MUST be X'00'.
+
