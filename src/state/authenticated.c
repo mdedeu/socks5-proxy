@@ -9,14 +9,14 @@ unsigned authenticated_handler_read(struct selector_key *key){
 
     size_t available_space;
     buffer_compact(client_data->write_buffer);
-    uint8_t * writeFrom = buffer_write_ptr(client_data->write_buffer, &available_space);
+    uint8_t * write_from = buffer_write_ptr(client_data->write_buffer, &available_space);
 
-    int received_amount = recv(key->fd, writeFrom, available_space, MSG_DONTWAIT);
+    int received_amount = recv(key->fd, write_from, available_space, MSG_DONTWAIT);
     buffer_write_adv(client_data->write_buffer, received_amount);
 
     bool finished = feed_sock_request_parser(
         (struct sock_request_message *) (client_data->current_parser.request_message),
-        writeFrom,
+        write_from,
         received_amount
     );
     
