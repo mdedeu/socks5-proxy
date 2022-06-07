@@ -6,7 +6,7 @@ SRC_DIR= src
 STATE_DIR= $(SRC_DIR)/state
 PARSE_DIR= $(SRC_DIR)/parsing
 
-EXEC=server
+EXEC= server
 
 #Si se agrega un directorio para compilar agregar un SRC+= al final de estas siguiendo el patron
 SRC= $(wildcard $(SRC_DIR)/*.c)
@@ -17,12 +17,12 @@ OBJ= $(patsubst %.c, %.o, $(SRC))
 
 .PHONY: all
 all: $(OBJ)
-	$(CC) $(CFLAGS) -o $(EXEC) $(OBJ)
+	@$(CC) $(CFLAGS) -o $(EXEC) $(OBJ)
 
 %.o : %.c
-	$(CC) -c $(CFLAGS) $< -o $@
+	@$(CC) -c $(CFLAGS) $< -o $@
 
 .PHONY: clean
 clean:
+	@rm -f $(OBJ) server
 #	find . -name '*.o' -type f -delete
-	rm -f $(OBJ) server

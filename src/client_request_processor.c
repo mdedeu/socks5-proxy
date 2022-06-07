@@ -100,7 +100,7 @@ void generate_request_answer(struct sock_request_message * data, struct selector
 
     buffer_write(data->answer_buffer, 0);
 
-    //    buffer_write(data->answer_buffer,data->atyp);
+    //buffer_write(data->answer_buffer,data->atyp);
     buffer_write(data->answer_buffer, 1); //IPV4 atyp
 
     struct sockaddr address_info;
@@ -108,10 +108,10 @@ void generate_request_answer(struct sock_request_message * data, struct selector
     getsockname(client_information->origin_fd, &address_info, &socklen);
 
     size_t available_space;
-    uint8_t  * writing_direction;
+    uint8_t * writing_direction;
     writing_direction = buffer_write_ptr(data->answer_buffer, &available_space);
 
-//    if(data->atyp == IPV4ADDRESS){
+//  if(data->atyp == IPV4ADDRESS){
         struct sockaddr_in client_info_ipv4 = *((struct sockaddr_in *) &address_info);
         memcpy(writing_direction, &client_info_ipv4.sin_addr.s_addr, IPV4SIZE);
         buffer_write_adv(data->answer_buffer, IPV4SIZE);
