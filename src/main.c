@@ -21,7 +21,7 @@
 #include "parsing/sock_request_parser.h"
 #include "parsing/sock_authentication_parser.h"
 
-#define MAX_PENDING_CONNECTIONS 3    // un valor bajo, para realizar pruebas
+#define MAX_PENDING_CONNECTIONS 500    // un valor bajo, para realizar pruebas
 #define PORT 1080
 #define OTHER_PORT 9090
 #define TRUE 1
@@ -88,7 +88,7 @@ fd_handler activeFdHandler = {
 //
 //}
 
-//El cliente se conecta conmigo a traves del socket pasivo tcp (masterSocket)
+//El cliente se conecta conmigo a traves del socket pasivo tcp (master_socket)
 //
 //  (masterSock)
 // Cli -----> Proxy
@@ -132,52 +132,83 @@ void tcpConnectionHandler(struct selector_key *key){
 int main(){
 
 	int opt = TRUE;
-    int masterSocket[2];
-    int masterSocketSize=0;
+    int master_socket[2];
+    int master_socket_size=0;
     struct sockaddr_in address;
 
-    if( (masterSocket[masterSocketSize] = socket(AF_INET , SOCK_STREAM , 0)) == 0)
+    if( (master_socket[master_socket_size] = socket(AF_INET , SOCK_STREAM , 0)) < 0)
     {
         goto error;
     } else {
-        //set master socket to allow multiple connections , this is just a good habit, it will work without this
-        if( setsockopt(masterSocket[masterSocketSize], SOL_SOCKET, SO_REUSEADDR, (char *)&opt, sizeof(opt)) < 0 )
+        if( setsockopt(master_socket[master_socket_size], SOL_SOCKET, SO_REUSEADDR, (char *)&opt, sizeof(opt)) < 0 )
         {
             goto error;
         }
 
-        //type of socket created
+        selector_fd_set_nio(master_socket[master_socket_size]);
+
         address.sin_family = AF_INET;
         address.sin_addr.s_addr = inet_addr("127.0.0.1");
         address.sin_port = htons(PORT);
 
-        // bind the socket to localhost port 8888
-        if (bind(masterSocket[masterSocketSize], (struct sockaddr *)&address, sizeof(address))<0)
+        if (bind(master_socket[master_socket_size], (struct sockaddr *)&address, sizeof(address))<0)
         {
-            close(masterSocket[masterSocketSize]);
+            close(master_socket[master_socket_size]);
             goto error;
         }
         else {
-            if (listen(masterSocket[0], MAX_PENDING_CONNECTIONS) < 0)
+            if (listen(master_socket[0], MAX_PENDING_CONNECTIONS) < 0)
             {
-                close(masterSocket[masterSocketSize]);
+                close(master_socket[master_socket_size]);
                 goto error;
             } else {
-                masterSocketSize++;
+                master_socket_size++;
             }
         }
     }
+
+    struct sockaddr_in6 server6addr;
+	if ((master_socket[master_socket_size] = socket(AF_INET6, SOCK_STREAM, 0)) < 0)
+	{
+        goto error;
+	} else {
+		if (setsockopt(master_socket[master_socket_size], SOL_SOCKET, SO_REUSEADDR, (char *) &opt, sizeof(opt)) < 0)
+		{
+            goto error;
+		}
+        selector_fd_set_nio(master_socket[master_socket_size]);
+
+		memset(&server6addr, 0, sizeof(server6addr));
+		server6addr.sin6_family = AF_INET6;
+		server6addr.sin6_port = htons(PORT);
+        inet_pton(AF_INET6, "::1", &server6addr.sin6_addr);
+
+		if (bind(master_socket[master_socket_size], (struct sockaddr *) &server6addr, sizeof(server6addr)) < 0)
+		{
+			close(master_socket[master_socket_size]);
+            goto error;
+		} else {
+			if (listen(master_socket[master_socket_size], MAX_PENDING_CONNECTIONS) < 0)
+			{
+				close(master_socket[master_socket_size]);
+                goto error;
+			} else {
+				master_socket_size++;
+			}
+		}
+	}
 
     double x = 10.1;
     struct timeval tp;
     tp.tv_sec = (long) x;
     tp.tv_usec = (x - tp.tv_sec) * 1000000000L;
     struct selector_init selector_initializer = {.select_timeout = tp, .signal = SIGALRM};
-    selector_init( &selector_initializer);
+    selector_init(&selector_initializer);
 
     fd_selector fdSelector = selector_new(0);
 
-    selector_register(fdSelector, masterSocket[0], &passiveFdHandler, OP_READ, NULL);
+    selector_register(fdSelector, master_socket[1], &passiveFdHandler, OP_READ, NULL);
+    selector_register(fdSelector, master_socket[0], &passiveFdHandler, OP_READ, NULL);
 
     while(1){
         selector_select(fdSelector);

@@ -1,5 +1,7 @@
-CC= gcc
-CFLAGS= -std=gnu11 -g -Wall -pedantic -D_POSIX_SOURCE=1 -pthread -D_GNU_SOURCE
+CC= gcc #TODO: deshardcodear el compilador
+CFLAGS= -std=gnu11 -g -Wall -pedantic -D_POSIX_SOURCE=1 -D_GNU_SOURCE 
+#--std=c99 -pedantic -pedantic-errors -Wall -Wextra -Werror -Wno-unused-parameter -Wno-implicit-fallthrough -D_POSIX_C_SOURCE=200112L 
+LDFLAGS= -pthread
 
 #Si se agrega un directorio bajo src agregar una variable _DIR al final de estas siguiendo el patron
 SRC_DIR= src
@@ -17,10 +19,10 @@ OBJ= $(patsubst %.c, %.o, $(SRC))
 
 .PHONY: all
 all: $(OBJ)
-	@$(CC) $(CFLAGS) -o $(EXEC) $(OBJ)
+	@$(CC) $(CFLAGS) $(LDFLAGS) -o $(EXEC) $(OBJ)
 
-%.o : %.c
-	@$(CC) -c $(CFLAGS) $< -o $@
+%.o : %.c %.h
+	@$(CC) -c $(CFLAGS) $(LDFLAGS) $< -o $@
 
 .PHONY: clean
 clean:
