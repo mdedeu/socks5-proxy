@@ -37,6 +37,7 @@ unsigned on_tcp_connected_handler_write(struct selector_key *key) {
 
 void on_tcp_connected_departure(const unsigned int leaving_state, struct selector_key *key){
     sock_client *client_data = (sock_client *) key->data;
+    //PREG_STALTA: por que estaria cerrando el hello parser y abriendo el authentication parser si esto no sigue el orden de los estados?
     close_sock_hello_parser(client_data->current_parser.hello_message);
     client_data->current_parser.authentication_message= init_sock_authentication_parser();
 }

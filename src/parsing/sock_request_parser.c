@@ -267,10 +267,10 @@ struct sock_request_message * init_sock_request_parser(){
 }
 
 
-bool feed_sock_request_parser(struct sock_request_message * sock_data ,char * input,int input_size){
+bool feed_sock_request_parser(struct sock_request_message * sock_data, char * input, int input_size){
     const struct parser_event * current_event;
     for(int i = 0 ; i < input_size  && (sock_data->using_parser->state != END  ); i++){
-        current_event = parser_feed(sock_data->using_parser,input[i]);
+        current_event = parser_feed(sock_data->using_parser, input[i]);
         uint8_t  current_character = current_event->data[0];
         switch (current_event->type) {
             case VERSION_READ_EVENT:
@@ -306,7 +306,7 @@ bool feed_sock_request_parser(struct sock_request_message * sock_data ,char * in
                 handle_port_reading_event(sock_data, current_character);
                 break;
         }
-        if(current_event->type ==ERROR_FOUND_EVENT){
+        if(current_event->type == ERROR_FOUND_EVENT){
             printf("Invalid input");
             break;
         }
