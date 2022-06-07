@@ -2,13 +2,13 @@
 
  void on_hello_sock_departure(const unsigned int leaving_state, struct selector_key *key){
     sock_client *client_data = (sock_client *) key->data;
+
     close_sock_authentication_parser(client_data->current_parser.authentication_message);
-    client_data->current_parser.request_message= init_sock_request_parser();
+    client_data->current_parser.request_message = init_sock_request_parser();
 }
 
-
-
- unsigned hello_sock_received_handler_write(struct selector_key *key){
+//PREG_SALTA: me parece raro que usemos el write_buffer para escribirle al cliente, mirar eso
+unsigned hello_sock_received_handler_write(struct selector_key *key){
     sock_client *client_data = (sock_client *) key->data;
 
     if (!buffer_can_read(client_data->write_buffer))
@@ -27,27 +27,32 @@
 
 
 unsigned hello_sock_received_handler_read(struct selector_key *key){
-    char aux_buff[READ_AMOUNT];
-    sock_client *client_data = (sock_client *) key->data;
+    sock_client * client_data = (sock_client *) key->data;
+
+    buffer_compact(client_data->write_buffer);
+    if(!buffer_can_write(client_data->write_buffer))
+        return HELLO_SOCK_RECEIVED;
+
     size_t available_space;
+    uint8_t * write_from = buffer_write_ptr(client_data->write_buffer, &available_space);
 
-    buffer_write_ptr(client_data->write_buffer, &available_space);
+    int read_amount = recv(key->fd, write_from, available_space, MSG_DONTWAIT);
 
-    if (available_space >=  AUTHENTICATION_ANSWER_LENGTH) {
+    bool finished = feed_sock_authentication_parser(
+        (struct sock_authentication_message *) (client_data->current_parser.authentication_message),
+        (char *) write_from,
+        read_amount
+    );
 
-        int read_amount = recv(key->fd, aux_buff, READ_AMOUNT, MSG_DONTWAIT);
-        bool finished = feed_sock_authentication_parser((struct sock_authentication_message *) (client_data->current_parser.authentication_message), aux_buff,
-                                                        read_amount);
-        if(!finished){
-            return HELLO_SOCK_RECEIVED;
-        }
-        else {
-            process_authentication_message(client_data->current_parser.authentication_message, key);
-            selector_set_interest_key(key, OP_WRITE);
+    buffer_write_adv(client_data->write_buffer, read_amount);
+    buffer_read_adv(client_data->write_buffer, read_amount);
+    buffer_compact(client_data->write_buffer);
 
-            return HELLO_SOCK_RECEIVED;
-        }
+    if(finished){
+        process_authentication_message(client_data->current_parser.authentication_message, key);
+        selector_set_interest_key(key, OP_WRITE);
     }
+
     return HELLO_SOCK_RECEIVED;
 }
 

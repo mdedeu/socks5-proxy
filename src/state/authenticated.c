@@ -15,11 +15,11 @@ unsigned authenticated_handler_read(struct selector_key *key){
 
     bool finished = feed_sock_request_parser(
         (struct sock_request_message *) (client_data->current_parser.request_message),
-        write_from,
+        (char *) write_from,
         received_amount
     );
 
-    //TODO: mirar que hacer en el caso en el que el cliente escriba de mas y este moviendo mal el puntero de lectura
+    //PREG_SALTA: mirar que hacer en el caso en el que el cliente escriba de mas y este moviendo mal el puntero de lectura
     buffer_write_adv(client_data->write_buffer, received_amount);
     buffer_read_adv(client_data->write_buffer, received_amount);
     buffer_compact(client_data->write_buffer);
