@@ -1,0 +1,6 @@
+#ifndef PARSER_H_AUTH_COOLPROTOCOL
+#define PARSER_H_AUTH_COOLPROTOCOL
+
+
+
+#endif

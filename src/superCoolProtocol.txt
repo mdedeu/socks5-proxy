@@ -75,6 +75,7 @@ The keywords MUST, MUST NOT, SHOULD, SHOULD NOT, MAY in this document will be in
 
             o   X'D0'   Query - Request that does not modify the state of the server.
             o   X'BE'   Modification - Request that modifies the state of the server.
+            o   X'FF' Goodbye- Request that ends the connection.
 
         Each ACTION has a set of methods associated with it. 
 
@@ -100,6 +101,7 @@ The keywords MUST, MUST NOT, SHOULD, SHOULD NOT, MAY in this document will be in
             o   X'03'   Disable Password Spoofing - returns 0 on success in 1 byte.
             o   X'04'   Change Buffer Size - returns 0 on success in 1 byte.
 
+        The action Goodbye should only be used with METHOD X'FF' to signal the termination of the connection.
 
 
     4.2 General Response Structure
