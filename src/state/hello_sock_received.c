@@ -36,16 +36,19 @@ unsigned hello_sock_received_handler_read(struct selector_key *key){
     size_t available_space;
     uint8_t * write_from = buffer_write_ptr(client_data->write_buffer, &available_space);
 
-    int read_amount = recv(key->fd, write_from, available_space, MSG_DONTWAIT);
+    int received_amount = recv(key->fd, write_from, available_space, MSG_DONTWAIT);
+    buffer_write_adv(client_data->write_buffer, received_amount);
+
+    uint8_t * read_from = buffer_read_ptr(client_data->write_buffer, &available_space);
 
     bool finished = feed_sock_authentication_parser(
         (struct sock_authentication_message *) (client_data->current_parser.authentication_message),
-        (char *) write_from,
-        read_amount
+        (char *) read_from,
+        available_space 
     );
 
-    buffer_write_adv(client_data->write_buffer, read_amount);
-    buffer_read_adv(client_data->write_buffer, read_amount);
+    //PREG_SALTA: como se que se esta consumiendo todo el available space?
+    buffer_read_adv(client_data->write_buffer, available_space);
     buffer_compact(client_data->write_buffer);
 
     if(finished){

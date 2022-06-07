@@ -12,16 +12,18 @@ unsigned authenticated_handler_read(struct selector_key *key){
     uint8_t * write_from = buffer_write_ptr(client_data->write_buffer, &available_space);
 
     int received_amount = recv(key->fd, write_from, available_space, MSG_DONTWAIT);
+    buffer_write_adv(client_data->write_buffer, received_amount);
+
+    uint8_t * read_from = buffer_read_ptr(client_data->write_buffer, &available_space);
 
     bool finished = feed_sock_request_parser(
         (struct sock_request_message *) (client_data->current_parser.request_message),
-        (char *) write_from,
-        received_amount
+        (char *) read_from,
+        available_space
     );
 
     //PREG_SALTA: mirar que hacer en el caso en el que el cliente escriba de mas y este moviendo mal el puntero de lectura
-    buffer_write_adv(client_data->write_buffer, received_amount);
-    buffer_read_adv(client_data->write_buffer, received_amount);
+    buffer_read_adv(client_data->write_buffer, available_space);
     buffer_compact(client_data->write_buffer);
     
     if(!finished)

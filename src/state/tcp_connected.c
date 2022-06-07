@@ -21,7 +21,8 @@ unsigned on_tcp_connected_handler_read(struct selector_key *key) {
         available_space
     );
 
-    buffer_read_adv(client_data->write_buffer, read_amount);
+    //PREG_SALTA: como se que se esta consumiendo todo el available space?
+    buffer_read_adv(client_data->write_buffer, available_space);
     buffer_compact(client_data->write_buffer);
 
     if(finished){
