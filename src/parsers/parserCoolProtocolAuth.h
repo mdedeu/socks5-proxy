@@ -1,15 +1,15 @@
 #ifndef PARSER_H_AUTH_COOLPROTOCOL
 #define PARSER_H_AUTH_COOLPROTOCOL
 
-struct cool_protocol_authentication_message{
+struct cool_protocol_authentication_message {
 	uint8_t  version;
-    uint8_t  username_length;
-    uint8_t username_characters_read;
-    char * username;
-    uint8_t  password_length;
-    uint8_t password_characters_read;
-    char * password;
-    struct parser * using_parser;
+	uint8_t  username_length;
+	uint8_t username_characters_read;
+	char * username;
+	uint8_t  password_length;
+	uint8_t password_characters_read;
+	char * password;
+	struct parser * using_parser;
 };
 
 
