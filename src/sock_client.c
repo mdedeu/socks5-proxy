@@ -1,12 +1,12 @@
 #include "sock_client.h"
 
 struct sock_client * init_new_client_connection(int fd){
-    sock_client  * new_client = malloc(sizeof (sock_client));
+    sock_client  * new_client = calloc(1, sizeof (sock_client));
 //    if(new_client == NULL)
     new_client->client_fd = fd;
     new_client->client_state_machine = init_proxy_state_machine();
-    buffer * temp_write = malloc(sizeof (buffer));
-    buffer * temp_read = malloc(sizeof (buffer));
+    buffer * temp_write = calloc(1, sizeof (buffer));
+    buffer * temp_read = calloc(1, sizeof (buffer));
     buffer_init(temp_write,BUFFER_SIZE,new_client->raw_write_buffer);
     buffer_init(temp_read,BUFFER_SIZE,new_client->raw_read_buffer);
     new_client->read_buffer = temp_read;

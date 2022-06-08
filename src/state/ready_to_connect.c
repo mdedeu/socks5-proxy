@@ -10,6 +10,7 @@ void ready_to_connect_on_arrival(unsigned state, struct selector_key * key){
 
         client_information->origin_fd = server_socket_fd;
         connect(server_socket_fd, (struct sockaddr *) (client_information->origin_address), sizeof(struct sockaddr_in));
+        selector_register(key->s, server_socket_fd, &socks5_handler, OP_WRITE, client_information);
     }
     else if(client_information->origin_address_length == IPV6SIZE){
         server_socket_fd = socket(AF_INET6, SOCK_STREAM, 0);
@@ -17,9 +18,8 @@ void ready_to_connect_on_arrival(unsigned state, struct selector_key * key){
 
         client_information->origin_fd = server_socket_fd;
         connect(server_socket_fd, (struct sockaddr *) (client_information->origin_address), sizeof(struct sockaddr_in6));
+        selector_register(key->s, server_socket_fd, &socks5_handler, OP_WRITE, client_information);
     }
-
-    selector_register(key->s, server_socket_fd, &socks5_handler, OP_WRITE, client_information);
 }
 
 
