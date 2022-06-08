@@ -2,6 +2,8 @@
 #define SELECTOR_H_W50GNLODsARolpHbsDsrvYvMsbT
 
 #include <stdbool.h>
+#include <sys/time.h>
+#include <stddef.h>
 
 /**
  * selector.c - un muliplexor de entrada salida
@@ -69,7 +71,7 @@ struct selector_init {
     const int signal;
 
     /** tiempo máximo de bloqueo durante `selector_iteratate' */
-    struct timeval  select_timeout;
+    struct timeval select_timeout;
 };
 
 /** inicializa la librería */

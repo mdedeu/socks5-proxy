@@ -21,7 +21,7 @@
  * de selector.c.
  */
 
-struct state_machine {
+typedef struct state_machine {
     /** declaración de cual es el estado inicial */
     unsigned                      initial;
     /**
@@ -32,7 +32,7 @@ struct state_machine {
     unsigned                      max_state;
     /** estado actual */
     const struct state_definition *current;
-};
+} state_machine;
 
 struct selector_key *key;
 
@@ -67,6 +67,9 @@ stm_init(struct state_machine *stm);
 unsigned
 stm_state        (struct state_machine *stm);
 
+
+//this methods should be passed to the fd_handler on adding a new fd, depending on the current state,
+//different methods would be executed.
 /** indica que ocurrió el evento read. retorna nuevo id de nuevo estado. */
 unsigned
 stm_handler_read(struct state_machine *stm, struct selector_key *key);
