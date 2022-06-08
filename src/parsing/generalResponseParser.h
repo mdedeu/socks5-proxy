@@ -8,9 +8,9 @@
 #define N(x) (sizeof(x)/sizeof((x)[0]))
 
 struct general_response_message{
-    uint8_t  action;
-    uint8_t  method;
-    uint8_t  response_length;
+    uint8_t action;
+    uint8_t method;
+    uint8_t response_length;
     uint8_t response_characters_read;
     char * response;
     struct parser * using_parser;
