@@ -1,8 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <check.h>
-
-#include "../parser.h"
+#include "parserCoolProtocolAuth.h"
 
 enum states {
 	INITIAL_STATE,
@@ -20,11 +16,12 @@ enum event_types {
 	VERSION_READ_EVENT,
 	ULEN_READ_EVENT,
 	USERNAME_READ_EVENT,
-	PLEN_READ_EVENT,
+	PASSLEN_READ_EVENT,
 	READING_PASSWORD_EVENT,
 	END_EVENT,
-	ERROR_FOUND_EVENT
+	ERROR_EVENT
 };
+
 enum errors {
 	WRONG_VERSION
 };
@@ -33,7 +30,7 @@ enum errors {
 //actions
 
 void error(struct parser_event * event, uint8_t c) {
-	event->type = ERROR_FOUND_EVENT;
+	event->type = ERROR_EVENT;
 	event->data[0] = WRONG_VERSION;
 	event->n = 1;
 }
@@ -54,7 +51,7 @@ void save_username_character(struct parser_event * event , uint8_t c) {
 	event->n = 1;
 }
 void save_password_length(struct parser_event * event , uint8_t c) {
-	event->type = PLEN_READ_EVENT;
+	event->type = PASSLEN_READ_EVENT;
 	event->data[0] = c;
 	event->n = 1;
 }
@@ -64,32 +61,6 @@ void save_password_character(struct parser_event * event , uint8_t c) {
 	event->n = 1;
 }
 
-
-void check_version(struct  parser_event * event , uint8_t c) {
-	event->type = VERSION_READ_EVENT;
-	event->data[0] = c;
-	event->n = 1;
-}
-void save_username_length(struct parser_event * event , uint8_t c) {
-	event->type = ULEN_READ_EVENT;
-	event->data[0] = c;
-	event->n = 1;
-}
-void save_username_character(struct parser_event * event , uint8_t c) {
-	event->type = USERNAME_READ_EVENT;
-	event->data[0] = c;
-	event->n = 1;
-}
-void save_password_length(struct parser_event * event , uint8_t c) {
-	event->type = PLEN_READ_EVENT;
-	event->data[0] = c;
-	event->n = 1;
-}
-void save_password_character(struct parser_event * event , uint8_t c) {
-	event->type = READING_PASSWORD_EVENT;
-	event->data[0] = c;
-	event->n = 1;
-}
 
 
 //handlers
@@ -137,28 +108,27 @@ static void handle_error_event(struct cool_protocol_authentication_message *  cu
 }
 
 //transitions & parser def.
-
 static struct parser_state_transition initial_state_transitions[] = {
 	{.when = ANY, .dest = VERSION_READ, .act1 = check_version}
 };
 static  struct parser_state_transition version_read_transitions[] = {
-	{.when = 1, .dest = ULEN_READ, .act1 = save_username_length}
+	{.when = 1, .dest = ULEN_READ, .act1 = save_username_length},
 	{.when = ANY, .dest = ERROR, .act1 = error}
 };
 static struct parser_state_transition ulen_read_transitions[] = {
-	{.when = ANY, .dest = READING_USERNAME, .act1 = save_username_character}
+	{.when = ANY, .dest = USERNAME_READING, .act1 = save_username_character}
 };
 static struct parser_state_transition reading_username_transitions[] = {
-	{.when = ANY, .dest = READING_USERNAME, .act1 = save_username_character}
+	{.when = ANY, .dest = USERNAME_READING, .act1 = save_username_character}
 };
 static struct parser_state_transition finish_username_transitions[] = {
-	{.when = ANY, .dest = PLEN_READ, .act1 = save_password_length}
+	{.when = ANY, .dest = PASSLEN_READ, .act1 = save_password_length}
 };
 static struct parser_state_transition reading_password_length_transitions[] = {
-	{.when = ANY, .dest = READING_PASSWORD, .act1 = save_password_character}
+	{.when = ANY, .dest = PASS_READING, .act1 = save_password_character}
 };
 static struct parser_state_transition reading_password_transitions[] = {
-	{.when = ANY, .dest = READING_PASSWORD, .act1 = save_password_character}
+	{.when = ANY, .dest = PASS_READING, .act1 = save_password_character}
 };
 static const struct parser_state_transition  * cool_protocol_authentication_transitions[] = {initial_state_transitions, version_read_transitions, ulen_read_transitions, reading_username_transitions,
 	       finish_username_transitions, reading_password_length_transitions, reading_password_transitions
@@ -209,7 +179,7 @@ bool feed_cool_protocol_authentication_parser(struct cool_protocol_authenticatio
 		case USERNAME_READ_EVENT:
 			handle_username_read_event(cool_protocol_data, current_character);
 			break;
-		case PLEN_READ_EVENT:
+		case PASSLEN_READ_EVENT:
 			handle_plen_read_event(cool_protocol_data, current_character);
 			break;
 		case READING_PASSWORD_EVENT:
@@ -235,3 +205,4 @@ void close_cool_protocol_authentication_parser(struct cool_protocol_authenticati
 	free(current_data->username);
 	free(current_data->password);
 	free(current_data);
+}
