@@ -48,15 +48,16 @@ void save_password_check_character(struct parser_event * event , uint8_t c){
     event->n=1;
 }
 
-static void handle_pop3_check_event(struct pop3_authentication_message * current_data,uint8_t version ){
+static void handle_pop3_check_event(struct pop3_authentication_message * current_data, uint8_t c){
+    
 }
-static void handle_username_read_event(struct pop3_authentication_message * current_data,uint8_t version ){
+static void handle_username_read_event(struct pop3_authentication_message * current_data,uint8_t c){
 }
-static void handle_username_check_event(struct pop3_authentication_message * current_data,uint8_t version ){
+static void handle_username_check_event(struct pop3_authentication_message * current_data,uint8_t c){
 }
-static void handle_password_read_event(struct pop3_authentication_message * current_data,uint8_t version ){
+static void handle_password_read_event(struct pop3_authentication_message * current_data,uint8_t c){
 }
-static void handle_password_check_event(struct pop3_authentication_message * current_data,uint8_t version ){
+static void handle_password_check_event(struct pop3_authentication_message * current_data,uint8_t c){
 }
 
 static struct parser_state_transition initial_state_transitions[] ={
@@ -141,20 +142,20 @@ bool feed_pop3_authentication_parser(struct pop3_authentication_message * pop3_d
         current_event = parser_feed(pop3_data->using_parser,input[i]);
         uint8_t  current_character = current_event->data[0];
         switch (current_event->type) {
-            case VERSION_READ_EVENT:
-                handle_version_read_event(pop3_data,current_character);
-                break;
-            case ULEN_READ_EVENT:
-                handle_ulen_read_event(pop3_data,current_character);
+            case POP3_CHECK_EVENT:
+                handle_pop3_check_event(pop3_data,current_character);
                 break;
             case USERNAME_READ_EVENT:
                 handle_username_read_event(pop3_data, current_character);
                 break;
-            case PLEN_READ_EVENT:
-                handle_plen_read_event(pop3_data,current_character);
+            case USERNAME_CHECK_EVENT:
+                handle_username_check_event(pop3_data, current_character);
                 break;
-            case READING_PASSWORD_EVENT:
-                handle_password_read_event(pop3_data,current_character);
+            case PASSWORD_READ_EVENT:
+                handle_password_read_event(pop3_data, current_character);
+                break;
+            case PASSWORD_CHECK_EVENT:
+                handle_password_check_event(pop3_data, current_character);
                 break;
             case END :
 //                end_parser_handler(pop3_data,current_character);
