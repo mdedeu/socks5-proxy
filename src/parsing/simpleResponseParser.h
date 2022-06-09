@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #define N(x) (sizeof(x)/sizeof((x)[0]))
 
-struct simple_response_parser{
+struct simple_response_message{
     uint8_t version;
     uint8_t response;
     struct parser * using_parser;
