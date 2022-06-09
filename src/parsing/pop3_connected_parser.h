@@ -11,8 +11,8 @@
 struct pop3_connected_message{
     uint8_t check_characters_read;
     struct parser * using_parser;
-    char text[512];
-    uint8_t text_len;
+    char prefix[BUFFER_SIZE];
+    uint8_t prefix_len;
     bool connected;
 };
 
