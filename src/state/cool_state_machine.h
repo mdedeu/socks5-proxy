@@ -14,7 +14,7 @@
 #include <sys/socket.h>
 #include "../bufferService.h"
 #include "../client_request_processor.h"
-#include "../sock_client.h"
+#include "../cool_client.h"
 #include "../parsing/sock_authentication_parser.h"
 #include "../parsing/sock_request_parser.h"
 #include "../general_handlers.h"

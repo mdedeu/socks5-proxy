@@ -53,5 +53,4 @@ dkms.conf
 
 .idea
 
-src/server
-src/non_compile
+server

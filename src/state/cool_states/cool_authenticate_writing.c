@@ -6,10 +6,10 @@ void cool_authenticate_writing_arrival(const unsigned int leaving_state, struct 
 
 
 unsigned cool_authenticate_write_handler(struct selector_key *key){
-    sock_client *client_data = (sock_client *) key->data;
+    cool_client *client_data = (cool_client *) key->data;
 
     if (!buffer_can_read(client_data->write_buffer))
-        return SOCK_AUTHENTICATE_WRITING;
+        return COOL_AUTHENTICATE_WRITING;
 
     size_t write_amount;
     uint8_t *reading_since = buffer_read_ptr(client_data->write_buffer, &write_amount);
@@ -18,9 +18,9 @@ unsigned cool_authenticate_write_handler(struct selector_key *key){
     buffer_compact(client_data->write_buffer);
 
     if(written_bytes < write_amount)
-        return SOCK_AUTHENTICATE_WRITING;
+        return COOL_AUTHENTICATE_WRITING;
     else
-        return SOCK_REQUEST_READING;
+        return COOL_REQUEST_READING;
 }
 
 void cool_authenticate_writing_departure(const unsigned int leaving_state, struct selector_key *key){
