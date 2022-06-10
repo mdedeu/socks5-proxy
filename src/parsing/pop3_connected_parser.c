@@ -25,7 +25,7 @@ static void save_closing_character(struct parser_event * event , uint8_t c){
 
 static void handle_pop3_check_event(struct pop3_connected_message * current_data, uint8_t c){
     if(current_data->check_characters_read < current_data->prefix_len){
-        if(c != current_data->prefix[current_data->check_characters_read]){
+        if(toupper(c) != toupper(current_data->prefix[current_data->check_characters_read])){
             current_data->connected = false;
             current_data->using_parser->state = END;
             return;
@@ -42,7 +42,6 @@ static struct parser_state_transition checking_pop3_transitions[] ={
         {.when=ANY,.dest=CHECKING_POP3,.act1=save_pop3_check_character}
 };
 static struct parser_state_transition closing_transitions[] ={
-    //TODO: mirar si al matchear con el \n se deja de tener en cuenta la transicion anterior por el orden
         {.when='\n',.dest=END,.act1=save_closing_character},
         {.when=ANY,.dest=CHECKING_POP3,.act1=save_pop3_check_character}
 };
@@ -113,12 +112,12 @@ void close_pop3_connected_parser(struct pop3_connected_message * current_data){
 //OK POP me llamo salvador\r\n
 //OK OP me llamo salvador\r\n
 // int main(){
-//     struct pop3_connected_message * testMessage = init_pop3_connected_parser();
-//     testMessage->prefix_len = 3;
-//     memcpy(testMessage->prefix,"+OK",8);
-//     bool finished;
+//      struct pop3_connected_message * testMessage = init_pop3_connected_parser();
+//      testMessage->prefix_len = 3;
+//      memcpy(testMessage->prefix,"+OK",8);
+//      bool finished;
 
-//     finished = feed_pop3_connected_parser(testMessage, "+OK m llam\rbbb\rbbb\naaa\r\n", 24);
-//     printf("Connected:%d\n", (int) testMessage->connected);
-//     printf("Finished:%d\n", (int) finished);
-// }
+//      finished = feed_pop3_connected_parser(testMessage, "+OK m llam\rbbb\rbbb\naaa\r\n", 24);
+//      printf("Connected:%d\n", (int) testMessage->connected);
+//      printf("Finished:%d\n", (int) finished);
+//  }

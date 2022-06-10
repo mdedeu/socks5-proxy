@@ -32,7 +32,7 @@ static void save_closing_character(struct parser_event * event , uint8_t c){
 
 static void handle_pop3_check_event(struct pop3_data_message * current_data, uint8_t c){
     if(current_data->check_characters_read < current_data->prefix_len){
-        if(c != current_data->prefix[current_data->check_characters_read]){
+        if(toupper(c) != toupper(current_data->prefix[current_data->check_characters_read])){
             current_data->connected = false;
             current_data->using_parser->state = END;
             return;
@@ -44,10 +44,10 @@ static void handle_pop3_check_event(struct pop3_data_message * current_data, uin
         current_data->using_parser->state = READING_DATA;
 }
 
-//TODO: mirar case-insensitivness de pop3
 static void handle_data_read_event(struct pop3_data_message * current_data, uint8_t c){
-    if(current_data->data_characters_read >= BUFFER_SIZE-2){
+    if(current_data->data_characters_read >= BUFFER_SIZE-1){
         //TODO: mirar si aca habria que tirar un error o algo
+        current_data->connected = false;
         current_data->using_parser->state = END;
         return;
     }
@@ -57,6 +57,12 @@ static void handle_data_read_event(struct pop3_data_message * current_data, uint
 static void handle_close_event(struct pop3_data_message * current_data, uint8_t c){
     if(c == '\n'){
         current_data->data_characters_read--;
+        current_data->using_parser->state = END;
+        return;
+    }
+    if(current_data->data_characters_read >= BUFFER_SIZE-1){
+        //TODO: mirar si aca habria que tirar un error o algo
+        current_data->connected = false;
         current_data->using_parser->state = END;
         return;
     }
@@ -78,7 +84,6 @@ static struct parser_state_transition reading_data_transitions[] ={
         {.when=ANY,.dest=READING_DATA,.act1=save_data_character}
 };
 static struct parser_state_transition closing_transitions[] ={
-    //TODO: mirar si al matchear con el \n se deja de tener en cuenta la transicion anterior por el orden
         {.when=ANY,.dest=CLOSING,.act1=save_closing_character}
 };
 
@@ -154,10 +159,9 @@ void close_pop3_data_parser(struct pop3_data_message * current_data){
 // int main(){
 //     struct pop3_data_message * testMessage = init_pop3_data_parser();
 //     testMessage->prefix_len=4;
-//     memcpy(testMessage->prefix, "USER", 5);
+//     memcpy(testMessage->prefix, "UsER", 5);
 //     bool finished;
-//     finished = feed_pop3_data_parser(testMessage, "USER sal va\r\raa\n\rbbbc", 21);
-//     finished = feed_pop3_data_parser(testMessage, "USER sal va\r\raa\n\rbbbc\r\n", 23);
+//     finished = feed_pop3_data_parser(testMessage, "USER vdo\nes\r\n", 21);
 //     printf("Connected:%d\n", (int) testMessage->connected);
 //     printf("Finished:%d\n", (int) finished);
 

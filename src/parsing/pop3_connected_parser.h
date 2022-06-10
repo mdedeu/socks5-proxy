@@ -5,6 +5,7 @@
 #include "parser.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
 #define N(x) (sizeof(x)/sizeof((x)[0]))
 #define BUFFER_SIZE 512
 
