@@ -27,6 +27,7 @@
 #include "cool_states/cool_authenticate_reading.h"
 #include "cool_states/cool_authenticate_writing.h"
 #include "cool_states/cool_request_reading.h"
+#include "cool_states/cool_response_writing.h"
 
 enum cool_client_state{
     COOL_AUTHENTICATE_READING,
