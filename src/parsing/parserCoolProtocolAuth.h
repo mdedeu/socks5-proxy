@@ -22,8 +22,10 @@ struct cool_protocol_authentication_message {
 
 
 
-struct cool_protocol_authentication_message * init_cool_protocol_authentication_parser();
-bool feed_cool_protocol_authentication_parser(struct cool_protocol_authentication_message * sock_data , char * input, int input_size);
-void close_cool_protocol_authentication_parser(struct cool_protocol_authentication_message * message);
+struct cool_protocol_authentication_message * init_cool_protocol_authentication_message();
+struct parser * init_cool_protocol_authentication_parser();
+bool feed_cool_protocol_authentication_parser(struct parser * using_parser, struct cool_protocol_authentication_message * sock_data , char * input, int input_size);
+void close_cool_protocol_authentication_message(struct cool_protocol_authentication_message *  current_data);
+void close_cool_protocol_authentication_parser(struct parser * using_parser);
 
 #endif

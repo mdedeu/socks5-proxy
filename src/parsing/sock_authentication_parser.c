@@ -121,8 +121,7 @@ static struct parser_definition sock_parser_definition={
 };
 
 struct parser * init_sock_authentication_parser(){
-    return   parser_init(parser_no_classes(),&sock_parser_definition);
-
+    return parser_init(parser_no_classes(),&sock_parser_definition);
 }
 
 struct sock_authentication_message * init_sock_authentication_message(){

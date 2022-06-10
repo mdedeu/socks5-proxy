@@ -15,13 +15,16 @@
 #include "../bufferService.h"
 #include "../client_request_processor.h"
 #include "../cool_client.h"
-#include "../parsing/sock_authentication_parser.h"
+#include "../parsing/parserCoolProtocolAuth.h"
 #include "../parsing/sock_request_parser.h"
 #include "../general_handlers.h"
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+
+#include "cool_states/cool_authenticate_reading.h"
+#include "cool_states/cool_authenticate_writing.h"
 
 enum cool_client_state{
     COOL_AUTHENTICATE_READING,

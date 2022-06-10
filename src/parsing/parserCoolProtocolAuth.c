@@ -29,33 +29,33 @@ enum errors {
 
 //actions
 
-void error(struct parser_event * event, uint8_t c) {
+static void error(struct parser_event * event, uint8_t c) {
 	event->type = ERROR_EVENT;
 	event->data[0] = WRONG_VERSION;
 	event->n = 1;
 }
 
-void check_version(struct  parser_event * event , uint8_t c) {
+static void check_version(struct  parser_event * event , uint8_t c) {
 	event->type = VERSION_READ_EVENT;
 	event->data[0] = c;
 	event->n = 1;
 }
-void save_username_length(struct parser_event * event , uint8_t c) {
+static void save_username_length(struct parser_event * event , uint8_t c) {
 	event->type = ULEN_READ_EVENT;
 	event->data[0] = c;
 	event->n = 1;
 }
-void save_username_character(struct parser_event * event , uint8_t c) {
+static void save_username_character(struct parser_event * event , uint8_t c) {
 	event->type = USERNAME_READ_EVENT;
 	event->data[0] = c;
 	event->n = 1;
 }
-void save_password_length(struct parser_event * event , uint8_t c) {
+static void save_password_length(struct parser_event * event , uint8_t c) {
 	event->type = PASSLEN_READ_EVENT;
 	event->data[0] = c;
 	event->n = 1;
 }
-void save_password_character(struct parser_event * event , uint8_t c) {
+static void save_password_character(struct parser_event * event , uint8_t c) {
 	event->type = READING_PASSWORD_EVENT;
 	event->data[0] = c;
 	event->n = 1;
@@ -153,10 +153,8 @@ static struct parser_definition cool_protocol_parser_definition = {
 
 //functions
 
-struct cool_protocol_authentication_message * init_cool_protocol_authentication_parser() {
+struct cool_protocol_authentication_message * init_cool_protocol_authentication_message() {
 	struct cool_protocol_authentication_message * new_cool_protocol_authentication_message = malloc(sizeof (struct cool_protocol_authentication_message));
-	struct parser * cool_protocol_authentication_parser = parser_init(parser_no_classes(), &cool_protocol_parser_definition);
-	new_cool_protocol_authentication_message->using_parser = cool_protocol_authentication_parser;
 	new_cool_protocol_authentication_message->password_length = 0;
 	new_cool_protocol_authentication_message->password_characters_read = 0;
 	new_cool_protocol_authentication_message->username_characters_read = 0;
@@ -164,7 +162,11 @@ struct cool_protocol_authentication_message * init_cool_protocol_authentication_
 	return new_cool_protocol_authentication_message;
 }
 
-bool feed_cool_protocol_authentication_parser(struct cool_protocol_authentication_message * cool_protocol_data , char * input, int input_size) {
+struct parser * init_cool_protocol_authentication_parser(){
+    return parser_init(parser_no_classes(),&cool_protocol_parser_definition);
+}
+
+bool feed_cool_protocol_authentication_parser(struct parser * using_parser, struct cool_protocol_authentication_message * cool_protocol_data , char * input, int input_size) {
 	const struct parser_event * current_event;
 	for (int i = 0 ; i < input_size  && (cool_protocol_data->using_parser->state != END  ); i++) {
 		current_event = parser_feed(cool_protocol_data->using_parser, input[i]);
@@ -200,8 +202,11 @@ bool feed_cool_protocol_authentication_parser(struct cool_protocol_authenticatio
 	else return true;
 }
 
-void close_cool_protocol_authentication_parser(struct cool_protocol_authentication_message *  current_data) {
-	parser_destroy(current_data->using_parser);
+void close_cool_protocol_authentication_parser(struct parser* using_parser){
+    parser_destroy(using_parser);
+}
+
+void close_cool_protocol_authentication_message(struct cool_protocol_authentication_message * current_data) {
 	free(current_data->username);
 	free(current_data->password);
 	free(current_data);
