@@ -59,9 +59,9 @@ void tcpConnectionHandler(struct selector_key *key){
     int new_client_fd = accept(key->fd,  &new_client_information, &new_client_information_size);
     if(new_client_fd > 0 ){
         struct sock_client * new_client_data = init_new_client_connection(new_client_fd);
-        selector_register(key->s, new_client_fd, &active_handlers, OP_READ, new_client_data);
+        if(new_client_data != NULL)
+            selector_register(key->s, new_client_fd, &active_handlers, OP_READ, new_client_data);
     }
-
 }
 
 int main(const int argc, const char **argv){
