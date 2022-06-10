@@ -10,6 +10,8 @@ PARSE_DIR= $(SRC_DIR)/parsing
 
 EXEC= server
 
+EXCLUDED=main.c
+
 #Si se agrega un directorio para compilar agregar un SRC+= al final de estas siguiendo el patron
 SRC= $(wildcard $(SRC_DIR)/*.c)
 SRC+= $(wildcard $(PARSE_DIR)/*.c)
