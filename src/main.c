@@ -198,14 +198,18 @@ int main(){
 		}
 	}
 
-    double x = 10.1;
-    struct timeval tp;
-    tp.tv_sec = (long) x;
-    tp.tv_usec = (x - tp.tv_sec) * 1000000000L;
-    struct selector_init selector_initializer = {.select_timeout = tp, .signal = SIGALRM};
-    selector_init(&selector_initializer);
+    const struct selector_init conf = {
+            .signal = SIGALRM,
+            .select_timeout = {
+                    .tv_sec  = 10,
+                    .tv_nsec = 0,
+            },
+    };
 
-    fd_selector fdSelector = selector_new(0);
+//    struct selector_init selector_initializer = {.select_timeout = tp, .signal = SIGALRM};
+    selector_init(&conf);
+
+    fd_selector fdSelector = selector_new(1024);
 
     selector_register(fdSelector, master_socket[1], &passiveFdHandler, OP_READ, NULL);
     selector_register(fdSelector, master_socket[0], &passiveFdHandler, OP_READ, NULL);

@@ -143,9 +143,9 @@ struct fdselector {
     fd_set  slave_r,  slave_w;
 
     /** timeout prototipico para usar en select() */
-    struct timeval master_t;
+    struct timespec master_t;
     /** tambien select() puede cambiar el valor */
-    struct timeval slave_t;
+    struct timespec slave_t;
 
     // notificaciónes entre blocking jobs y el selector
     volatile pthread_t      selector_thread;
@@ -291,7 +291,7 @@ selector_new(const size_t initial_elements) {
     if(ret != NULL) {
         memset(ret, 0x00, size);
         ret->master_t.tv_sec  = conf.select_timeout.tv_sec;
-        ret->master_t.tv_usec = conf.select_timeout.tv_usec;
+        ret->master_t.tv_nsec = conf.select_timeout.tv_nsec;
         assert(ret->max_fd == 0);
         ret->resolution_jobs  = 0;
         pthread_mutex_init(&ret->resolution_mutex, 0);
