@@ -1,25 +1,33 @@
 #include "proxy_state_machine.h"
 
-static const struct state_definition tcp_connected_state = {.state=TCP_CONNECTED, .on_read_ready=on_tcp_connected_handler_read, .on_write_ready=on_tcp_connected_handler_write,.on_departure=on_tcp_connected_departure};
-static const struct state_definition hello_sock_received_state = {.state=HELLO_SOCK_RECEIVED, .on_read_ready=hello_sock_received_handler_read, .on_write_ready=hello_sock_received_handler_write,.on_departure=on_hello_sock_departure};
-static const struct state_definition authenticated_state = {.state=AUTHENTICATED, .on_read_ready=authenticated_handler_read};
-static const struct state_definition ready_to_connect = {.state=READY_TO_CONNECT, .on_block_ready=ready_to_connect_block_handler, .on_write_ready=ready_to_connect_write_handle,.on_arrival=ready_to_connect_on_arrival};
-static const struct state_definition writing_reply = {.state=WRITING_REPLY, .on_write_ready=writing_reply_write_handler,.on_arrival=writing_reply_on_arrival};
+static const struct state_definition sock_hello_reading_state= {.state=SOCK_HELLO_READING, .on_arrival=sock_hello_reading_on_arrival,.on_read_ready=sock_hello_read_handler,.on_departure=sock_hello_reading_on_departure};
+static const struct state_definition sock_hello_writing_state = {.state=SOCK_HELLO_WRITING, .on_arrival=sock_hello_writing_on_arrival,.on_write_ready=sock_hello_write_handler,.on_departure=sock_hello_writing_on_departure};
+static const struct state_definition authenticate_reading_state = {.state=SOCK_AUTHENTICATE_READING, .on_arrival=authenticate_reading_arrival,.on_read_ready=authenticate_read_handler,.on_departure=authenticate_reading_departure};
+static const struct state_definition authenticate_writing_state= {.state=SOCK_AUTHENTICATE_WRITING, .on_arrival = authenticate_writing_arrival,.on_write_ready=authenticate_write_handler,.on_departure=authenticate_writing_departure};
+static const struct state_definition sock_request_reading = {.state=SOCK_REQUEST_READING, .on_arrival=request_reading_arrival,.on_read_ready=request_reading_read_handler,.on_departure=request_reading_departure};
+static const struct state_definition resolving_host_address = {.state=RESOLVING_HOST_ADDRESS, .on_arrival=resolving_host_address_arrival,.on_block_ready=resolving_host_address_block};
+static const struct state_definition domain_connecting = {.state=DOMAIN_CONNECTING, .on_arrival=domain_connecting_arrival,.on_write_ready=domain_connecting_write_handler};
+static const struct state_definition address_connecting = {.state=ADDRESS_CONNECTING, .on_arrival=address_connecting_arrival,.on_write_ready=address_connecting_write_handler};
+static const struct state_definition sock_request_writing = {.state=SOCK_REQUEST_WRITING, .on_write_ready=sock_request_writing_write_handler,.on_arrival=sock_request_writing_arrival,.on_departure=sock_request_writing_departure};
 static const struct state_definition connected = {.state=CONNECTED, .on_write_ready=connected_write_handler,.on_arrival=connected_on_arrival,.on_read_ready=connected_read_handler};
 static const struct state_definition closing_connection = {.state=CLOSING_CONNECTION,.on_departure=closing_connection_on_departure,.on_arrival=closing_connection_on_arrival};
 
 static const struct state_definition states[] = {
-    tcp_connected_state,
-    hello_sock_received_state,
-    authenticated_state,
-    ready_to_connect,
-    writing_reply,
+        sock_hello_reading_state,
+        sock_hello_writing_state,
+        authenticate_reading_state,
+        authenticate_writing_state,
+        sock_request_reading,
+        resolving_host_address,
+        domain_connecting,
+        address_connecting,
+        sock_request_writing,
     connected,
     closing_connection
 };
 
 static struct state_machine sock_client_machine = {
-        .initial=TCP_CONNECTED,
+        .initial=SOCK_HELLO_READING,
         .states=states,
         .max_state = N(states)
 };

@@ -25,15 +25,16 @@ struct sock_request_message{
     uint8_t ipv4_character_read;
     uint8_t ipv6_character_read;
     uint8_t  port_character_read;
-    struct parser * using_parser;
+//    struct parser * using_parser;
     //reply fields
-    uint8_t raw_buffer [1024];
-    buffer * answer_buffer;
+//    uint8_t raw_buffer [1024];
+//    buffer * answer_buffer;
 };
 
-
-struct sock_request_message * init_sock_request_parser();
-bool feed_sock_request_parser(struct sock_request_message * sock_data ,char * input,int input_size);
-void close_sock_request_parser(struct sock_request_message * message);
+struct parser * init_sock_request_parser();
+struct sock_request_message * init_sock_request_message();
+bool feed_sock_request_parser(struct parser * using_parser , struct sock_request_message * sock_data ,char * input,int input_size);
+void close_sock_request_parser(struct parser  * parser);
+void  close_sock_request_message(struct sock_request_message * message);
 
 #endif

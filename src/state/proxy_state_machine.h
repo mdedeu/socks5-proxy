@@ -22,27 +22,38 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+
 //states handlers
-#include "tcp_connected.h"
-#include "hello_sock_received.h"
-#include "authenticated.h"
-#include "ready_to_connect.h"
-#include "writing_reply.h"
+#include "sock_hello_reading.h"
+#include "sock_hello_writing.h"
+#include "authenticate_reading.h"
+#include "authenticate_writing.h"
+#include "request_reading.h"
+#include "resolving_host_address.h"
+#include "domain_connecting.h"
+#include "address_connecting.h"
+#include "sock_request_writing.h"
 #include "connected.h"
 #include "closing_connection.h"
 
-enum sock_state {
-    TCP_CONNECTED,
-    HELLO_SOCK_RECEIVED,
-    AUTHENTICATED,
-    READY_TO_CONNECT,
-    WRITING_REPLY,
+
+
+enum client_state{
+    SOCK_HELLO_READING,
+    SOCK_HELLO_WRITING,
+    SOCK_AUTHENTICATE_READING,
+    SOCK_AUTHENTICATE_WRITING,
+    SOCK_REQUEST_READING,
+    RESOLVING_HOST_ADDRESS,
+    DOMAIN_CONNECTING,
+    ADDRESS_CONNECTING,
+    SOCK_REQUEST_WRITING,
     CONNECTED,
     CLOSING_CONNECTION
 };
 
-struct state_machine *init_proxy_state_machine();
 
+struct state_machine *init_proxy_state_machine();
 void destroy_sock_state(struct state_machine *sock_machine);
 
 #endif

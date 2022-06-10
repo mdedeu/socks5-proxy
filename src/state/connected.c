@@ -6,7 +6,7 @@ void connected_on_arrival(unsigned state, struct selector_key * key){
     buffer_reset(client_information->write_buffer);
     buffer_reset(client_information->read_buffer);
 
-    close_sock_request_parser(client_information->current_parser.request_message);
+//    close_sock_request_parser(client_information->current_parser.request_message);
 
     selector_set_interest(key->s,client_information->client_fd, OP_READ);
     selector_set_interest(key->s,client_information->origin_fd, OP_READ);

@@ -190,57 +190,57 @@ static struct parser_definition sock_parser_definition={
 static void handle_version_read_event(struct sock_request_message * sock_data ,uint8_t current_character){
     sock_data->version = current_character;
 }
-static void handle_cmd_read_event(struct sock_request_message * sock_data ,uint8_t current_character){
+static void handle_cmd_read_event(struct parser * using_parser,struct sock_request_message * sock_data ,uint8_t current_character){
     if(current_character == 1 )
         sock_data->cmd = current_character;
     else
-        sock_data->using_parser->state = END;
+        using_parser->state = END;
 }
-static void handle_ipv4_atyp_read_event(struct sock_request_message * sock_data ,uint8_t current_character){
+static void handle_ipv4_atyp_read_event(struct parser * using_parser,struct sock_request_message * sock_data ,uint8_t current_character){
     if(current_character != 1 )
-        sock_data->using_parser->state = END;
+        using_parser->state = END;
     else {
         sock_data->atyp = 1 ;
         sock_data->ipv4 = malloc(IPV4SIZE);
     }
 }
-static void handle_ipv6_atyp_read_event(struct sock_request_message * sock_data ,uint8_t current_character){
+static void handle_ipv6_atyp_read_event(struct parser * using_parser,struct sock_request_message * sock_data ,uint8_t current_character){
     if(current_character != 4 )
-        sock_data->using_parser->state = END;
+        using_parser->state = END;
     else{
         sock_data->atyp = 4 ;
         sock_data->ipv6 = malloc(IPV6SIZE);
     }
 
 }
-static void handle_addr_atyp_read_event(struct sock_request_message * sock_data ,uint8_t current_character){
+static void handle_addr_atyp_read_event(struct parser * using_parser,struct sock_request_message * sock_data ,uint8_t current_character){
     if(current_character != 3)
-        sock_data -> using_parser -> state = END;
+         using_parser -> state = END;
     else sock_data->atyp = 3;
 }
 static void handle_addrlen_read_event(struct sock_request_message * sock_data ,uint8_t current_character) {
     sock_data->address = malloc(current_character);
     sock_data->addrlen = current_character;
 }
-static void handle_ipv4_reading_event(struct sock_request_message * sock_data , uint8_t current_character){
+static void handle_ipv4_reading_event(struct parser * using_parser,struct sock_request_message * sock_data , uint8_t current_character){
     sock_data->ipv4[sock_data->ipv4_character_read] = current_character;
     sock_data->ipv4_character_read++;
     if(sock_data->ipv4_character_read == IPV4SIZE)
-        sock_data->using_parser->state=PORT_READING;
+        using_parser->state=PORT_READING;
 }
-static void handle_ipv6_reading_event(struct sock_request_message * sock_data ,uint8_t current_character){
+static void handle_ipv6_reading_event(struct parser * using_parser,struct sock_request_message * sock_data ,uint8_t current_character){
     sock_data->ipv6[sock_data->ipv6_character_read] = current_character;
     sock_data->ipv6_character_read++;
     if(sock_data->ipv6_character_read == IPV6SIZE)
-        sock_data->using_parser->state=PORT_READING;
+        using_parser->state=PORT_READING;
 }
-static void handle_addr_reading_event(struct sock_request_message * sock_data ,uint8_t current_character){
+static void handle_addr_reading_event(struct parser * using_parser,struct sock_request_message * sock_data ,uint8_t current_character){
     sock_data->address[sock_data->addr_character_read] = current_character;
     sock_data->addr_character_read++;
     if(sock_data->addr_character_read == sock_data->addrlen)
-        sock_data->using_parser->state = PORT_READING;
+        using_parser->state = PORT_READING;
 }
-static void handle_port_reading_event(struct sock_request_message * sock_data ,uint8_t current_character){
+static void handle_port_reading_event(struct parser * using_parser,struct sock_request_message * sock_data ,uint8_t current_character){
     if(sock_data->port_character_read == 0 ){
         sock_data->port= malloc(2);
         sock_data->port[0]=current_character;
@@ -248,62 +248,65 @@ static void handle_port_reading_event(struct sock_request_message * sock_data ,u
     }else{
         sock_data->port[1] = current_character;
         sock_data->port_character_read++;
-        sock_data->using_parser->state=END;
+        using_parser->state=END;
     }
 }
 
+struct parser * init_sock_request_parser(){
+    return parser_init(parser_no_classes(),&sock_parser_definition);
 
-struct sock_request_message * init_sock_request_parser(){
+}
+
+
+struct sock_request_message * init_sock_request_message(){
     struct sock_request_message * new_sock_request_message = malloc(sizeof (struct sock_request_message));
-    struct parser * sock_request_parser = parser_init(parser_no_classes(),&sock_parser_definition);
-    new_sock_request_message->using_parser = sock_request_parser;
     new_sock_request_message->port_character_read=0;
     new_sock_request_message->ipv6_character_read=0;
     new_sock_request_message->ipv4_character_read=0;
     new_sock_request_message->addr_character_read=0;
-    new_sock_request_message->answer_buffer = malloc(sizeof (buffer));
-    buffer_init(new_sock_request_message->answer_buffer,1024,new_sock_request_message->raw_buffer);
+//    new_sock_request_message->answer_buffer = malloc(sizeof (buffer));
+//    buffer_init(new_sock_request_message->answer_buffer,1024,new_sock_request_message->raw_buffer);
     return new_sock_request_message;
 }
 
 
-bool feed_sock_request_parser(struct sock_request_message * sock_data, char * input, int input_size){
+bool feed_sock_request_parser(struct parser * using_parser, struct sock_request_message * sock_data, char * input, int input_size){
     const struct parser_event * current_event;
-    for(int i = 0 ; i < input_size  && (sock_data->using_parser->state != END  ); i++){
-        current_event = parser_feed(sock_data->using_parser, input[i]);
+    for(int i = 0 ; i < input_size  && (using_parser->state != END  ); i++){
+        current_event = parser_feed(using_parser, input[i]);
         uint8_t  current_character = current_event->data[0];
         switch (current_event->type) {
             case VERSION_READ_EVENT:
                 handle_version_read_event(sock_data,current_character);
                 break;
             case CMD_READ_EVENT:
-                handle_cmd_read_event(sock_data,current_character);
+                handle_cmd_read_event(using_parser,sock_data,current_character);
                 break;
             case RSV_READ_EVENT:
                 break;
             case READ_IPV4_ATYP_EVENT:
-                handle_ipv4_atyp_read_event(sock_data, current_character);
+                handle_ipv4_atyp_read_event(using_parser,sock_data, current_character);
                 break;
             case READ_IPV6_ATYP_EVENT:
-                handle_ipv6_atyp_read_event(sock_data, current_character);
+                handle_ipv6_atyp_read_event(using_parser,sock_data, current_character);
                 break;
             case READ_ADDR_ATYP_EVENT:
-                handle_addr_atyp_read_event(sock_data, current_character);
+                handle_addr_atyp_read_event(using_parser,sock_data, current_character);
                 break;
             case IPV4_READING_EVENT:
-                handle_ipv4_reading_event(sock_data, current_character);
+                handle_ipv4_reading_event(using_parser,sock_data, current_character);
                 break;
             case IPV6_READING_EVENT:
-                handle_ipv6_reading_event(sock_data, current_character);
+                handle_ipv6_reading_event(using_parser,sock_data, current_character);
                 break;
             case ADDR_LEN_READING_EVENT:
                 handle_addrlen_read_event(sock_data, current_character);
                 break;
             case ADDR_READING_EVENT:
-                handle_addr_reading_event(sock_data, current_character);
+                handle_addr_reading_event(using_parser,sock_data, current_character);
                 break;
             case PORT_READING_EVENT:
-                handle_port_reading_event(sock_data, current_character);
+                handle_port_reading_event(using_parser,sock_data, current_character);
                 break;
         }
         if(current_event->type == ERROR_FOUND_EVENT){
@@ -311,33 +314,20 @@ bool feed_sock_request_parser(struct sock_request_message * sock_data, char * in
             break;
         }
     }
-    if(sock_data->using_parser->state == END)
+    if(using_parser->state == END)
         return true;
     return false;
 }
 
-void  close_sock_request_parser(struct sock_request_message * message){
+void close_sock_request_parser(struct parser * using_parser){
+    parser_destroy(using_parser);
+}
+
+
+void  close_sock_request_message(struct sock_request_message * message){
     //ipv or addres, port
     free(message->port);
-    free(message->answer_buffer);
+//    free(message->answer_buffer);
     free(message);
 }
 
-// int main(){
-//     struct sock_request_message * sock =init_sock_request_parser();
-//     char input[]={5,1,0,1,192,168,143,3,80,80};
-// //    feed_sock_authentication_parser(sock,input,sizeof (input));
-//     for(int i = 0 ; i < sizeof (input);i++){
-//         feed_sock_authentication_parser(sock,input+i,1);
-// //        sleep(5);
-//     }
-//     printf("version: %d\n",sock->version);
-//     printf("cmd: %d\n",sock->cmd);
-//     printf("atyp: %d\n",sock->atyp);
-//     for(int i = 0 ; i < IPV4SIZE; i++)
-//         printf("ip: %d\n",sock->ipv4[i]);
-//     for(int j = 0 ; j <2 ; j++)
-//         printf("port: %d\n",sock->port[j]);
-//     close_sock_request_parser(sock);
-
-// }

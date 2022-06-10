@@ -12,12 +12,12 @@ enum states_and_events{
     ERROR_FOUND_EVENT
 };
 
-void save_pop3_check_character(struct parser_event * event , uint8_t c){
+static void save_pop3_check_character(struct parser_event * event , uint8_t c){
     event->type = POP3_CHECK_EVENT;
     event->data[0]=c;
     event->n=1;
 }
-void save_closing_character(struct parser_event * event , uint8_t c){
+static void save_closing_character(struct parser_event * event , uint8_t c){
     event->type = CLOSE_EVENT;
     event->data[0]=c;
     event->n=1;

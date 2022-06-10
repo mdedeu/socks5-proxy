@@ -13,11 +13,12 @@ struct sock_hello_message{
     uint8_t nmethods;
     uint8_t * methods;
     uint8_t last_method_added;
-    struct parser * using_parser;
 };
 
-struct sock_hello_message * init_sock_hello_parser();
-bool feed_sock_hello_parser(struct sock_hello_message * sock_data ,char * input,int input_size);
-void close_sock_hello_parser(struct sock_hello_message *  current_data);
+struct sock_hello_message * init_sock_hello_message();
+struct parser * init_sock_hello_parser();
+bool feed_sock_hello_parser(struct parser  *using_parser, struct sock_hello_message * sock_data ,char * input,int input_size);
+void close_sock_hello_parser(struct parser *  using_parser);
+void close_sock_hello_message(struct sock_hello_message* current_data);
 
 #endif
