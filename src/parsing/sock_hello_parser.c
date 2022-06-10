@@ -111,16 +111,11 @@ bool feed_sock_hello_parser(struct parser * using_parser , struct sock_hello_mes
             case METHODS_READ_EVENT:
                 handle_method_read_event(using_parser,sock_data, current_character);
                 break;
-            case END :
-//                end_parser_handler(sock_data,current_character);
-                break;
-            case ERROR_FOUND_EVENT: printf("ERROR_FOUND_EVENT");break;
         }
-        if(current_event->type ==ERROR_FOUND_EVENT)
-            break;
+        if(using_parser->state == END)
+            return true;
     }
-    if(using_parser->state == END)
-        return true;
+
     return false;
 }
 

@@ -35,6 +35,7 @@ typedef struct sock_client{
 
     struct parser * using_parser;
     void * parsed_message;
+    bool close_after_write;
 
 
 

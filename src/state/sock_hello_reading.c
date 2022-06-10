@@ -32,8 +32,12 @@ unsigned sock_hello_read_handler(struct selector_key *key) {
         receiving_buffer,
         read_amount
     );
+    if(finished){
+        client_data->close_after_write = !process_hello_message((struct sock_hello_message *) client_data->parsed_message, key);
+        return SOCK_HELLO_WRITING ;
+    }
 
-    return finished ? SOCK_HELLO_WRITING : SOCK_HELLO_READING;
+    return  SOCK_HELLO_READING;
 }
 
 
@@ -41,7 +45,6 @@ unsigned sock_hello_read_handler(struct selector_key *key) {
 void sock_hello_reading_on_departure(const unsigned state , struct selector_key *key) {
     if(key != NULL  && key->data != NULL) {
         sock_client *client_data = (sock_client *) key->data;
-        process_hello_message((struct sock_hello_message *) client_data->parsed_message, key);
         close_sock_hello_message((struct sock_hello_message *) client_data->parsed_message);
         close_sock_hello_parser(client_data->using_parser);
         selector_set_interest_key(key, OP_NOOP);

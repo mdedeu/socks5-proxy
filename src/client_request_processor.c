@@ -12,7 +12,7 @@ struct user_info users[10]={
         {.username="gbeade", .password="gbeade"},
 };
 
-void process_hello_message(struct sock_hello_message * data, struct selector_key * key){
+bool process_hello_message(struct sock_hello_message * data, struct selector_key * key){
     //check the version
     bool accepted_method_given = false;
     for(int i = 0; i < data->nmethods; i++){
@@ -27,12 +27,13 @@ void process_hello_message(struct sock_hello_message * data, struct selector_key
         buffer_write(client_data->write_buffer, USERNAME_AUTHENTICATION);
     else
         buffer_write(client_data->write_buffer, NON_METHODS_ACCEPTED);
+    return accepted_method_given; 
 }
 
-void process_authentication_message(struct sock_authentication_message * data, struct selector_key * key){
+bool process_authentication_message(struct sock_authentication_message * data, struct selector_key * key){
     bool valid_user = false;
     for(int i = 0; i < 10; i++){
-            if(strcmp(data->username, users[i].username) && strcmp(data->password, users[i].password))
+            if(strcmp(data->username, users[i].username)==0 && 0==strcmp(data->password, users[i].password))
                 valid_user = true;
     }
 
@@ -41,8 +42,9 @@ void process_authentication_message(struct sock_authentication_message * data, s
 
     if(valid_user)
         buffer_write(client_data->write_buffer, VALID_USER);
-    else         //todo: close the connection as the rfc said.
+    else
         buffer_write(client_data->write_buffer, NO_VALID_USER);
+    return valid_user; 
 }
 
 void process_request_message(struct sock_request_message * data, struct selector_key * key){

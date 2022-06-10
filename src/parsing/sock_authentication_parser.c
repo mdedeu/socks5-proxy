@@ -155,18 +155,11 @@ struct sock_authentication_message * init_sock_authentication_message(){
             case READING_PASSWORD_EVENT:
                 handle_password_read_event(using_parser,sock_data,current_character);
                 break;
-            case END :
-//                end_parser_handler(sock_data,current_character);
-                break;
-            case ERROR_FOUND_EVENT: printf("ERROR_FOUND_EVENT");break;
         }
-        if(current_event->type ==ERROR_FOUND_EVENT)
-            break;
+        if((using_parser->state == END  ))
+            return true;
     }
-
-    if((using_parser->state != END  ))
-        return false;
-    else return true;
+    return false;
 }
 
 void close_sock_authentication_parser(struct parser*  using_parser){

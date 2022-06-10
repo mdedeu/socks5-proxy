@@ -16,6 +16,7 @@ struct sock_client * init_new_client_connection(int fd){
         new_client->read_buffer = temp_read;
         new_client->write_buffer = temp_write;
         new_client->origin_fd = -1;
+        new_client->close_after_write = false;
     }
 
     return new_client;

@@ -19,6 +19,8 @@ unsigned authenticate_write_handler(struct selector_key *key){
 
     if(written_bytes < write_amount)
         return SOCK_AUTHENTICATE_WRITING;
+    else if (client_data->close_after_write)
+        return CLOSING_CONNECTION;
     else
         return SOCK_REQUEST_READING;
 }
