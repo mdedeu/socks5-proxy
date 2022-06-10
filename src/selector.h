@@ -71,7 +71,7 @@ struct selector_init {
     const int signal;
 
     /** tiempo máximo de bloqueo durante `selector_iteratate' */
-    struct timeval select_timeout;
+    struct timespec select_timeout;
 };
 
 /** inicializa la librería */
