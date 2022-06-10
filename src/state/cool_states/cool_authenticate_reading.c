@@ -5,7 +5,7 @@
  void cool_authenticate_reading_departure(const unsigned int leaving_state, struct selector_key *key){
      cool_client *client_data = (cool_client *) key->data;
      //TODO: implementar los procesadores de la data
-     process_authentication_message((struct cool_protocol_authentication_message * ) client_data->parsed_message, key);
+     process_cool_authentication_message((struct cool_protocol_authentication_message * ) client_data->parsed_message, key);
      close_cool_protocol_authentication_parser(client_data->using_parser);
      close_cool_protocol_authentication_message((struct cool_protocol_authentication_message * ) client_data->parsed_message);
      selector_set_interest_key(key, OP_NOOP);

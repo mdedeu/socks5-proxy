@@ -13,7 +13,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include "../bufferService.h"
-#include "../client_request_processor.h"
+#include "../cool_request_processor.h"
 #include "../cool_client.h"
 #include "../parsing/parserCoolProtocolAuth.h"
 #include "../parsing/sock_request_parser.h"
