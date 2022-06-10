@@ -111,13 +111,13 @@ void close_pop3_connected_parser(struct pop3_connected_message * current_data){
 //+OK PP me llamo salvador\r\n
 //OK POP me llamo salvador\r\n
 //OK OP me llamo salvador\r\n
-// int main(){
-//      struct pop3_connected_message * testMessage = init_pop3_connected_parser();
-//      testMessage->prefix_len = 3;
-//      memcpy(testMessage->prefix,"+OK",8);
-//      bool finished;
+//  int main(){
+//       struct pop3_connected_message * testMessage = init_pop3_connected_parser();
+//       testMessage->prefix_len = 3;
+//       memcpy(testMessage->prefix,"+OK",8);
+//       bool finished;
 
-//      finished = feed_pop3_connected_parser(testMessage, "+OK m llam\rbbb\rbbb\naaa\r\n", 24);
-//      printf("Connected:%d\n", (int) testMessage->connected);
-//      printf("Finished:%d\n", (int) finished);
-//  }
+//       finished = feed_pop3_connected_parser(testMessage, "+OK m llam\rbbb\rbbb\n", 19);
+//       printf("Connected:%d\n", (int) testMessage->connected);
+//       printf("Finished:%d\n", (int) finished);
+//   }
