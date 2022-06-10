@@ -10,7 +10,7 @@ struct coolProtocolRequestMessage{
 
 struct coolProtocolRequestMessageAddUser{
 	
-	struct* coolProtocolRequestMessage;
+	struct coolProtocolRequestMessage * request;
 	uint8_t ulen;
 	char* uname;
 	uint8_t passlen;
@@ -20,7 +20,7 @@ struct coolProtocolRequestMessageAddUser{
 
 struct coolProtocolRequestMessageRemoveUser{
 	
-	struct* coolProtocolRequestMessage;
+	struct coolProtocolRequestMessage * request;
 	uint8_t ulen;
 	char* uname;
 
@@ -29,14 +29,14 @@ struct coolProtocolRequestMessageRemoveUser{
 
 struct coolProtocolRequestMessagePassSpoofing{
 	
-	struct* coolProtocolRequestMessage;
+	struct coolProtocolRequestMessage * request;
 	uint8_t pcol;
 
 };
 
 struct coolProtocolRequestMessageChangeBufferSize{
 	
-	struct* coolProtocolRequestMessage;
+	struct coolProtocolRequestMessage * request;
 	uint16_t nsize;
 		
 };
