@@ -5,13 +5,9 @@ static const struct state_definition authenticate_writing_state= {.state=COOL_AU
 
 static const struct state_definition states[] = {
     authenticate_reading_state,
-    authenticate_writing_state
-    /*
+    authenticate_writing_state,
     request_reading_state,
-    add_user_reading_state,
-    remove_user_reading_state,
-    enable_password_spoofing_reading_state,
-    disable_password_spoofing_reading_state,
+    /*
     response_writing_state
     */
 };

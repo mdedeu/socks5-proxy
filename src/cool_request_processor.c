@@ -27,3 +27,7 @@ void process_cool_authentication_message(struct cool_protocol_authentication_mes
     else         //todo: close the connection as the rfc said.
         buffer_write(client_data->write_buffer, NO_VALID_USER);
 }
+
+unsigned process_cool_request_message(struct cool_protocol_authentication_message * data, struct selector_key * key){
+    
+}

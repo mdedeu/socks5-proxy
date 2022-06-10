@@ -15,13 +15,14 @@
 #include "../bufferService.h"
 #include "../cool_request_processor.h"
 #include "../cool_client.h"
-#include "../parsing/parserCoolProtocolAuth.h"
-#include "../parsing/sock_request_parser.h"
 #include "../general_handlers.h"
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+
+#include "../parsing/parserCoolProtocolAuth.h"
+#include "../parsing/parserCoolProtocolRequestListener.h"
 
 #include "cool_states/cool_authenticate_reading.h"
 #include "cool_states/cool_authenticate_writing.h"
@@ -30,11 +31,7 @@ enum cool_client_state{
     COOL_AUTHENTICATE_READING,
     COOL_AUTHENTICATE_WRITING,
     COOL_REQUEST_READING,
-    ADD_USER_READING,
-    REMOVE_USER_READING,
-    ENBALE_PASSWORD_SPOOFING_READING,
-    DISABLE_PASSWORD_SPOOFING_READING,
-    COOL_RESPONSE_WRITING,
+    COOL_RESPONSE_WRITING
 };
 
 

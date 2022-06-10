@@ -3,9 +3,9 @@
 
  void cool_request_reading_departure(const unsigned int leaving_state, struct selector_key *key){
      cool_client *client_data = (cool_client *) key->data;
-     process_authentication_message((struct sock_authentication_message * ) client_data->parsed_message, key);
-     close_sock_authentication_parser(client_data->using_parser);
-     close_sock_authentication_message((struct sock_authentication_message * ) client_data->parsed_message);
+
+     unsigned next_state = process_cool_request_message((struct cool_protocol_authentication_message * ) client_data->parsed_message, key);
+     close_coolProtocolRequestMessage_parser((struct cool_protocol_authentication_message * ) client_data->parsed_message);
      selector_set_interest_key(key, OP_NOOP);
 
 }
