@@ -52,7 +52,7 @@ enum states_and_events{
 
 
 
-void initial_state(struct  parser_event * event , uint8_t c){
+static void initial_state(struct  parser_event * event , uint8_t c){
     if(c == QUERY)
         event->type = QUERY_ACTION_READ_EVENT;
     else event->type = MODIFY_ACTION_READ_EVENT;
@@ -60,14 +60,14 @@ void initial_state(struct  parser_event * event , uint8_t c){
     event->n=1;
 }
 
-void query_action_read(struct  parser_event * event , uint8_t c){
+static void query_action_read(struct  parser_event * event , uint8_t c){
     event->type = QUERY_METHOD_READ_EVENT;
     event->data[0]=c;
     event->n=1;
 }
 
 
-void modify_action_read(struct  parser_event * event , uint8_t c){
+static void modify_action_read(struct  parser_event * event , uint8_t c){
     if( c == 0 ) event->type = ADDING_USERNAME_METHOD_READ_EVENT;
     else if (c == 1 ) event->type = REMOVING_USERNAME_METHOD_READ_EVENT; 
     else  event->type = PASSWORD_METHOD_READ_EVENT;
@@ -75,43 +75,43 @@ void modify_action_read(struct  parser_event * event , uint8_t c){
     event->n=1;
 }
 
-void adding_ulen_read(struct  parser_event * event , uint8_t c){
+static void adding_ulen_read(struct  parser_event * event , uint8_t c){
     event->type = ADDING_ULEN_READ_EVENT; 
     event->data[0]=c;
     event->n=1;
 }
 
 
-void removing_ulen_read(struct  parser_event * event , uint8_t c){
+static void removing_ulen_read(struct  parser_event * event , uint8_t c){
     event->type = REMOVING_ULEN_READ_EVENT; 
     event->data[0]=c;
     event->n=1;
 }
-void password_protocol_read(struct  parser_event * event , uint8_t c){
+static void password_protocol_read(struct  parser_event * event , uint8_t c){
     event->type = PASSWORD_PROTOCOL_READ_EVENT; 
     event->data[0]=c;
     event->n=1;
 }
 
 
-void adding_username_read(struct  parser_event * event , uint8_t c){
+static void adding_username_read(struct  parser_event * event , uint8_t c){
     event->type = ADDING_USERNAME_USERNAME_READING_EVENT; 
     event->data[0]=c;
     event->n=1;
 }
-void removing_username_read(struct  parser_event * event , uint8_t c){
+static void removing_username_read(struct  parser_event * event , uint8_t c){
     event->type = REMOVING_USERNAME_USERNAME_READING_EVENT; 
     event->data[0]=c;
     event->n=1;
 }
 
-void adding_plen_read(struct  parser_event * event , uint8_t c){
+static void adding_plen_read(struct  parser_event * event , uint8_t c){
     event->type = ADDING_USERNAME_PLEN_READ_EVENT; 
     event->data[0]=c;
     event->n=1;
 }
 
-void adding_password_reading(struct  parser_event * event , uint8_t c){
+static void adding_password_reading(struct  parser_event * event , uint8_t c){
     event->type = ADDING_USERNAME_PASSWORD_READING_EVENT; 
     event->data[0]=c;
     event->n=1;
@@ -346,5 +346,8 @@ bool feed_general_request_parser(struct general_request_message * general_reques
         }
 //        if(current_event->type ==ERROR_FOUND_EVENT)
 //            break;
+        if(general_request_data->using_parser->state == END)
+            return true;
     }
+    return false;
 }

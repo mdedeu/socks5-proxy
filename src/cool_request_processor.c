@@ -28,6 +28,6 @@ void process_cool_authentication_message(struct cool_protocol_authentication_mes
         buffer_write(client_data->write_buffer, NO_VALID_USER);
 }
 
-unsigned process_cool_request_message(struct cool_protocol_authentication_message * data, struct selector_key * key){
-    
+void process_cool_request_message(struct general_request_message * data, struct selector_key * key){
+
 }

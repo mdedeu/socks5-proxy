@@ -17,7 +17,8 @@ typedef struct cool_client{
     buffer * write_buffer;
     struct state_machine * client_state_machine;
     union{
-        struct sock_authentication_message * authentication_message;
+        struct cool_protocol_authentication_message * authentication_message;
+        struct general_request_message * request_message;
     } current_parser;
 
     int origin_fd;

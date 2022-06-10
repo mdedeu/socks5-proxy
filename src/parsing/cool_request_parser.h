@@ -2,7 +2,6 @@
 #define COOL_REQUEST_PARSER
 
 #include "parser.h"
-#include "parser.c"
 #include <stdlib.h>
 #include <stdio.h>
 #define QUERY 208

@@ -1,5 +1,6 @@
 #ifndef PARSER_H_REQUEST_LISTENER_COOLPROTOCOL
 #define PARSER_H_REQUEST_LISTENER_COOLPROTOCOL
+#include <stdint.h>
 
 struct coolProtocolRequestMessage{
 	

@@ -22,10 +22,11 @@
 #include <netdb.h>
 
 #include "../parsing/parserCoolProtocolAuth.h"
-#include "../parsing/parserCoolProtocolRequestListener.h"
+#include "../parsing/cool_request_parser.h"
 
 #include "cool_states/cool_authenticate_reading.h"
 #include "cool_states/cool_authenticate_writing.h"
+#include "cool_states/cool_request_reading.h"
 
 enum cool_client_state{
     COOL_AUTHENTICATE_READING,

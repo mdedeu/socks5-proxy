@@ -2,7 +2,6 @@
 #define COOL_REQUEST_PROCESSOR_H
 
 #include "selector.h"
-#include "cool_request_processor.h"
 #include "cool_client.h"
 #include "buffer.h"
 #include "string.h"
@@ -10,7 +9,9 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include "dns_query.h"
+
 #include "parsing/parserCoolProtocolAuth.h"
+#include "parsing/cool_request_parser.h"
 
 
 #define USERNAME_AUTHENTICATION 2
@@ -28,6 +29,7 @@
 
 
 void process_cool_authentication_message(struct cool_protocol_authentication_message * data, struct selector_key * key);
+void process_cool_request_message(struct general_request_message * data, struct selector_key * key);
 
 
 #endif
