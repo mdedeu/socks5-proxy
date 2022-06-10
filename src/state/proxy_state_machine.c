@@ -22,8 +22,8 @@ static const struct state_definition states[] = {
         domain_connecting,
         address_connecting,
         sock_request_writing,
-    connected,
-    closing_connection
+        connected,
+        closing_connection
 };
 
 static struct state_machine sock_client_machine = {
