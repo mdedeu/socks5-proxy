@@ -3,7 +3,8 @@
 void * request_resolving_blocking(void * data){
     struct selector_key * key = (struct selector_key *) data;
     struct sock_client * sock_client_information = (struct sock_client *) key->data;
-    struct sock_request_message * request_message = sock_client_information->current_parser.request_message;
+    struct sock_request_message *  request_message = (struct sock_request_message *)sock_client_information->parsed_message;
+
 
     pthread_detach(pthread_self());
 
@@ -24,8 +25,9 @@ void * request_resolving_blocking(void * data){
 
     char buff[7];
     snprintf(buff, sizeof (buff), "%d", port);
+
     getaddrinfo(
-        (char *) sock_client_information->current_parser.request_message->address,
+        (char *) request_message->address,
         buff,
         &hints,
         &sock_client_information->origin_resolutions

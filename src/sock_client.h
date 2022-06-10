@@ -33,6 +33,9 @@ typedef struct sock_client{
 //    int origin_port;
     int origin_fd;
 
+    struct parser * using_parser;
+    void * parsed_message;
+
 
 
 } sock_client;

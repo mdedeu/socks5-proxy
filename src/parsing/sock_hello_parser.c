@@ -41,12 +41,12 @@ static void handle_nmethods_read_event(struct sock_hello_message * current_data,
     current_data->methods= malloc(nmethods);
 }
 
-static void handle_method_read_event(struct sock_hello_message * current_data , uint8_t method){
+static void handle_method_read_event(struct parser * using_parser , struct sock_hello_message * current_data , uint8_t method){
     //finish if reading username/authentication method
     current_data->methods[current_data->last_method_added] = method;
     current_data->last_method_added ++ ;
     if(current_data->last_method_added== current_data->nmethods){
-        current_data->using_parser->state = END;
+        using_parser->state = END;
     }
 }
 
@@ -84,18 +84,22 @@ static struct parser_definition sock_parser_definition={
 };
 
 
-struct sock_hello_message * init_sock_hello_parser(){
+struct sock_hello_message * init_sock_hello_message(){
     struct sock_hello_message * new_sock_hello_message = malloc(sizeof (struct sock_hello_message));
-    struct parser * sock_hello_parser = parser_init(parser_no_classes(),&sock_parser_definition);
-    new_sock_hello_message->using_parser = sock_hello_parser;
     new_sock_hello_message->last_method_added=0;
     return new_sock_hello_message;
+
 }
 
-bool feed_sock_hello_parser(struct sock_hello_message * sock_data ,char * input,int input_size){
+
+struct parser * init_sock_hello_parser(){
+    return parser_init(parser_no_classes(),&sock_parser_definition);
+}
+
+bool feed_sock_hello_parser(struct parser * using_parser , struct sock_hello_message * sock_data ,char * input,int input_size){
     const struct parser_event * current_event;
-    for(int i = 0 ; i < input_size  && (sock_data->using_parser->state != END  ); i++){
-        current_event = parser_feed(sock_data->using_parser,input[i]);
+    for(int i = 0 ; i < input_size  && (using_parser->state != END  ); i++){
+        current_event = parser_feed(using_parser,input[i]);
         uint8_t  current_character = current_event->data[0];
         switch (current_event->type) {
             case VERSION_READ_EVENT:
@@ -105,7 +109,7 @@ bool feed_sock_hello_parser(struct sock_hello_message * sock_data ,char * input,
                 handle_nmethods_read_event(sock_data,current_character);
                 break;
             case METHODS_READ_EVENT:
-                handle_method_read_event(sock_data, current_character);
+                handle_method_read_event(using_parser,sock_data, current_character);
                 break;
             case END :
 //                end_parser_handler(sock_data,current_character);
@@ -115,13 +119,16 @@ bool feed_sock_hello_parser(struct sock_hello_message * sock_data ,char * input,
         if(current_event->type ==ERROR_FOUND_EVENT)
             break;
     }
-    if(sock_data->using_parser->state == END)
+    if(using_parser->state == END)
         return true;
     return false;
 }
 
-void close_sock_hello_parser(struct sock_hello_message *  current_data){
-    parser_destroy(current_data->using_parser);
+void close_sock_hello_parser(struct parser * using_parser){
+    parser_destroy(using_parser);
+}
+
+void close_sock_hello_message(struct sock_hello_message *  current_data){
     free(current_data->methods);
     free(current_data);
 }

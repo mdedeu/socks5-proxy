@@ -1,12 +1,11 @@
 #include "closing_connection.h"
 
 
-unsigned  closing_connection_on_departure(const unsigned state ,struct selector_key * key){
+void  closing_connection_on_departure(const unsigned state ,struct selector_key * key){
     close(key->fd);
-    return CLOSING_CONNECTION;
 }
 
-unsigned closing_connection_on_arrival(const unsigned state ,struct selector_key * key ){
+void closing_connection_on_arrival(const unsigned state ,struct selector_key * key ){
     selector_unregister_fd(key->s,key->fd);
     sock_client * client_information = (sock_client*) key->data;
     if(key->fd == client_information->origin_fd)
@@ -14,5 +13,4 @@ unsigned closing_connection_on_arrival(const unsigned state ,struct selector_key
     else
         selector_unregister_fd(key->s,client_information->origin_fd);
     destroy_sock_client(client_information);
-    return CLOSING_CONNECTION;
 }
