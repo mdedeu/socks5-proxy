@@ -12,12 +12,12 @@ enum states_and_events{
     ERROR_FOUND_EVENT
 };
 
-void save_pop3_check_character(struct parser_event * event , uint8_t c){
+static void save_pop3_check_character(struct parser_event * event , uint8_t c){
     event->type = POP3_CHECK_EVENT;
     event->data[0]=c;
     event->n=1;
 }
-void save_closing_character(struct parser_event * event , uint8_t c){
+static void save_closing_character(struct parser_event * event , uint8_t c){
     event->type = CLOSE_EVENT;
     event->data[0]=c;
     event->n=1;
@@ -105,3 +105,20 @@ void close_pop3_connected_parser(struct pop3_connected_message * current_data){
     free(current_data);
 }
 
+
+//+OK POP me llamo salvador\r\n
+//+OK POP me llamo salvador\r y mi apellido es castagnino\r\n
+//+OK POP me llamo salvador\n y mi apellido es castagnino\r\n
+//+OK PP me llamo salvador\r\n
+//OK POP me llamo salvador\r\n
+//OK OP me llamo salvador\r\n
+// int main(){
+//     struct pop3_connected_message * testMessage = init_pop3_connected_parser();
+//     testMessage->prefix_len = 3;
+//     memcpy(testMessage->prefix,"+OK",8);
+//     bool finished;
+
+//     finished = feed_pop3_connected_parser(testMessage, "+OK m llam\rbbb\rbbb\naaa\r\n", 24);
+//     printf("Connected:%d\n", (int) testMessage->connected);
+//     printf("Finished:%d\n", (int) finished);
+// }

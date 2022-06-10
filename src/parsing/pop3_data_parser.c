@@ -14,17 +14,17 @@ enum states_and_events{
     ERROR_FOUND_EVENT
 };
 
-void save_pop3_check_character(struct parser_event * event , uint8_t c){
+static void save_pop3_check_character(struct parser_event * event , uint8_t c){
     event->type = POP3_CHECK_EVENT;
     event->data[0]=c;
     event->n=1;
 }
-void save_data_character(struct parser_event * event , uint8_t c){
+static void save_data_character(struct parser_event * event , uint8_t c){
     event->type = DATA_READ_EVENT;
     event->data[0]=c;
     event->n=1;
 }
-void save_closing_character(struct parser_event * event , uint8_t c){
+static void save_closing_character(struct parser_event * event , uint8_t c){
     event->type = CLOSE_EVENT;
     event->data[0]=c;
     event->n=1;
@@ -44,6 +44,7 @@ static void handle_pop3_check_event(struct pop3_data_message * current_data, uin
         current_data->using_parser->state = READING_DATA;
 }
 
+//TODO: mirar case-insensitivness de pop3
 static void handle_data_read_event(struct pop3_data_message * current_data, uint8_t c){
     if(current_data->data_characters_read >= BUFFER_SIZE-2){
         //TODO: mirar si aca habria que tirar un error o algo
@@ -54,8 +55,13 @@ static void handle_data_read_event(struct pop3_data_message * current_data, uint
 }
 
 static void handle_close_event(struct pop3_data_message * current_data, uint8_t c){
-    if(c != '\n'){
-        current_data->data[current_data->data_characters_read++] = c;
+    if(c == '\n'){
+        current_data->data_characters_read--;
+        current_data->using_parser->state = END;
+        return;
+    }
+    current_data->data[current_data->data_characters_read++] = c;
+    if(c != '\r'){
         current_data->using_parser->state = READING_DATA;
     }
 }
@@ -73,7 +79,6 @@ static struct parser_state_transition reading_data_transitions[] ={
 };
 static struct parser_state_transition closing_transitions[] ={
     //TODO: mirar si al matchear con el \n se deja de tener en cuenta la transicion anterior por el orden
-        {.when='\n',.dest=END,.act1=save_closing_character},
         {.when=ANY,.dest=CLOSING,.act1=save_closing_character}
 };
 
@@ -117,12 +122,15 @@ bool feed_pop3_data_parser(struct pop3_data_message * pop3_data ,char * input,in
         switch (current_event->type) {
             case POP3_CHECK_EVENT:
                 handle_pop3_check_event(pop3_data,current_character);
+                printf("CHECK = %c\n", current_character);
                 break;
             case DATA_READ_EVENT:
                 handle_data_read_event(pop3_data,current_character);
+                printf("READ = %c\n", current_character);
                 break;
             case CLOSE_EVENT:
                 handle_close_event(pop3_data,current_character);
+                printf("CLOSE = %c\n", current_character);
                 break;
             case END :
 //                end_parser_handler(pop3_data,current_character);
@@ -143,3 +151,22 @@ void close_pop3_data_parser(struct pop3_data_message * current_data){
     free(current_data);
 }
 
+// int main(){
+//     struct pop3_data_message * testMessage = init_pop3_data_parser();
+//     testMessage->prefix_len=4;
+//     memcpy(testMessage->prefix, "USER", 5);
+//     bool finished;
+//     finished = feed_pop3_data_parser(testMessage, "USER sal va\r\raa\n\rbbbc", 21);
+//     finished = feed_pop3_data_parser(testMessage, "USER sal va\r\raa\n\rbbbc\r\n", 23);
+//     printf("Connected:%d\n", (int) testMessage->connected);
+//     printf("Finished:%d\n", (int) finished);
+
+//     printf("Data Quant:%d\n", testMessage->data_characters_read);
+//     testMessage->data[testMessage->data_characters_read] = 0;
+//     printf("Data:%s\n", testMessage->data);
+//     /*
+//     finished = feed_pop3_data_parser(testMessage, "casta\r\n", 7);
+//     printf("Connected:%d\n", (int) testMessage->connected);
+//     printf("Finished:%d\n", (int) finished);
+//     */
+// }
