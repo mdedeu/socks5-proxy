@@ -2,7 +2,7 @@
 #define COOL_AUTHENTICATION_MAX_LENGTH 2
 #define  MAX_READ_LENGTH 512
 
- void authenticate_reading_departure(const unsigned int leaving_state, struct selector_key *key){
+ void cool_authenticate_reading_departure(const unsigned int leaving_state, struct selector_key *key){
      sock_client *client_data = (sock_client *) key->data;
      process_authentication_message((struct sock_authentication_message * ) client_data->parsed_message, key);
      close_sock_authentication_parser(client_data->using_parser);
@@ -12,7 +12,7 @@
 }
 
 
-unsigned authenticate_read_handler(struct selector_key *key){
+unsigned cool_authenticate_read_handler(struct selector_key *key){
     sock_client * client_data = (sock_client *) key->data;
 
     char temp_buffer[MAX_READ_LENGTH];
@@ -30,7 +30,7 @@ unsigned authenticate_read_handler(struct selector_key *key){
 }
 
 
-void authenticate_reading_arrival(const unsigned int leaving_state, struct selector_key *key){
+void cool_authenticate_reading_arrival(const unsigned int leaving_state, struct selector_key *key){
     sock_client *client_data = (sock_client *) key->data;
     client_data->using_parser = init_sock_authentication_parser();
     client_data->parsed_message= init_sock_authentication_message();

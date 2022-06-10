@@ -1,11 +1,11 @@
-#include "authenticate_writing.h"
+#include "cool_authenticate_writing.h"
 
-void authenticate_writing_arrival(const unsigned int leaving_state, struct selector_key *key){
+void cool_authenticate_writing_arrival(const unsigned int leaving_state, struct selector_key *key){
     selector_set_interest_key(key,OP_WRITE);
 }
 
 
-unsigned authenticate_write_handler(struct selector_key *key){
+unsigned cool_authenticate_write_handler(struct selector_key *key){
     sock_client *client_data = (sock_client *) key->data;
 
     if (!buffer_can_read(client_data->write_buffer))
@@ -23,6 +23,6 @@ unsigned authenticate_write_handler(struct selector_key *key){
         return SOCK_REQUEST_READING;
 }
 
-void authenticate_writing_departure(const unsigned int leaving_state, struct selector_key *key){
+void cool_authenticate_writing_departure(const unsigned int leaving_state, struct selector_key *key){
     selector_set_interest_key(key,OP_NOOP);
 }
