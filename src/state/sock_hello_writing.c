@@ -7,16 +7,13 @@ void sock_hello_writing_on_arrival(const unsigned state, struct selector_key *ke
 
 
 unsigned sock_hello_write_handler(struct selector_key *key) {
-    if(key==NULL)
+    if(key==NULL|| key->data==NULL)
         return CLOSING_CONNECTION;
 
     sock_client *client_data = (sock_client *) key->data;
 
-    if(client_data->using_parser == NULL || client_data->parsed_message == NULL || client_data->write_buffer == NULL)
+    if( client_data->write_buffer == NULL || !buffer_can_read(client_data->write_buffer) )
         return CLOSING_CONNECTION ;
-
-    if (!buffer_can_read(client_data->write_buffer))
-        return SOCK_HELLO_WRITING;
 
     size_t write_amount;
     uint8_t *reading_since = buffer_read_ptr(client_data->write_buffer, &write_amount);

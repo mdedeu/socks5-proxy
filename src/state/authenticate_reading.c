@@ -21,7 +21,6 @@ unsigned authenticate_read_handler(struct selector_key *key){
     char temp_buffer[MAX_READ_LENGTH];
 
     int received_amount = recv(key->fd, temp_buffer, MAX_READ_LENGTH, MSG_DONTWAIT);
-
     if(received_amount <= 0){
         return CLOSING_CONNECTION;
     }
