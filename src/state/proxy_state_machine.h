@@ -29,7 +29,6 @@
 #include "authenticate_reading.h"
 #include "authenticate_writing.h"
 #include "request_reading.h"
-#include "resolving_host_address.h"
 #include "domain_connecting.h"
 #include "address_connecting.h"
 #include "sock_request_writing.h"
@@ -67,5 +66,6 @@ enum socks_response_status{
 
 struct state_machine *init_proxy_state_machine();
 void destroy_sock_state(struct state_machine *sock_machine);
+enum socks_response_status errno_to_sock(const int e );
 
 #endif
