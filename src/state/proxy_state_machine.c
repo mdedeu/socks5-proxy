@@ -44,7 +44,7 @@ void destroy_sock_state(struct state_machine *sock_machine) {
 }
 
 
-enum socks_response_status errno_to_sock(const int e ){
+unsigned  errno_to_sock(const int e ){
     switch(e){
         case 0:
             return status_succeeded;

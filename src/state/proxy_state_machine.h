@@ -5,6 +5,7 @@
 #define AUTHENTICATION_ANSWER_LENGTH 2
 #define REQUEST_CONNECT_ANSWER 20
 #define READ_AMOUNT 512
+#define POP_PORT 110
 #include <errno.h>
 #include "stm.h"
 #include <string.h>
@@ -44,7 +45,6 @@ enum client_state{
     SOCK_AUTHENTICATE_READING,
     SOCK_AUTHENTICATE_WRITING,
     SOCK_REQUEST_READING,
-//    RESOLVING_HOST_ADDRESS,
     DOMAIN_CONNECTING,
     ADDRESS_CONNECTING,
     SOCK_REQUEST_WRITING,
@@ -53,9 +53,10 @@ enum client_state{
     CLOSING_CONNECTION
 };
 
-enum socks_response_status{
+ enum socks_response_status{
     status_succeeded,
     status_general_socks_server_failure,
+    status_connection_not_allowed_by_ruleset,
     status_network_unreachable,
     status_host_unreachable,
     status_connection_refused,
@@ -66,6 +67,6 @@ enum socks_response_status{
 
 struct state_machine *init_proxy_state_machine();
 void destroy_sock_state(struct state_machine *sock_machine);
-enum socks_response_status errno_to_sock(const int e );
+unsigned  errno_to_sock(const int e );
 
 #endif

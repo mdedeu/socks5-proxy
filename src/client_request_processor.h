@@ -29,13 +29,14 @@
 #define HOST_UNREACHABLE 4
 #define SUCCEEDED 0
 #define SUBNEGOTIATION_CURRENT_VERSION 1
+#define RSV_VALUE 0
 
 
 
 bool process_hello_message(struct sock_hello_message * data, struct selector_key * key);
 bool process_authentication_message(struct sock_authentication_message * data, struct selector_key * key);
 void process_request_message(struct sock_request_message  * data, struct selector_key * key);
-void generate_request_answer(struct sock_request_message * data ,struct  selector_key * key);
+void generate_positive_request_answer(struct sock_request_message * data ,struct  selector_key * key);
 
 
 #endif

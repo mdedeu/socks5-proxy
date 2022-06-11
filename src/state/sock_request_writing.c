@@ -7,7 +7,7 @@ void sock_request_writing_arrival(unsigned state, struct selector_key * key){
     struct sock_request_message *  message = (struct sock_request_message * )client_information->parsed_message;
     if(message->connection_result != 0 ) //if not connected should have gone to sock_negative_request_writing
         return;
-    generate_request_answer(message, key);
+    generate_positive_request_answer(message, key);
     selector_set_interest(key->s, client_information->client_fd, OP_WRITE);
 }
 
@@ -31,7 +31,9 @@ unsigned sock_request_writing_write_handler(struct selector_key * key){
     if(written_bytes < write_amount)
         return SOCK_REQUEST_WRITING;
     else
-        return CONNECTED;
+        if(client_data->origin_port != POP_PORT)
+            return CONNECTED;
+        else ; //posible user/password
 }
 
 
