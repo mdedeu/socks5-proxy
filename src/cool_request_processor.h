@@ -26,6 +26,22 @@
 #define HOST_UNREACHABLE 4
 #define SUCCEEDED 0
 
+#define MODIFY 0xBE
+#define QUERY 0xD0
+
+#define ADD_USER 0
+#define REMOVE_USER 1
+#define ENABLE_SPOOFING 2
+#define DISABLE_SPOOFING 3
+
+#define TOTAL_CONNECTIONS 0
+#define CURRENT_CONNECTIONS 1
+#define MAX_CURRENT_CONNECTIONS 2
+#define TOTAL_BYTES_SENT 3
+#define TOTAL_BYTES_RECV 4
+#define CONNECTED_USERS 5
+
+
 
 
 void process_cool_authentication_message(struct cool_protocol_authentication_message * data, struct selector_key * key);
