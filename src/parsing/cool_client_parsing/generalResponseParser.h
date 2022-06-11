@@ -2,7 +2,7 @@
 #define GENERAL_RESPONSE_PARSER_H
 
 #include <stdint.h>
-#include "parser.h"
+#include "../parser.h"
 #include <stdio.h>
 #include <stdlib.h>
 #define N(x) (sizeof(x)/sizeof((x)[0]))
