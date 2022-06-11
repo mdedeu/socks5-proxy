@@ -49,7 +49,6 @@ unsigned sock_negative_request_write_handler(struct selector_key * key){
         return CLOSING_CONNECTION;
 }
 
-//on departure free parsed message.
 void sock_negative_request_writing_departure(unsigned state, struct selector_key * key) {
     if (key == NULL || key->data == NULL)
         return;

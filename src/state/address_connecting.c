@@ -3,8 +3,12 @@
 static enum socks_response_status errno_to_sock(const int e );
 
 unsigned address_connecting_write_handler(struct selector_key * key){
+    if(key == NULL || key->data == NULL )
+        return CLOSING_CONNECTION;
     struct sock_client * client_information = (struct sock_client *) key->data;
     struct sock_request_message * client_message = (struct sock_request_message * )client_information->parsed_message;
+    if(client_message == NULL )
+        return CLOSING_CONNECTION;
 
     int error ;
     socklen_t  length = sizeof (error);
@@ -22,6 +26,8 @@ unsigned address_connecting_write_handler(struct selector_key * key){
 }
 
 void address_connecting_departure(struct selector_key * key){
+    if(key == NULL || key->data == NULL )
+        return;
     struct sock_client * client_information = (struct sock_client *) key->data;
     selector_set_interest(key->s,client_information->origin_fd , OP_NOOP);
     selector_set_interest(key->s,client_information->client_fd,OP_NOOP);

@@ -2,6 +2,7 @@
 #define  MAX_READ_LENGTH 512
 
 static bool try_connect( struct selector_key * key);
+static bool try_connection_aux(struct selector_key * key, struct sock_request_message * client_message, int domain , socklen_t address_length );
 
 void request_reading_arrival(const unsigned state , struct selector_key * key ){
     if(key!=NULL && key->data!=NULL){
@@ -49,7 +50,7 @@ unsigned request_reading_read_handler(struct selector_key *key){
     else if(received_message->atyp == IPV4ADDRESS || received_message->atyp == IPV6ADDRESS){
         if(try_connect(key))
             return ADDRESS_CONNECTING;
-        else return CLOSING_CONNECTION;
+        else return SOCK_NEGATIVE_REQUEST_WRITING;
     }
     else return CLOSING_CONNECTION;
 
@@ -71,29 +72,49 @@ static bool try_connect( struct selector_key * key){
     sock_client * client_information  = (sock_client*) key->data;
     if(client_information->parsed_message == NULL)
         return false;
+    struct sock_request_message * client_message = (struct sock_request_message *) client_information->parsed_message;
 
-    process_request_message((struct sock_request_message *) client_information->parsed_message,key);
+    process_request_message(client_message,key);
 
-    int server_socket_fd;
-    if(client_information->origin_address_length == IPV4SIZE){
-        server_socket_fd = socket(AF_INET, SOCK_STREAM, 0);
-        if(server_socket_fd < 0 )
-            return false;
-        selector_fd_set_nio(server_socket_fd);
+    if(client_information->origin_address_length == IPV4SIZE)
+        return try_connection_aux( key, client_message, AF_INET , sizeof(struct sockaddr_in));
+    else if(client_information->origin_address_length == IPV6SIZE)
+        return try_connection_aux(key,client_message,AF_INET6, sizeof(struct sockaddr_in6));
+    else return false;
 
-        client_information->origin_fd = server_socket_fd;
-        connect(server_socket_fd, (struct sockaddr *) (client_information->origin_address), sizeof(struct sockaddr_in));
-        selector_register(key->s, server_socket_fd, &socks5_handler, OP_WRITE, client_information);
+}
+
+static bool try_connection_aux(struct selector_key * key, struct sock_request_message * client_message, int domain , socklen_t address_length ){
+    sock_client *client_information = (sock_client *) key->data;
+    int  server_socket_fd = socket(domain, SOCK_STREAM, IPPROTO_TCP);
+    if(server_socket_fd < 0 ){
+        client_message->connection_result= status_general_socks_server_failure;
+        return false;
     }
-    else if(client_information->origin_address_length == IPV6SIZE){
-        server_socket_fd = socket(AF_INET6, SOCK_STREAM, 0);
-        if(server_socket_fd < 0 )
-            return false;
-        selector_fd_set_nio(server_socket_fd);
 
-        client_information->origin_fd = server_socket_fd;
-        connect(server_socket_fd, (struct sockaddr *) (client_information->origin_address), sizeof(struct sockaddr_in6));
-        selector_register(key->s, server_socket_fd, &socks5_handler, OP_WRITE, client_information);
+    if(SELECTOR_SUCCESS != selector_fd_set_nio(server_socket_fd)){
+        client_message->connection_result = status_general_socks_server_failure;
+        return false;
     }
-    return true;
+
+    client_information->origin_fd = server_socket_fd;
+    connect(server_socket_fd, (struct sockaddr *) (client_information->origin_address), address_length);
+    switch (errno) {
+        case ECONNREFUSED:
+            client_message->connection_result = status_connection_refused;
+            return false;
+        case EHOSTUNREACH:
+            client_message->connection_result = status_host_unreachable;
+            return false;
+        case ENETUNREACH:
+            client_message->connection_result = status_network_unreachable;
+            return false;
+        case EINPROGRESS:
+            if(SELECTOR_SUCCESS == selector_register(key->s, server_socket_fd, &socks5_handler, OP_WRITE, client_information))
+                return true;
+        default:
+            client_message->connection_result = status_general_socks_server_failure;
+            return false;
+    }
+    
 }

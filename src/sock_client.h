@@ -18,11 +18,7 @@ typedef struct sock_client{
     buffer * read_buffer;
     buffer * write_buffer;
     struct state_machine * client_state_machine;
-    union{
-        struct sock_hello_message  * hello_message;
-        struct sock_request_message *  request_message;
-        struct sock_authentication_message * authentication_message;
-    } current_parser;
+
 
     struct addrinfo * origin_resolutions;
     struct addrinfo * current_origin_resolution;
@@ -30,7 +26,6 @@ typedef struct sock_client{
     struct sockaddr_storage * origin_address;
     socklen_t  origin_address_length;
     uint16_t  origin_port;
-//    int origin_port;
     int origin_fd;
 
     struct parser * using_parser;
