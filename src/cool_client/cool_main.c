@@ -35,11 +35,32 @@ int main(){
     printf("Sent:%d\n", ret);
 
     ret = recv(sock_fd, buff_recv, 2, 0);
-    printf("Recieved:%d\n", ret);
+    printf("Received:%d\n", ret);
 
-    for(int i = 0; i < 2; i++)
+    for(int i = 0; i < 2; i++){
         printf("%d", buff_recv[i]);
+        printf("|");
+    }
+
+    printf("\n==============================\n");
+
+    buff[0] = 0xD0;
+    buff[1] = 0x04;
+
+    ret = send(sock_fd, buff, 2, 0);
+    printf("Sent:%d\n", ret);
+
+    ret = recv(sock_fd, buff_recv, 4, 0);
+    printf("Received:%d\n", ret);
+
+    for(int i = 0; i < 4; i++){
+        printf("%d", buff_recv[i]);
+        printf("|");
+    }
 
     printf("\n");
+
+    while(1){
+    }
 
 }

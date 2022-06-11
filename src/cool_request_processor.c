@@ -36,6 +36,7 @@ void process_cool_authentication_message(struct cool_protocol_authentication_mes
 void process_cool_request_message(struct general_request_message * data, struct selector_key * key){
     cool_client * client_data = (cool_client * ) key->data;
     uint64_t result;
+    int error = 0;
 
     buffer_write(client_data->write_buffer, data->action);
     buffer_write(client_data->write_buffer, data->method);
@@ -56,6 +57,13 @@ void process_cool_request_message(struct general_request_message * data, struct 
             case DISABLE_SPOOFING:
                 buffer_write(client_data->write_buffer, disable_spoofing_handler(data->protocol));
                 break;
+                default:
+                    error = 1;
+                    break;
+            }
+            if(error){
+                buffer_write(client_data->write_buffer, 0);
+                buffer_write(client_data->write_buffer, 1);
             }
             break;
         case QUERY:
@@ -78,10 +86,23 @@ void process_cool_request_message(struct general_request_message * data, struct 
             case CONNECTED_USERS:
                 result = get_connected_users();
                 break;
+            default:
+                error = 1;
+                break;
             }
-            buffer_write(client_data->write_buffer, 8);
-            for(int i = 0; i < 7; i++)
-                buffer_write(client_data->write_buffer, (result >> i*8) & 255);
+            if(error){
+                buffer_write(client_data->write_buffer, 0);
+                buffer_write(client_data->write_buffer, 1);
+            }
+            else{
+                buffer_write(client_data->write_buffer, 8);
+                for(int i = 0; i < 7; i++)
+                    buffer_write(client_data->write_buffer, (result >> i*8) & 255);
+            }
+            break;
+        default:
+            buffer_write(client_data->write_buffer, 0);
+            buffer_write(client_data->write_buffer, 0);
             break;
     }
 }

@@ -2,12 +2,11 @@
 #define  MAX_READ_LENGTH 512
 
 void cool_request_reading_departure(const unsigned int leaving_state, struct selector_key *key){
-     cool_client *client_data = (cool_client *) key->data;
-
-     process_cool_request_message((struct general_request_message * ) client_data->parsed_message, key);
-     destroy_general_request_message((struct general_request_message * ) client_data->parsed_message);
-     selector_set_interest_key(key, OP_NOOP);
-
+    cool_client *client_data = (cool_client *) key->data;
+    process_cool_request_message((struct general_request_message * ) client_data->parsed_message, key);
+    destroy_general_request_parser(client_data->using_parser);
+    destroy_general_request_message((struct general_request_message * ) client_data->parsed_message);
+    selector_set_interest_key(key, OP_NOOP);
 }
 
 

@@ -24,6 +24,7 @@ struct general_request_message {
 struct general_request_message * init_general_parser();
 void destroy_general_request_message(struct general_request_message * message);
 bool feed_general_request_parser(struct general_request_message * general_request_data, char * input, int input_size);
+void destroy_general_request_parser(struct parser*  using_parser);
 
 
 #endif

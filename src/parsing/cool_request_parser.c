@@ -285,11 +285,13 @@ struct general_request_message * init_general_parser(){
      return new_general_request_message;
 }
 
+void destroy_general_request_parser(struct parser*  using_parser){
+    parser_destroy(using_parser);
+}
 
 void destroy_general_request_message(struct general_request_message * message){
-        if(message->username != NULL ) free(message->username);
-        if(message->password != NULL ) free(message->password);               
-        parser_destroy(message->using_parser);
+        if(message->ulen != 0 ) free(message->username);
+        if(message->plen != 0 ) free(message->password);               
         free(message); 
 }
 
