@@ -10,6 +10,7 @@
 #include "selector.h"
 #include "sock_client.h"
 #include "general_handlers.h"
+#include "cool_handlers.h"
 #include "parsing/sock_request_parser.h"
 #include <limits.h>
 
@@ -49,6 +50,12 @@ fd_handler active_handlers = {
     .handle_close = &socks5_close
 };
 
+fd_handler cool_handlers = {
+    .handle_read = &cool_read,
+    .handle_write = &cool_write,
+    .handle_block = &cool_block,
+    .handle_close = &cool_close
+};
 
 
 void tcpConnectionHandler(struct selector_key *key){

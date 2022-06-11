@@ -1,8 +1,7 @@
-#ifndef GENERAL_DANDLERS_H
-#define GENERAL_DANDLERS_H
+#ifndef GENERAL_HANDLERS_H
+#define GENERAL_HANDLERS_H
 
 #include "selector.h"
-#include "general_handlers.h"
 #include "sock_client.h"
 #include "state/proxy_state_machine.h"
 #include "client_request_processor.h"

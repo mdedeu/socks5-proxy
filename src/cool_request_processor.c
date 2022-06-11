@@ -25,7 +25,7 @@ void process_cool_authentication_message(struct cool_protocol_authentication_mes
 
     if(valid_user)
         buffer_write(client_data->write_buffer, VALID_USER);
-    else         //todo: close the connection as the rfc said.
+    else         //TODO: close the connection as the rfc said.
         buffer_write(client_data->write_buffer, NO_VALID_USER);
 }
 
