@@ -74,12 +74,12 @@ static void handle_ulen_read_event(struct cool_protocol_authentication_message *
 	current_data->username = malloc(current_data->username_length + 1 );
 }
 
-static void handle_username_read_event(struct cool_protocol_authentication_message * current_data , uint8_t username_character) {
+static void handle_username_read_event(struct parser * using_parser, struct cool_protocol_authentication_message * current_data , uint8_t username_character) {
 	current_data->username[current_data->username_characters_read] = username_character;
 	current_data->username_characters_read ++ ;
 	if (current_data->username_characters_read == current_data->username_length) {
 		current_data->username[current_data->username_characters_read] = 0;
-		current_data->using_parser->state = FINISH_USERNAME;
+		using_parser->state = FINISH_USERNAME;
 	}
 }
 
@@ -88,12 +88,12 @@ static void handle_plen_read_event(struct cool_protocol_authentication_message *
 	current_data->password = malloc(current_data->password_length + 1);
 }
 
-static void handle_password_read_event(struct cool_protocol_authentication_message * current_data , uint8_t password_character) {
+static void handle_password_read_event(struct parser * using_parser, struct cool_protocol_authentication_message * current_data , uint8_t password_character) {
 	current_data->password[current_data->password_characters_read] = password_character;
 	current_data->password_characters_read ++ ;
 	if (current_data->password_characters_read == current_data->password_length) {
 		current_data->password[current_data->password_characters_read] = 0;
-		current_data->using_parser->state = END;
+		using_parser->state = END;
 	}
 }
 static void handle_error_event(struct cool_protocol_authentication_message *  current_data, uint8_t error) {
@@ -112,8 +112,8 @@ static struct parser_state_transition initial_state_transitions[] = {
 	{.when = ANY, .dest = VERSION_READ, .act1 = check_version}
 };
 static  struct parser_state_transition version_read_transitions[] = {
-	{.when = 1, .dest = ULEN_READ, .act1 = save_username_length},
-	{.when = ANY, .dest = ERROR, .act1 = error}
+	{.when = ANY, .dest = ULEN_READ, .act1 = save_username_length}
+	//{.when = ANY, .dest = ERROR, .act1 = error}
 };
 static struct parser_state_transition ulen_read_transitions[] = {
 	{.when = ANY, .dest = USERNAME_READING, .act1 = save_username_character}
@@ -168,8 +168,8 @@ struct parser * init_cool_protocol_authentication_parser(){
 
 bool feed_cool_protocol_authentication_parser(struct parser * using_parser, struct cool_protocol_authentication_message * cool_protocol_data , char * input, int input_size) {
 	const struct parser_event * current_event;
-	for (int i = 0 ; i < input_size  && (cool_protocol_data->using_parser->state != END  ); i++) {
-		current_event = parser_feed(cool_protocol_data->using_parser, input[i]);
+	for (int i = 0 ; i < input_size  && (using_parser->state != END  ); i++) {
+		current_event = parser_feed(using_parser, input[i]);
 		uint8_t  current_character = current_event->data[0];
 		switch (current_event->type) {
 		case VERSION_READ_EVENT:
@@ -179,13 +179,13 @@ bool feed_cool_protocol_authentication_parser(struct parser * using_parser, stru
 			handle_ulen_read_event(cool_protocol_data, current_character);
 			break;
 		case USERNAME_READ_EVENT:
-			handle_username_read_event(cool_protocol_data, current_character);
+			handle_username_read_event(using_parser, cool_protocol_data, current_character);
 			break;
 		case PASSLEN_READ_EVENT:
 			handle_plen_read_event(cool_protocol_data, current_character);
 			break;
 		case READING_PASSWORD_EVENT:
-			handle_password_read_event(cool_protocol_data, current_character);
+			handle_password_read_event(using_parser, cool_protocol_data, current_character);
 			break;
 		case END :
 //                end_parser_handler(cool_protocol_data,current_character);
@@ -197,7 +197,7 @@ bool feed_cool_protocol_authentication_parser(struct parser * using_parser, stru
 			break;
 	}
 
-	if ((cool_protocol_data->using_parser->state != END  ))
+	if ((using_parser->state != END  ))
 		return false;
 	else return true;
 }

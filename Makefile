@@ -29,4 +29,4 @@ all: $(OBJ)
 .PHONY: clean
 clean:
 	@rm -f $(OBJ) server
-#	find . -name '*.o' -type f -delete
+#find . -name '*.o' -type f -delete

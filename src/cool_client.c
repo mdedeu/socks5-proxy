@@ -4,7 +4,7 @@ struct cool_client * init_cool_client_connection(int fd){
     struct cool_client  * new_client = calloc(1, sizeof (cool_client));
 //    if(new_client == NULL)
     new_client->client_fd = fd;
-    new_client->client_state_machine = init_proxy_state_machine();
+    new_client->client_state_machine = init_cool_state_machine();
     buffer * temp_write = calloc(1, sizeof (buffer));
     buffer_init(temp_write, BUFFER_SIZE, new_client->raw_write_buffer);
     new_client->write_buffer = temp_write;
