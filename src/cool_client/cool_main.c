@@ -10,7 +10,7 @@
 #define COOL_PORT 42069
 
 int main(){
-    uint8_t buff[100] = {1, 11, 's', 'c', 'a', 's', 't', 'a', 'g', 'n', 'i', 'n', 'o', 11, 's', 'c', 'a', 's', 't', 'a', 'g', 'n', 'i', 'n', 'o'};
+    uint8_t buff[100] = {1, 11, 's', 'c', 'a', 's', 't', 'a', 'g', 'n', 'i', 'n', 'i', 11, 's', 'c', 'a', 's', 't', 'a', 'g', 'n', 'i', 'n', 'o'};
     uint8_t buff_recv[100];
     
     int read_chars = 25;

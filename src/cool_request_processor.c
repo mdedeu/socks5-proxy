@@ -16,17 +16,20 @@ void process_cool_authentication_message(struct cool_protocol_authentication_mes
     //TODO: hace la comprarcion con un metodo del sistema de metricas
     bool valid_user = false;
     for(int i = 0; i < 10; i++){
-            if(strcmp(data->username, users[i].username) && strcmp(data->password, users[i].password))
+            if(!strcmp(data->username, users[i].username) && !strcmp(data->password, users[i].password))
                 valid_user = true;
     }
 
     cool_client * client_data = (cool_client * ) key->data;
-    buffer_write(client_data->write_buffer, VERSION);
 
-    if(valid_user)
-        buffer_write(client_data->write_buffer, VALID_USER);
-    else         //TODO: close the connection as the rfc said.
-        buffer_write(client_data->write_buffer, NO_VALID_USER);
+    if(valid_user){
+        buffer_write(client_data->write_buffer, 0xC0);
+        buffer_write(client_data->write_buffer, 0x01);
+    }
+    else{         //TODO: close the connection as the rfc said.
+        buffer_write(client_data->write_buffer, 0x4B);
+        buffer_write(client_data->write_buffer, 0x1D);
+    }
 }
 
 //TODO: para ver como se implementan los metodos haca falta ver si se necesita un buffer auxiliar
