@@ -2,7 +2,7 @@
 
 void sock_request_writing_arrival(unsigned state, struct selector_key * key){
     struct sock_client * client_information = (struct sock_client *) key->data;
-    generate_request_answer(client_information->current_parser.request_message, key);
+    generate_request_answer((struct sock_request_message * )client_information->parsed_message, key);
     selector_set_interest(key->s, client_information->client_fd, OP_WRITE);
 }
 

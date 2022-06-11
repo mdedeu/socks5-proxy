@@ -74,34 +74,32 @@ bool process_authentication_message(struct sock_authentication_message * data, s
 }
 
 void process_request_message(struct sock_request_message * data, struct selector_key * key){
-    if(data->cmd != CONNECT_COMMAND) //invalid command
+    if(key == NULL || key->data == NULL || data == NULL || data->cmd != CONNECT_COMMAND)
         return ;
 
     sock_client * client_information = (sock_client *) key->data;
     if(data->atyp == IPV4ADDRESS) {
-        struct sockaddr_in * addr = malloc(sizeof(struct sockaddr_in)) ;
 
-        addr->sin_addr.s_addr = *((uint32_t *) data->ipv4);
-        addr->sin_family = AF_INET;
-        addr->sin_port = data->port[0];
-        addr->sin_port <<= 8;
-        addr->sin_port += data->port[1];
-        addr->sin_port = htons(addr->sin_port);
-
-        client_information->origin_address = ((struct sockaddr_storage*) addr);
+        struct sockaddr_in * ipv4_address = malloc(sizeof(struct sockaddr_in)) ;
+        ipv4_address->sin_addr.s_addr = *((uint32_t *) data->ipv4);
+        ipv4_address->sin_family = AF_INET;
+        ipv4_address->sin_port = data->port[0];
+        ipv4_address->sin_port <<= 8;
+        ipv4_address->sin_port += data->port[1];
+        ipv4_address->sin_port = htons(ipv4_address->sin_port);
+        client_information->origin_address = ((struct sockaddr_storage*) ipv4_address);
         client_information -> origin_address_length = IPV4SIZE ;
 
     }else if(data->atyp == IPV6ADDRESS){
-        struct sockaddr_in6 * addr = malloc(sizeof(struct sockaddr_in6));
 
-        memcpy(addr->sin6_addr.__in6_u.__u6_addr8, data->ipv6, IPV6SIZE);
-        addr->sin6_family = AF_INET6;
-        addr->sin6_port = data->port[0];
-        addr->sin6_port <<= 8;
-        addr->sin6_port += data->port[1];
-        addr->sin6_port = htons(addr->sin6_port);
-
-        client_information->origin_address = ((struct sockaddr_storage*) addr);
+        struct sockaddr_in6 * ipv6_address = malloc(sizeof(struct sockaddr_in6));
+        memcpy(ipv6_address->sin6_addr.__in6_u.__u6_addr8, data->ipv6, IPV6SIZE);
+        ipv6_address->sin6_family = AF_INET6;
+        ipv6_address->sin6_port = data->port[0];
+        ipv6_address->sin6_port <<= 8;
+        ipv6_address->sin6_port += data->port[1];
+        ipv6_address->sin6_port = htons(ipv6_address->sin6_port);
+        client_information->origin_address = ((struct sockaddr_storage*) ipv6_address);
         client_information-> origin_address_length = IPV6SIZE ;
     }
 

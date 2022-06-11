@@ -33,6 +33,7 @@
 #include "domain_connecting.h"
 #include "address_connecting.h"
 #include "sock_request_writing.h"
+#include "sock_negative_request_writing.h"
 #include "connected.h"
 #include "closing_connection.h"
 
@@ -48,8 +49,19 @@ enum client_state{
     DOMAIN_CONNECTING,
     ADDRESS_CONNECTING,
     SOCK_REQUEST_WRITING,
+    SOCK_NEGATIVE_REQUEST_WRITING,
     CONNECTED,
     CLOSING_CONNECTION
+};
+
+enum socks_response_status{
+    status_succeeded,
+    status_general_socks_server_failure,
+    status_network_unreachable,
+    status_host_unreachable,
+    status_connection_refused,
+    status_ttl_expired,
+    status_command_not_supported
 };
 
 

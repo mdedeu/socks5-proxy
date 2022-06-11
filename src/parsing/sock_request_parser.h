@@ -25,10 +25,7 @@ struct sock_request_message{
     uint8_t ipv4_character_read;
     uint8_t ipv6_character_read;
     uint8_t  port_character_read;
-//    struct parser * using_parser;
-    //reply fields
-//    uint8_t raw_buffer [1024];
-//    buffer * answer_buffer;
+    uint8_t  connection_result;
 };
 
 struct parser * init_sock_request_parser();
