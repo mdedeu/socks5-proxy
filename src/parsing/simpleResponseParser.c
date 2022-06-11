@@ -12,12 +12,12 @@ enum states_and_events{
     ERROR_FOUND_EVENT
 };
 
-void check_version(struct parser_event * event, uint8_t c){
+static void check_version(struct parser_event * event, uint8_t c){
     event->type = VERSION_READ_EVENT;
     event->data[0]=c;
     event->n=1;
 }
-void check_response(struct parser_event * event, uint8_t c){
+static void check_response(struct parser_event * event, uint8_t c){
     event->type = RESPONSE_READ_EVENT;
     event->data[0]=c;
     event->n=1;
