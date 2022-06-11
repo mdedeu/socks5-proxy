@@ -5,7 +5,7 @@ struct user_info{
     char password[30];
 };
 
-struct user_info users[10]={
+struct user_info users[]={
         {.username="shadad", .password="shadad"},
         {.username="mdedeu", .password="mdedeu"},
         {.username="scastagnino", .password="scastagnino"},
@@ -60,8 +60,10 @@ bool process_authentication_message(struct sock_authentication_message * data, s
 
     bool valid_user = false;
     for(int i = 0; users != NULL && i < N(users) ; i++){
-        if(strcmp(data->username, users[i].username)==0 && 0==strcmp(data->password, users[i].password))
+        if(strcmp(data->username, users[i].username)==0 && 0==strcmp(data->password, users[i].password)){
             valid_user = true;
+            break;
+        }
     }
 
     buffer_write(client_data->write_buffer, CURRENT_SOCK_VERSION);
