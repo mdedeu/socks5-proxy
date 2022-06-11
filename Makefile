@@ -8,6 +8,7 @@ SRC_DIR= src
 STATE_DIR= $(SRC_DIR)/state
 COOL_STATES_DIR= $(STATE_DIR)/cool_states
 PARSE_DIR= $(SRC_DIR)/parsing
+COOL_PARSE_DIR= $(PARSE_DIR)/cool_client_parsing
 
 EXEC= server
 
@@ -16,6 +17,7 @@ SRC= $(wildcard $(SRC_DIR)/*.c)
 SRC+= $(wildcard $(PARSE_DIR)/*.c)
 SRC+= $(wildcard $(STATE_DIR)/*.c)
 SRC+= $(wildcard $(COOL_STATES_DIR)/*.c)
+SRC+= $(wildcard $(COOL_PARSE_DIR)/*.c)
 
 OBJ= $(patsubst %.c, %.o, $(SRC))
 

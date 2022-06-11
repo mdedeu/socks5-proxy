@@ -8,8 +8,8 @@
 #define N(x) (sizeof(x)/sizeof((x)[0]))
 
 struct simple_response_message{
-    uint8_t version;
-    uint8_t response;
+    uint8_t status[2];
+    uint8_t status_bytes_read;
     struct parser * using_parser;
 };
 
