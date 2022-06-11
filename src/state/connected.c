@@ -1,13 +1,15 @@
 #include "connected.h"
 
 void connected_on_arrival(unsigned state, struct selector_key * key){
+//    if(key== NULL || key->data ==NULL)
+//        return ;
     struct sock_client * client_information = (struct sock_client *) key->data;
+
+//    if(client_information->write_buffer ==NULL && client_information->read_buffer ==NULL )
+//        return;
 
     buffer_reset(client_information->write_buffer);
     buffer_reset(client_information->read_buffer);
-
-//    close_sock_request_parser(client_information->current_parser.request_message);
-
     selector_set_interest(key->s,client_information->client_fd, OP_READ);
     selector_set_interest(key->s,client_information->origin_fd, OP_READ);
 }
@@ -29,8 +31,8 @@ unsigned connected_read_handler(struct selector_key * key){
     uint8_t * writing_direction = buffer_write_ptr(current_buffer, &available_write);
     ssize_t read_amount = recv(key->fd, writing_direction, available_write, MSG_DONTWAIT);
 
-    if(!read_amount){
-        return CLOSING_CONNECTION;
+    if(read_amount <= 0 ){
+        return CLOSING_CONNECTION;  //DO NOT CLOSE, STH SHOULD BE SENT
     }
 
     buffer_write_adv(current_buffer, read_amount);

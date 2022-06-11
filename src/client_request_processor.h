@@ -18,7 +18,7 @@
 
 
 #define USERNAME_AUTHENTICATION 2
-#define VERSION 5
+#define CURRENT_SOCK_VERSION 5
 #define NON_METHODS_ACCEPTED 255
 #define VALID_USER 0
 #define NO_VALID_USER 1
@@ -28,11 +28,12 @@
 #define CONNECT_COMMAND 1
 #define HOST_UNREACHABLE 4
 #define SUCCEEDED 0
+#define SUBNEGOTIATION_CURRENT_VERSION 1
 
 
 
-void process_hello_message(struct sock_hello_message * data, struct selector_key * key);
-void process_authentication_message(struct sock_authentication_message * data, struct selector_key * key);
+bool process_hello_message(struct sock_hello_message * data, struct selector_key * key);
+bool process_authentication_message(struct sock_authentication_message * data, struct selector_key * key);
 void process_request_message(struct sock_request_message  * data, struct selector_key * key);
 void generate_request_answer(struct sock_request_message * data ,struct  selector_key * key);
 

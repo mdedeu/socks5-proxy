@@ -2,7 +2,8 @@
 
 
 void  closing_connection_on_departure(const unsigned state ,struct selector_key * key){
-    close(key->fd);
+    if(key->fd > 0 )
+        close(key->fd);
 }
 
 void closing_connection_on_arrival(const unsigned state ,struct selector_key * key ){
