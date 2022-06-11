@@ -31,7 +31,8 @@ void * request_resolving_blocking(void * data){
         buff,
         &hints,
         &sock_client_information->origin_resolutions
-    );
+    ) ;
+
 
     selector_notify_block(key->s, key->fd);
     free(data);

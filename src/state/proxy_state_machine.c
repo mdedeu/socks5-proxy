@@ -4,8 +4,8 @@ static const struct state_definition sock_hello_reading_state= {.state=SOCK_HELL
 static const struct state_definition sock_hello_writing_state = {.state=SOCK_HELLO_WRITING, .on_arrival=sock_hello_writing_on_arrival,.on_write_ready=sock_hello_write_handler,.on_departure=sock_hello_writing_on_departure};
 static const struct state_definition authenticate_reading_state = {.state=SOCK_AUTHENTICATE_READING, .on_arrival=authenticate_reading_arrival,.on_read_ready=authenticate_read_handler,.on_departure=authenticate_reading_departure};
 static const struct state_definition authenticate_writing_state= {.state=SOCK_AUTHENTICATE_WRITING, .on_arrival = authenticate_writing_arrival,.on_write_ready=authenticate_write_handler,.on_departure=authenticate_writing_departure};
-static const struct state_definition sock_request_reading = {.state=SOCK_REQUEST_READING, .on_arrival=request_reading_arrival,.on_read_ready=request_reading_read_handler,.on_departure=request_reading_departure};
-static const struct state_definition resolving_host_address = {.state=RESOLVING_HOST_ADDRESS, .on_arrival=resolving_host_address_arrival,.on_block_ready=resolving_host_address_block};
+static const struct state_definition sock_request_reading = {.state=SOCK_REQUEST_READING, .on_arrival=request_reading_arrival,.on_read_ready=request_reading_read_handler,.on_block_ready=request_reading_block_handler,.on_departure=request_reading_departure};
+//static const struct state_definition resolving_host_address = {.state=RESOLVING_HOST_ADDRESS, .on_arrival=resolving_host_address_arrival,.on_block_ready=resolving_host_address_block};
 static const struct state_definition domain_connecting = {.state=DOMAIN_CONNECTING, .on_arrival=domain_connecting_arrival,.on_write_ready=domain_connecting_write_handler};
 static const struct state_definition address_connecting = {.state=ADDRESS_CONNECTING,.on_write_ready=address_connecting_write_handler};
 static const struct state_definition sock_request_writing = {.state=SOCK_REQUEST_WRITING, .on_write_ready=sock_request_writing_write_handler,.on_arrival=sock_request_writing_arrival,.on_departure=sock_request_writing_departure};
@@ -19,7 +19,7 @@ static const struct state_definition states[] = {
         authenticate_reading_state,
         authenticate_writing_state,
         sock_request_reading,
-        resolving_host_address,
+//        resolving_host_address,
         domain_connecting,
         address_connecting,
         sock_request_writing,
