@@ -13,6 +13,7 @@ static struct user_info users[10]={
 };
 
 void process_cool_authentication_message(struct cool_protocol_authentication_message * data, struct selector_key * key){
+    //TODO: hace la comprarcion con un metodo del sistema de metricas
     bool valid_user = false;
     for(int i = 0; i < 10; i++){
             if(strcmp(data->username, users[i].username) && strcmp(data->password, users[i].password))
