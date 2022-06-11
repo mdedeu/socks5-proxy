@@ -9,6 +9,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include "dns_query.h"
+#include "metrics.h"
 
 #include "parsing/parserCoolProtocolAuth.h"
 #include "parsing/cool_request_parser.h"
@@ -25,9 +26,6 @@
 #define CONNECT_COMMAND 1
 #define HOST_UNREACHABLE 4
 #define SUCCEEDED 0
-
-#define MODIFY 0xBE
-#define QUERY 0xD0
 
 #define ADD_USER 0
 #define REMOVE_USER 1

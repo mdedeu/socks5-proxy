@@ -1,11 +1,11 @@
-#ifndef COOL_REQUEST_PARSER
-#define COOL_REQUEST_PARSER
+#ifndef COOL_REQUEST_PARSER_H
+#define COOL_REQUEST_PARSER_H
 
 #include "parser.h"
 #include <stdlib.h>
 #include <stdio.h>
-#define QUERY 208
-#define MODIFY 190
+#define QUERY 0xD0
+#define MODIFY 0xBE
 #define N(x) (sizeof(x)/sizeof((x)[0]))
 
 struct general_request_message {

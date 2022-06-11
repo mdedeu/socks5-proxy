@@ -31,6 +31,7 @@ void process_cool_authentication_message(struct cool_protocol_authentication_mes
 //TODO: para ver como se implementan los metodos haca falta ver si se necesita un buffer auxiliar
 void process_cool_request_message(struct general_request_message * data, struct selector_key * key){
     cool_client * client_data = (cool_client * ) key->data;
+    uint64_t result;
 
     buffer_write(client_data->write_buffer, data->action);
     buffer_write(client_data->write_buffer, data->method);
@@ -40,7 +41,7 @@ void process_cool_request_message(struct general_request_message * data, struct 
             buffer_write(client_data->write_buffer, 1);
             switch(data->method){
             case ADD_USER:
-                buffer_write(client_data->write_buffer, (data->ulen, data->username, data->plen, data->password));
+                buffer_write(client_data->write_buffer, add_user_handler(data->ulen, data->username, data->plen, data->password));
                 break;
             case REMOVE_USER:
                 buffer_write(client_data->write_buffer, remove_user_handler(data->ulen, data->username));
@@ -54,25 +55,24 @@ void process_cool_request_message(struct general_request_message * data, struct 
             }
             break;
         case QUERY:
-            uint64_t result;
             switch(data->method){
             case TOTAL_CONNECTIONS:
-                result = total_connections_handler();
+                result = get_total_connections();
                 break;
             case CURRENT_CONNECTIONS:
-                result = current_connections_handler();
+                result = get_current_connections();
                 break;
             case MAX_CURRENT_CONNECTIONS:
-                result = max_current_connections_handler();
+                result = get_max_current_connections();
                 break;
             case TOTAL_BYTES_SENT:
-                result = total_bytes_sent_handler();
+                result = get_total_bytes_sent();
                 break;
             case TOTAL_BYTES_RECV:
-                result = total_bytes_recv_handler();
+                result = get_total_bytes_recv();
                 break;
             case CONNECTED_USERS:
-                result = connected_users_handler();
+                result = get_connected_users();
                 break;
             }
             buffer_write(client_data->write_buffer, 8);
@@ -80,46 +80,4 @@ void process_cool_request_message(struct general_request_message * data, struct 
                 buffer_write(client_data->write_buffer, (result >> i*8) & 255);
             break;
     }
-}
-
-
-static uint8_t add_user_handler(uint8_t ulen, char * username, uint8_t plen, char * password){
-    return 255;
-}
-
-static uint8_t remove_user_handler(uint8_t ulen, char * username){
-    return 255;
-}
-
-static uint8_t enable_spoofing_handler(uint8_t protocol){
-    return 255;
-}
-
-static uint8_t disable_spoofing_handler(uint8_t protocol){
-    return 255;
-
-}
-
-static uint64_t total_connections_handler(){
-    return 255;
-}
-
-static uint64_t current_connections_handler(){
-    return 255;
-}
-
-static uint64_t max_current_connections_handler(){
-    return 255;
-}
-
-static uint64_t total_bytes_sent_handler(){
-    return 255;
-}
-
-static uint64_t total_bytes_recv_handler(){
-    return 255;
-}
-
-static uint64_t connected_users_handler(){
-    return 255;
 }
