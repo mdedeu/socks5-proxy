@@ -8,6 +8,8 @@
 #define N(x) (sizeof(x)/sizeof((x)[0]))
 #define BUFFER_SIZE 512
 
+
+
 struct pop3_data_message{
     uint8_t data_characters_read;
     char data[BUFFER_SIZE];
@@ -18,7 +20,7 @@ struct pop3_data_message{
     bool connected;
 };
 
-struct pop3_data_message * init_pop3_data_parser();
+struct pop3_data_message * init_pop3_data_parser(char * prefix_received,ssize_t prefix_received_length);
 bool feed_pop3_data_parser(struct pop3_data_message * sock_data, char * input,int input_size);
 void close_pop3_data_parser(struct pop3_data_message *  current_data);
 

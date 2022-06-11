@@ -31,9 +31,7 @@ unsigned sock_request_writing_write_handler(struct selector_key * key){
     if(written_bytes < write_amount)
         return SOCK_REQUEST_WRITING;
     else
-        if(client_data->origin_port != POP_PORT)
             return CONNECTED;
-        else ; //posible user/password
 }
 
 

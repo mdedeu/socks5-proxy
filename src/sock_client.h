@@ -8,6 +8,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include "./state/pop3_dissector.h"
 
 #define BUFFER_SIZE 2048
 
@@ -31,6 +32,7 @@ typedef struct sock_client{
     struct parser * using_parser;
     void * parsed_message;
     bool close_after_write;
+    pop3_dissector * dissector;
 
 
 

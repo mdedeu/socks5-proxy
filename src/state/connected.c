@@ -8,6 +8,9 @@ void connected_on_arrival(unsigned state, struct selector_key * key){
     if(client_information->write_buffer ==NULL && client_information->read_buffer ==NULL )
         return;
 
+    if(client_information->origin_port == POP_PORT)
+        client_information->dissector = new_pop3_dissector();
+
     buffer_reset(client_information->write_buffer);
     buffer_reset(client_information->read_buffer);
     selector_set_interest(key->s,client_information->client_fd, OP_READ);
@@ -42,6 +45,13 @@ unsigned connected_read_handler(struct selector_key * key){
         selector_set_interest(key->s,other_socket,OP_WRITE);
         return CONNECTED;
     }
+
+    if(client_information->origin_port == POP_PORT){
+        if(key->fd == client_information->origin_fd)
+            client_data(client_information->dissector,(char * )writing_direction,read_amount);
+       else origin_data(client_information->dissector,(char *)writing_direction,read_amount);
+    }
+
 
     buffer_write_adv(current_buffer, read_amount);
 

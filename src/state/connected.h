@@ -2,6 +2,7 @@
 #define CONNECTED_H
 
 #include "proxy_state_machine.h"
+#include "pop3_dissector.h"
 
 void connected_on_arrival(unsigned  state , struct selector_key * key);
 unsigned  connected_read_handler(struct  selector_key * key);

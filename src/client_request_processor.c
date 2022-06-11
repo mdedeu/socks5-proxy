@@ -133,7 +133,7 @@ void generate_positive_request_answer(struct sock_request_message * data, struct
         struct sockaddr_in client_info_ipv4 = *((struct sockaddr_in *) &address_info);
         memcpy(writing_direction, &client_info_ipv4.sin_addr.s_addr, IPV4SIZE);
         buffer_write_adv(answer_buffer, IPV4SIZE);
-        client_information->origin_port = client_info_ipv4.sin_port;
+        client_information->origin_port = ntohs(client_info_ipv4.sin_port);
         port_pointer = (uint8_t * ) &client_info_ipv4.sin_port;
 
     }else{
@@ -142,7 +142,7 @@ void generate_positive_request_answer(struct sock_request_message * data, struct
         struct sockaddr_in6 client_info_ipv6 = *((struct sockaddr_in6 *) &address_info);
         memcpy(writing_direction, client_info_ipv6.sin6_addr.__in6_u.__u6_addr8, IPV6SIZE);
         buffer_write_adv(answer_buffer, IPV6SIZE);
-        client_information->origin_port = client_info_ipv6.sin6_port;
+        client_information->origin_port = ntohs(client_info_ipv6.sin6_port);
         port_pointer = (uint8_t * ) &client_info_ipv6.sin6_port;
 
     }

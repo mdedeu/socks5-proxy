@@ -16,7 +16,7 @@ struct pop3_connected_message{
     bool connected;
 };
 
-struct pop3_connected_message * init_pop3_connected_parser();
+struct pop3_connected_message * init_pop3_connected_parser(char * prefix,size_t prefix_length);
 bool feed_pop3_connected_parser(struct pop3_connected_message * sock_data, char * input,int input_size);
 void close_pop3_connected_parser(struct pop3_connected_message *  current_data);
 

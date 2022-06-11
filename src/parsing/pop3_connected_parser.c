@@ -68,12 +68,13 @@ static struct parser_definition pop3_parser_definition={
 };
 
 
-struct pop3_connected_message * init_pop3_connected_parser(){
+struct pop3_connected_message * init_pop3_connected_parser(char * prefix,size_t prefix_length){
     struct pop3_connected_message * new_pop3_connected_message = malloc(sizeof (struct pop3_connected_message));
     struct parser * pop3_connected_parser = parser_init(parser_no_classes(),&pop3_parser_definition);
     new_pop3_connected_message->using_parser = pop3_connected_parser;
     new_pop3_connected_message->check_characters_read=0;
     new_pop3_connected_message->connected = true;
+    memcpy(new_pop3_connected_message->prefix,prefix,prefix_length);
     return new_pop3_connected_message;
 }
 
