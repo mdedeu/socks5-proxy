@@ -113,8 +113,8 @@ void close_pop3_connected_parser(struct pop3_connected_message * current_data){
 //OK OP me llamo salvador\r\n
 //  int main(){
 //       struct pop3_connected_message * testMessage = init_pop3_connected_parser();
-//       testMessage->prefix_len = 3;
-//       memcpy(testMessage->prefix,"+OK",8);
+//       testMessage->prefix_len = 7;
+//       memcpy(testMessage->prefix,"+OK POP",8);
 //       bool finished;
 
 //       finished = feed_pop3_connected_parser(testMessage, "+OK m llam\rbbb\rbbb\n", 19);

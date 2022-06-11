@@ -9,6 +9,7 @@
 #include <netinet/in.h>
 #include "selector.h"
 #include "sock_client.h"
+#include "cool_client.h"
 #include "general_handlers.h"
 #include "cool_handlers.h"
 #include "parsing/sock_request_parser.h"
@@ -18,9 +19,11 @@
 
 #define MAX_PENDING_CONNECTIONS 500
 #define OTHER_PORT 9090
+#define COOL_PORT 42069
 #define TRUE 1
 #define RW_AMOUNT 30
 #define SOCKS_PASSIVE_SOCKET_SIZE 2
+#define SOCKS_COOL_PASSIVE_SOCKET_SIZE 1
 #define DEFAULT_SOCK_PORT 1080
 
 static bool done = false;
@@ -34,6 +37,7 @@ sigterm_handler(const int signal) {
 
 
 void tcpConnectionHandler(struct selector_key *key);
+void coolTcpConnectionHandler(struct selector_key *key);
 
 
 fd_handler passive_handlers = {
@@ -50,7 +54,14 @@ fd_handler active_handlers = {
     .handle_close = &socks5_close
 };
 
-fd_handler cool_handlers = {
+fd_handler cool_passive_handlers = {
+        .handle_read = &coolTcpConnectionHandler,
+        .handle_write = NULL,
+        .handle_block = NULL,
+        .handle_close = NULL
+};
+
+fd_handler cool_active_handlers = {
     .handle_read = &cool_read,
     .handle_write = &cool_write,
     .handle_block = &cool_block,
@@ -59,7 +70,6 @@ fd_handler cool_handlers = {
 
 
 void tcpConnectionHandler(struct selector_key *key){
-
     struct sockaddr  new_client_information;
     socklen_t  new_client_information_size =  sizeof(new_client_information);
 
@@ -68,6 +78,18 @@ void tcpConnectionHandler(struct selector_key *key){
         struct sock_client * new_client_data = init_new_client_connection(new_client_fd);
         if(new_client_data != NULL)
             selector_register(key->s, new_client_fd, &active_handlers, OP_READ, new_client_data);
+    }
+}
+
+void coolTcpConnectionHandler(struct selector_key *key){
+    struct sockaddr  new_client_information;
+    socklen_t  new_client_information_size =  sizeof(new_client_information);
+
+    int new_client_fd = accept(key->fd,  &new_client_information, &new_client_information_size);
+    if(new_client_fd > 0 ){
+        struct cool_client * new_client_data = init_cool_client_connection(new_client_fd);
+        if(new_client_data != NULL)
+            selector_register(key->s, new_client_fd, &cool_active_handlers, OP_READ, new_client_data);
     }
 }
 
@@ -104,7 +126,11 @@ int main(const int argc, const char **argv){
 
 
     int master_socket[SOCKS_PASSIVE_SOCKET_SIZE];
+    int cool_master_socket[SOCKS_COOL_PASSIVE_SOCKET_SIZE];
     int current_sock_passive_socket=0;
+    int current_sock_cool_passive_socket=0;
+
+    //=========================IPV4=================================
     
     struct sockaddr_in server_address_4;
     memset(&server_address_4, 0, sizeof(server_address_4));
@@ -139,7 +165,8 @@ int main(const int argc, const char **argv){
         goto finally;
     }
     current_sock_passive_socket++;
-
+    
+    //=========================IPV6=================================
 
 	if ((master_socket[current_sock_passive_socket] = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP)) < 0)
 	{
@@ -148,40 +175,71 @@ int main(const int argc, const char **argv){
 	}
     setsockopt(master_socket[current_sock_passive_socket], SOL_SOCKET, SO_REUSEADDR, (char *) &opt, sizeof(opt));
 
-        struct sockaddr_in6 server_address_6;
-        memset(&server_address_6, 0, sizeof(server_address_6));
-		server_address_6.sin6_family = AF_INET6;
-		server_address_6.sin6_port = htons(port);
-        inet_pton(AF_INET6, "::1", &server_address_6.sin6_addr);
+    struct sockaddr_in6 server_address_6;
+    memset(&server_address_6, 0, sizeof(server_address_6));
+	server_address_6.sin6_family = AF_INET6;
+	server_address_6.sin6_port = htons(port);
+    inet_pton(AF_INET6, "::1", &server_address_6.sin6_addr);
 
-		if (bind(master_socket[current_sock_passive_socket], (struct sockaddr *) &server_address_6, sizeof(server_address_6)) < 0)
+	if (bind(master_socket[current_sock_passive_socket], (struct sockaddr *) &server_address_6, sizeof(server_address_6)) < 0)
+	{
+        err_msg = "unable to bind  for ipv6";
+        goto finally;
+	}
+
+    if (listen(master_socket[current_sock_passive_socket], MAX_PENDING_CONNECTIONS) < 0)
 		{
-            err_msg = "unable to bind  for ipv6";
+            err_msg = "unable to listen  for ipv6";
             goto finally;
 		}
 
-        if (listen(master_socket[current_sock_passive_socket], MAX_PENDING_CONNECTIONS) < 0)
-			{
-                err_msg = "unable to listen  for ipv6";
-                goto finally;
-			}
+    if(selector_fd_set_nio(master_socket[current_sock_passive_socket]) == -1) {
+        err_msg = "getting server socket flags";
+        goto finally;
+    }
+    current_sock_passive_socket++;
 
-        if(selector_fd_set_nio(master_socket[current_sock_passive_socket]) == -1) {
-            err_msg = "getting server socket flags";
+    //=======================COOL_IPV4==============================
+
+    memset(&server_address_4, 0, sizeof(server_address_4));
+    server_address_4.sin_family      = AF_INET;
+    server_address_4.sin_addr.s_addr = htonl(INADDR_ANY);
+    server_address_4.sin_port        = htons(COOL_PORT);
+
+    if( (cool_master_socket[current_sock_cool_passive_socket] = socket(AF_INET , SOCK_STREAM , IPPROTO_TCP)) < 0)
+    {
+        err_msg = "unable to create socket for ipv4";
+        goto finally;
+    }
+
+    setsockopt(cool_master_socket[current_sock_cool_passive_socket], SOL_SOCKET, SO_REUSEADDR, (char *)&opt, sizeof(opt)) ;
+    fprintf(stdout, "Listening on TCP port %d\n", COOL_PORT);
+
+
+    if (bind(cool_master_socket[current_sock_cool_passive_socket], (struct sockaddr *)&server_address_4, sizeof(server_address_4))<0)
+        {
+            err_msg = "unable to bind socket for ipv4";
             goto finally;
         }
-        current_sock_passive_socket++;
 
+    if (listen(cool_master_socket[0], MAX_PENDING_CONNECTIONS) < 0){
+        err_msg = "unable to listen for ipv4";
+        goto finally;
+    }
 
-
-
-        const struct selector_init conf = {
-            .signal = SIGALRM,
-            .select_timeout = {
-                    .tv_sec  = 10,
-                    .tv_nsec = 0,
-            },
-        };
+    if(selector_fd_set_nio(cool_master_socket[current_sock_cool_passive_socket]) == -1) {
+        err_msg = "getting server socket flags";
+        goto finally;
+    }
+    current_sock_cool_passive_socket++;
+    
+    const struct selector_init conf = {
+        .signal = SIGALRM,
+        .select_timeout = {
+                .tv_sec  = 10,
+                .tv_nsec = 0,
+        },
+    };
 
     if(0 != selector_init(&conf)) {
         err_msg = "initializing selector";
@@ -196,6 +254,14 @@ int main(const int argc, const char **argv){
 
     for(int i = 0 ; i < N(master_socket) ; i++){
         selector_status_returned = selector_register(selector, master_socket[i], &passive_handlers, OP_READ, NULL);
+        if(SELECTOR_SUCCESS != selector_status_returned ){
+            err_msg = "registering fd";
+            goto finally;
+        }
+    }
+
+    for(int i = 0 ; i < N(cool_master_socket) ; i++){
+        selector_status_returned = selector_register(selector, cool_master_socket[i], &cool_passive_handlers, OP_READ, NULL);
         if(SELECTOR_SUCCESS != selector_status_returned ){
             err_msg = "registering fd";
             goto finally;
@@ -236,6 +302,11 @@ finally:
         for(int i = 0  ;i < N(master_socket); i++){
             if(master_socket[i] > 0 )
                 close(master_socket[i]);
+        }
+
+        for(int i = 0; i < N(cool_master_socket); i++){
+            if(cool_master_socket[i] > 0 )
+                close(cool_master_socket[i]);
         }
 
         return ret;
