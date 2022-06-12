@@ -7,11 +7,15 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <signal.h>
+#include "../parsing/cool_client_parsing/simpleResponseParser.h"
+#include "../parsing/cool_client_parsing/generalResponseParser.h"
+
 #define COOL_PORT 42069
+#define RECV_BUFFER_SIZE 512
 
 int main(){
     uint8_t buff[100] = {1, 11, 's', 'c', 'a', 's', 't', 'a', 'g', 'n', 'i', 'n', 'i', 11, 's', 'c', 'a', 's', 't', 'a', 'g', 'n', 'i', 'n', 'o'};
-    uint8_t buff_recv[100];
+    uint8_t buff_recv[RECV_BUFFER_SIZE];
     
     int read_chars = 25;
     int ret;
@@ -29,38 +33,37 @@ int main(){
     server_address_4.sin_port        = htons(COOL_PORT);
 
     ret = connect(sock_fd, (struct sockaddr *) &server_address_4, sizeof(server_address_4));
-    printf("Connect:%d\n", ret);
 
     ret = send(sock_fd, buff, read_chars, 0);
-    printf("Sent:%d\n", ret);
 
-    ret = recv(sock_fd, buff_recv, 2, 0);
-    printf("Received:%d\n", ret);
+    struct simple_response_message * simple_response = init_simple_response_parser();
 
-    for(int i = 0; i < 2; i++){
-        printf("%d", buff_recv[i]);
-        printf("|");
-    }
+    int read_amount;
+    do{
+        read_amount = recv(sock_fd, buff_recv, RECV_BUFFER_SIZE, 0);
+        if(read_amount < 0)
+            return -1;
+    } while(!feed_general_response_parser(simple_response, buff_recv, read_amount));
 
-    printf("\n==============================\n");
+    uint16_t returned_status = simple_response->status[0] << 8;
+    returned_status += simple_response->status[1];
+    
+    print_status(returned_status);
 
-    buff[0] = 0xD0;
-    buff[1] = 0x04;
+    close_simple_response_parser(simple_response);
 
-    ret = send(sock_fd, buff, 2, 0);
-    printf("Sent:%d\n", ret);
+    struct general_response_message * general_response = init_general_response_parser();
 
-    ret = recv(sock_fd, buff_recv, 4, 0);
-    printf("Received:%d\n", ret);
+    do{
+        read_amount = recv(sock_fd, buff_recv, RECV_BUFFER_SIZE, 0);
+        if(read_amount < 0)
+            return -1;
+    } while(!feed_general_response_parser(general_response, buff_recv, read_amount));
 
-    for(int i = 0; i < 4; i++){
-        printf("%d", buff_recv[i]);
-        printf("|");
-    }
+    print_response(general_response->action, general_response->method, general_response->response_length, general_response->response);
 
-    printf("\n");
+    close_general_response_parser(general_response);
 
     while(1){
     }
-
 }
