@@ -7,12 +7,12 @@
 #include <signal.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include "selector.h"
-#include "sock_client.h"
-#include "cool_client.h"
-#include "general_handlers.h"
-#include "cool_handlers.h"
-#include "parsing/sock_request_parser.h"
+#include "../selector.h"
+#include "../sock_client.h"
+#include "../cool_client.h"
+#include "../general_handlers.h"
+#include "../cool_handlers.h"
+#include "../parsing/sock_request_parser.h"
 #include <limits.h>
 
 
