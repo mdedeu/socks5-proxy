@@ -48,5 +48,6 @@ void destroy_sock_client(struct sock_client * sock_client){
     free(sock_client->write_buffer);
     free(sock_client->read_buffer);
     destroy_sock_state(sock_client->client_state_machine);
+    free(sock_client->client_information);
     free(sock_client);
 }
