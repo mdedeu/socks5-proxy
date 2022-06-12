@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <errno.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,10 +44,10 @@ static void print_status(uint16_t status);
 static void print_response(uint8_t action, uint8_t method, uint8_t response_length, char * response);
 
 int main(){
-    uint8_t username[CREDS_LEN], password[CREDS_LEN];
+    uint8_t username[CREDS_LEN] = {0}, password[CREDS_LEN] = {0};
     uint8_t action, method;
-    uint8_t parameters[PARAMS_LEN];
-    uint8_t  buff_recv[RECV_BUFFER_SIZE];
+    uint8_t parameters[PARAMS_LEN] = {0};
+    uint8_t  buff_recv[RECV_BUFFER_SIZE] = {0};
 
     int sock_fd = socket(AF_INET , SOCK_STREAM , 0);
 
@@ -61,8 +62,6 @@ int main(){
 
     if(connect(sock_fd, (struct sockaddr *) &server_address_4, sizeof(server_address_4)) < 0)
         return 1;
-
-    while(1){
 
     printf("\n~~~~~~~~~~~Authentication~~~~~~~~~~~\n");
 
@@ -84,14 +83,15 @@ int main(){
     
     print_status(returned_status);
 
+    close_simple_response_parser(simple_response);
+
+    while(1){
 
     printf("\n~~~~~~~~~~~Action & Method~~~~~~~~~~~\n");
 
     int param_len = ask_method_and_parameters(&action, &method, parameters);
 
     send_method_and_parameters(sock_fd, action, method, param_len, parameters);
-
-    close_simple_response_parser(simple_response);
 
     struct general_response_message * general_response = init_general_response_parser();
 
@@ -105,8 +105,8 @@ int main(){
 
     close_general_response_parser(general_response);
 
-    printf("\n=================================================\n\n");
-    printf("\n=================================================\n\n");
+    printf("\n=================================================\n");
+    printf("=================================================\n");
 
     }
 
@@ -114,18 +114,22 @@ int main(){
 }
 
 static int ask_method_and_parameters(uint8_t * action, uint8_t * method, uint8_t * parameters){
-    uint8_t action_str[4];
-    uint8_t method_str[4];
-    uint8_t len;
+    uint8_t action_str[6];
+    uint8_t method_str[6];
+    int len;
 
     printf("Action: ");
-    if(fgets((char *) action_str, CREDS_LEN, stdin) == 0)
+    fflush(stdout);
+    if(fgets((char *) action_str, 6, stdin) == 0)
         return -1;
+    action_str[4]=0;
     *action = strtol((char *) action_str, NULL, 0);
 
     printf("Method: ");
-    if(fgets((char *) method_str, CREDS_LEN, stdin) == 0)
+    fflush(stdout);
+    if(fgets((char *) method_str, 6, stdin) == 0)
         return -1;
+    method_str[4]=0;
     *method = strtol((char *) method_str, NULL, 0);
 
     if(*action == QUERY)
@@ -145,20 +149,20 @@ static int ask_parameters(uint8_t method, uint8_t * parameters){
             ulen = ask_username(parameters+1);
             if(ulen < 0)
                 return -1;
-            parameters[0] = ulen;
+            parameters[0] = (uint8_t) ulen;
             parameters += ulen+1;
 
             plen = ask_password(parameters+1);
             if(plen < 0)
                 return -1;
-            parameters[0] = plen;
+            parameters[0] = (uint8_t) plen;
             return ulen+plen+2;
 
         case REMOVE_USER:
             ulen = ask_username(parameters+1);
             if(ulen < 0)
                 return -1;
-            parameters[0] = ulen;
+            parameters[0] = (uint8_t) ulen;
             return ulen+1;
 
         case ENABLE_SPOOFING:
@@ -240,8 +244,9 @@ static int send_method_and_parameters(int sock_fd, uint8_t action, uint8_t metho
     if(send(sock_fd, &method, 1, 0) < 0)
         return -1;
 
-    if(send_array(sock_fd, param_len, parameters) < 0)
-        return -1;
+    if(param_len > 0)
+        if(send_array(sock_fd, param_len, parameters) < 0)
+            return -1;
 
     return 0;
 }
@@ -265,5 +270,5 @@ static void print_response(uint8_t action, uint8_t method, uint8_t response_leng
     printf("Action: %X\n", action);
     printf("Method: %X\n", method);
     *(response + response_length) = 0;
-    printf("Response: %s\n", response);
+    printf("Response: %d\n", response[0]);
 }

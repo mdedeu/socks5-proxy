@@ -95,9 +95,10 @@ void process_cool_request_message(struct general_request_message * data, struct 
                 buffer_write(client_data->write_buffer, 1);
             }
             else{
-                buffer_write(client_data->write_buffer, 8);
-                for(int i = 0; i < 7; i++)
-                    buffer_write(client_data->write_buffer, (result >> i*8) & 255);
+                buffer_write(client_data->write_buffer, 1);
+                //for(int i = 0; i < 7; i++)
+                //    buffer_write(client_data->write_buffer, (result >> i*8) & 255);
+                buffer_write(client_data->write_buffer, (uint8_t) (result & 255));
             }
             break;
         default:
