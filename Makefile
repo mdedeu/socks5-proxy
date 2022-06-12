@@ -11,7 +11,7 @@ PARSE_DIR= $(SRC_DIR)/parsing
 COOL_PARSE_DIR= $(PARSE_DIR)/cool_client_parsing
 #COOL_CLIENT_DIR= $(SRC_DIR)/cool_client
 
-EXEC= server
+EXEC= socks5d
 #EXEC= client
 
 #Si se agrega un directorio para compilar agregar un SRC+= al final de estas siguiendo el patron
