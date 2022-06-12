@@ -1,10 +1,6 @@
 #include "closing_connection.h"
 
 
-void  closing_connection_on_departure(const unsigned state ,struct selector_key * key){
-    if(key->fd > 0 )
-        close(key->fd);
-}
 
 void closing_connection_on_arrival(const unsigned state ,struct selector_key * key ){
     selector_unregister_fd(key->s,key->fd);
@@ -13,5 +9,10 @@ void closing_connection_on_arrival(const unsigned state ,struct selector_key * k
         selector_unregister_fd(key->s,client_information->client_fd);
     else
         selector_unregister_fd(key->s,client_information->origin_fd);
+
+    if(client_information->client_fd > 0 )
+        close(client_information->client_fd);
+    if(client_information->origin_fd > 0 )
+        close(client_information->origin_fd);
     destroy_sock_client(client_information);
 }

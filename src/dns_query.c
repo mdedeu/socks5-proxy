@@ -18,12 +18,12 @@ void * request_resolving_blocking(void * data){
         .ai_next = NULL,
     };
 
-    uint16_t  port;
+    uint16_t  port = 0 ;
     port = request_message->port[0];
     port <<= 8;
     port += request_message->port[1];
 
-    char buff[7];
+    char buff[16];
     snprintf(buff, sizeof (buff), "%d", port);
 
     getaddrinfo(
@@ -31,7 +31,8 @@ void * request_resolving_blocking(void * data){
         buff,
         &hints,
         &sock_client_information->origin_resolutions
-    );
+    ) ;
+
 
     selector_notify_block(key->s, key->fd);
     free(data);

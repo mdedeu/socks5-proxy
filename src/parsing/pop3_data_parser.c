@@ -45,7 +45,7 @@ static void handle_pop3_check_event(struct pop3_data_message * current_data, uin
 }
 
 static void handle_data_read_event(struct pop3_data_message * current_data, uint8_t c){
-    if(current_data->data_characters_read >= BUFFER_SIZE-1){
+    if(current_data->data_characters_read >= PARSER_BUFFER_SIZE-2){
         //TODO: mirar si aca habria que tirar un error o algo
         current_data->connected = false;
         current_data->using_parser->state = END;
@@ -60,7 +60,7 @@ static void handle_close_event(struct pop3_data_message * current_data, uint8_t 
         current_data->using_parser->state = END;
         return;
     }
-    if(current_data->data_characters_read >= BUFFER_SIZE-1){
+    if(current_data->data_characters_read >= PARSER_BUFFER_SIZE-1){
         //TODO: mirar si aca habria que tirar un error o algo
         current_data->connected = false;
         current_data->using_parser->state = END;
@@ -110,12 +110,15 @@ static struct parser_definition pop3_parser_definition={
 };
 
 
-struct pop3_data_message * init_pop3_data_parser(){
+struct pop3_data_message * init_pop3_data_parser(char * prefix_received,ssize_t prefix_received_length){
     struct pop3_data_message * new_pop3_data_message = malloc(sizeof (struct pop3_data_message));
     struct parser * pop3_data_parser = parser_init(parser_no_classes(),&pop3_parser_definition);
     new_pop3_data_message->using_parser = pop3_data_parser;
     new_pop3_data_message->data_characters_read = 0;
     new_pop3_data_message->connected = true;
+    new_pop3_data_message->check_characters_read = 0;
+    new_pop3_data_message->prefix_len = prefix_received_length;
+    memcpy(new_pop3_data_message->prefix, prefix_received,  prefix_received_length);
     return new_pop3_data_message;
 }
 
@@ -127,15 +130,15 @@ bool feed_pop3_data_parser(struct pop3_data_message * pop3_data ,char * input,in
         switch (current_event->type) {
             case POP3_CHECK_EVENT:
                 handle_pop3_check_event(pop3_data,current_character);
-                printf("CHECK = %c\n", current_character);
+//                printf("CHECK = %c\n", current_character);
                 break;
             case DATA_READ_EVENT:
                 handle_data_read_event(pop3_data,current_character);
-                printf("READ = %c\n", current_character);
+//                printf("READ = %c\n", current_character);
                 break;
             case CLOSE_EVENT:
                 handle_close_event(pop3_data,current_character);
-                printf("CLOSE = %c\n", current_character);
+//                printf("CLOSE = %c\n", current_character);
                 break;
             case END :
 //                end_parser_handler(pop3_data,current_character);
@@ -152,8 +155,11 @@ bool feed_pop3_data_parser(struct pop3_data_message * pop3_data ,char * input,in
 }
 
 void close_pop3_data_parser(struct pop3_data_message * current_data){
-    parser_destroy(current_data->using_parser);
-    free(current_data);
+    if(current_data!=NULL ){
+        if(current_data->using_parser != NULL)
+            parser_destroy(current_data->using_parser);
+        free(current_data);
+    }
 }
 
 // int main(){

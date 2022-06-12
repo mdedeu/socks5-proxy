@@ -3,6 +3,8 @@
 
 static bool try_connect( struct selector_key * key);
 static bool try_connection_aux(struct selector_key * key, struct sock_request_message * client_message, int domain , socklen_t address_length );
+static bool  create_resolution_thread( struct selector_key *key);
+
 
 void request_reading_arrival(const unsigned state , struct selector_key * key ){
     if(key!=NULL && key->data!=NULL){
@@ -45,8 +47,15 @@ unsigned request_reading_read_handler(struct selector_key *key){
         return SOCK_NEGATIVE_REQUEST_WRITING;
     }
 
-    if(received_message->atyp == DOMAIN_NAME)
-        return RESOLVING_HOST_ADDRESS;
+    if(received_message->atyp == DOMAIN_NAME){
+        if(create_resolution_thread(key))
+            return SOCK_REQUEST_READING;
+        else{
+            struct sock_request_message * message = (struct sock_request_message * )client_data->parsed_message;
+            message->connection_result = status_general_socks_server_failure;
+            return SOCK_NEGATIVE_REQUEST_WRITING;
+        }
+    }
     else if(received_message->atyp == IPV4ADDRESS || received_message->atyp == IPV6ADDRESS){
         if(try_connect(key))
             return ADDRESS_CONNECTING;
@@ -56,6 +65,18 @@ unsigned request_reading_read_handler(struct selector_key *key){
 
 }
 
+
+unsigned request_reading_block_handler(struct selector_key *key){
+    if(key==NULL || key->data == NULL )
+        return CLOSING_CONNECTION;
+    sock_client *client_data = (sock_client *) key->data;
+    if(client_data->origin_resolutions == NULL ){
+        struct sock_request_message * message = (struct sock_request_message * )client_data->parsed_message;
+        message->connection_result = status_general_socks_server_failure;
+        return SOCK_NEGATIVE_REQUEST_WRITING;
+    }
+    return DOMAIN_CONNECTING;
+}
 
 void request_reading_departure(const unsigned state , struct selector_key * key ){
     if(key!=NULL && key->data !=NULL){
@@ -98,6 +119,8 @@ static bool try_connection_aux(struct selector_key * key, struct sock_request_me
     }
 
     client_information->origin_fd = server_socket_fd;
+    if(client_information->origin_address == NULL )
+        return false;
     connect(server_socket_fd, (struct sockaddr *) (client_information->origin_address), address_length);
     switch (errno) {
         case ECONNREFUSED:
@@ -117,4 +140,16 @@ static bool try_connection_aux(struct selector_key * key, struct sock_request_me
             return false;
     }
     
+}
+
+
+static bool  create_resolution_thread( struct selector_key *key){
+    struct selector_key * thread_copy = malloc(sizeof(struct selector_key));
+    if(thread_copy == NULL )
+        return false;
+    memcpy(thread_copy, key, sizeof(struct selector_key));
+    pthread_t tid;
+   if(0!= pthread_create(&tid, 0, &request_resolving_blocking, thread_copy))
+       return false;
+   return true;
 }

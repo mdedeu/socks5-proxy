@@ -1,6 +1,5 @@
 #include "address_connecting.h"
 
-static enum socks_response_status errno_to_sock(const int e );
 
 unsigned address_connecting_write_handler(struct selector_key * key){
     if(key == NULL || key->data == NULL )
@@ -34,21 +33,6 @@ void address_connecting_departure(struct selector_key * key){
 }
 
 
-static enum socks_response_status errno_to_sock(const int e ){
-    switch(e){
-        case 0:
-            return status_succeeded;
-        case ECONNREFUSED:
-            return status_connection_refused;
-        case EHOSTUNREACH:
-            return status_host_unreachable;
-        case ENETUNREACH:
-            return status_network_unreachable;
-        case ETIMEDOUT:
-            return status_ttl_expired;
-        default:
-            return status_general_socks_server_failure;
-    }
-}
+
 
 

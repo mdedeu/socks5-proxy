@@ -25,10 +25,13 @@ unsigned sock_hello_write_handler(struct selector_key *key) {
     buffer_compact(client_data->write_buffer);
 
     if(written_bytes < write_amount)
-         return SOCK_HELLO_WRITING;
+        return SOCK_HELLO_WRITING;
     else if(client_data->close_after_write)
         return CLOSING_CONNECTION;
-    else return SOCK_AUTHENTICATE_READING;
+    else
+        if(AUTHENTICATION){
+            return SOCK_AUTHENTICATE_READING;
+        }else return SOCK_REQUEST_READING;
 }
 
 

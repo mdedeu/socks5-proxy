@@ -29,7 +29,7 @@ void sock_negative_request_writing_arrival(unsigned state, struct selector_key *
 unsigned sock_negative_request_write_handler(struct selector_key * key){
     if(key == NULL || key->data == NULL)
         return CLOSING_CONNECTION;
-    sock_client *client_data = (sock_client *) key->data;
+    sock_client * client_data = (sock_client *) key->data;
     buffer * writing_buffer = client_data->write_buffer;
     if(writing_buffer == NULL || !buffer_can_read(writing_buffer))
         return CLOSING_CONNECTION;
@@ -45,8 +45,16 @@ unsigned sock_negative_request_write_handler(struct selector_key * key){
 
     if(written_bytes < write_amount) // check if not connected
         return SOCK_NEGATIVE_REQUEST_WRITING;
-    else
+    else{
+        struct sock_request_message * message = (struct sock_request_message *  ) client_data->parsed_message;
+        char buff[32];
+        sockaddr_to_human(buff,32,(struct sockaddr *) client_data->client_information);
+        printf("Client : %s\t",buff);
+        sockaddr_to_human(buff,32,(struct sockaddr * )client_data->origin_address);
+        printf("Origin:%s\t",buff);
+        printf("status=%d\n",message->connection_result);
         return CLOSING_CONNECTION;
+    }
 }
 
 void sock_negative_request_writing_departure(unsigned state, struct selector_key * key) {

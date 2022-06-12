@@ -1,6 +1,7 @@
 #ifndef WRITING_REPLY_H
 #define WRITING_REPLY_H
 #include "proxy_state_machine.h"
+#include "../netutils.h"
 
 void sock_request_writing_arrival(unsigned state , struct selector_key * key );
 unsigned  sock_request_writing_write_handler(struct selector_key * key);

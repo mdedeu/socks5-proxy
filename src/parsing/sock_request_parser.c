@@ -219,7 +219,7 @@ static void handle_addr_atyp_read_event(struct parser * using_parser,struct sock
     else sock_data->atyp = 3;
 }
 static void handle_addrlen_read_event(struct sock_request_message * sock_data ,uint8_t current_character) {
-    sock_data->address = malloc(current_character);
+    sock_data->address = malloc(current_character + 1 ) ;
     sock_data->addrlen = current_character;
 }
 static void handle_ipv4_reading_event(struct parser * using_parser,struct sock_request_message * sock_data , uint8_t current_character){
@@ -237,8 +237,10 @@ static void handle_ipv6_reading_event(struct parser * using_parser,struct sock_r
 static void handle_addr_reading_event(struct parser * using_parser,struct sock_request_message * sock_data ,uint8_t current_character){
     sock_data->address[sock_data->addr_character_read] = current_character;
     sock_data->addr_character_read++;
-    if(sock_data->addr_character_read == sock_data->addrlen)
+    if(sock_data->addr_character_read == sock_data->addrlen){
+        sock_data->address[sock_data->addr_character_read]  = 0 ; 
         using_parser->state = PORT_READING;
+    }
 }
 static void handle_port_reading_event(struct parser * using_parser,struct sock_request_message * sock_data ,uint8_t current_character){
     if(sock_data->port_character_read == 0 ){
@@ -264,6 +266,7 @@ struct sock_request_message * init_sock_request_message(){
     new_sock_request_message->ipv6_character_read=0;
     new_sock_request_message->ipv4_character_read=0;
     new_sock_request_message->addr_character_read=0;
+    new_sock_request_message->connection_result = 0;
 //    new_sock_request_message->answer_buffer = malloc(sizeof (buffer));
 //    buffer_init(new_sock_request_message->answer_buffer,1024,new_sock_request_message->raw_buffer);
     return new_sock_request_message;
@@ -325,9 +328,12 @@ void close_sock_request_parser(struct parser * using_parser){
 
 
 void  close_sock_request_message(struct sock_request_message * message){
-    //ipv or addres, port
     free(message->port);
-//    free(message->answer_buffer);
+    if(message->atyp == 1)
+        free(message->ipv4);
+    else if(message->atyp == 4  )
+        free(message->ipv6);
+    else free(message->address);
     free(message);
 }
 

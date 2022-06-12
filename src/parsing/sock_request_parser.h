@@ -4,13 +4,9 @@
 #include <stdint.h>
 #include "parser.h"
 #include "../buffer.h"
-#include "../client_request_processor.h"
 #define IPV4SIZE 4
 #define IPV6SIZE 16
 #define N(x) (sizeof(x)/sizeof((x)[0]))
-
-
-
 
 struct sock_request_message{
     uint8_t  version;
