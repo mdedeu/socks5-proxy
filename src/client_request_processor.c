@@ -1,16 +1,5 @@
 #include "client_request_processor.h"
 
-struct user_info{
-    char username[30];
-    char password[30];
-};
-
-struct user_info users[]={
-        {.username="shadad", .password="shadad"},
-        {.username="mdedeu", .password="mdedeu"},
-        {.username="scastagnino", .password="scastagnino"},
-        {.username="gbeade", .password="gbeade"},
-};
 
 bool process_hello_message(struct sock_hello_message * data, struct selector_key * key){
     if(data==NULL || key == NULL || key->data ==NULL )
@@ -65,17 +54,16 @@ bool process_authentication_message(struct sock_authentication_message * data, s
     if(available_space < AUTHENTICATION_ANSWER_LENGTH)
         return false;
 
-    bool valid_user = false;
-    for(int i = 0; users != NULL && i < N(users) ; i++){
-        if(strcmp(data->username, users[i].username)==0 && 0==strcmp(data->password, users[i].password)){
-            valid_user = true;
-            break;
-        }
-    }
+    bool valid_user = connect_user((char *)data->username,(char * )data->password) ;
 
     buffer_write(client_data->write_buffer, CURRENT_SOCK_VERSION);
-    if(valid_user)
+    if(valid_user){
         buffer_write(client_data->write_buffer, VALID_USER);
+        client_data->username = malloc(data->username_length);
+        if(client_data->username ==NULL)
+            return false;
+        memcpy(client_data->username, data->username,data->username_length);
+    }
     else
         buffer_write(client_data->write_buffer, NO_VALID_USER);
     return valid_user; 

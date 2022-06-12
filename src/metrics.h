@@ -28,8 +28,8 @@ struct metrics{
 
 
 bool add_user_handler(uint8_t ulen, uint8_t * username, uint8_t plen, uint8_t * password);
-bool enable_spoofing_handler(uint8_t protocol);
-bool disable_spoofing_handler(uint8_t protocol);
+bool enable_spoofing_handler(/*uint8_t protocol*/);
+bool disable_spoofing_handler(/*uint8_t protocol*/);
 void increment_current_connections();
 void decrement_current_connections();
 bool clients_need_authentication();

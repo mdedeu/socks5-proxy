@@ -60,3 +60,23 @@ unsigned  errno_to_sock(const int e ){
             return status_general_socks_server_failure;
     }
 }
+
+void print_connection_data(struct selector_key *  key){
+    //just formatting time as ISO-8601
+    time_t seconds_from;
+    seconds_from= time(NULL);
+    struct tm * current_time =localtime(&seconds_from);
+    char time_buff[64];
+    strftime(time_buff, 64,"%Y-%m-%dT%H-%M-%SZ", current_time);
+
+    sock_client * client_data = (sock_client *) key->data;
+    struct sock_request_message * message = (struct sock_request_message *  ) client_data->parsed_message;
+
+    char buff[64] ;
+    sockaddr_to_human(buff,64,(struct sockaddr *) client_data->client_information);
+    printf("%s\t%s \t %s\t",time_buff,client_data->username==NULL?"unknown":client_data->username,buff);
+
+    sockaddr_to_human(buff,64,(struct sockaddr * )client_data->origin_address);
+    printf("%s\t",buff);
+    printf("status=%d\n",message->connection_result);
+}

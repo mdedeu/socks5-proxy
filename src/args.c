@@ -56,6 +56,7 @@ usage(const char *progname) {
             "   -P <conf port>   Puerto entrante conexiones configuracion\n"
             "   -u <name>:<pass> Usuario y contraseÃ±a de usuario que puede usar el proxy. Hasta 10.\n"
             "   -v               Imprime informaciÃ³n sobre la versiÃ³n versiÃ³n y termina.\n"
+            "   -N Disable password spoofing and authentication required"
             "\n",
             progname);
     exit(1);

@@ -105,10 +105,10 @@ int main(const int argc,  char **argv){
 
     /*initializing metrics.h*/
     port = received_args.socks_port;
-//    if(!received_args.disectors_enabled)
-//       disable_spoofing_handler();
+    if(!received_args.disectors_enabled)
+       disable_spoofing_handler();
 
-    set_clients_need_authentication(!received_args.disectors_enabled);
+    set_clients_need_authentication(received_args.disectors_enabled);
 
     for(int i = 0 ; i < 10 ; i ++){
         if(received_args.users[i].name != NULL && received_args.users[i].pass != NULL )

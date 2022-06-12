@@ -20,6 +20,7 @@ struct sock_client * init_new_client_connection(int fd,struct sockaddr * client_
         new_client->close_after_write = false;
         new_client->origin_resolutions = NULL ;
         new_client->current_origin_resolution = NULL;
+        new_client->username = NULL ;
 
         if(client_information->sa_family == AF_INET)
             new_client->client_information = malloc(sizeof (struct sockaddr_in));
@@ -45,6 +46,7 @@ struct sock_client * init_new_client_connection(int fd,struct sockaddr * client_
 void destroy_sock_client(struct sock_client * sock_client){
     if(sock_client->origin_resolutions != NULL)   freeaddrinfo(sock_client->origin_resolutions);
     else free(sock_client->origin_address);
+    if(sock_client->username != NULL) free(sock_client->username);
     free(sock_client->write_buffer);
     free(sock_client->read_buffer);
     destroy_sock_state(sock_client->client_state_machine);

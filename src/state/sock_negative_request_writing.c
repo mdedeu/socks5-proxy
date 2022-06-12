@@ -46,13 +46,7 @@ unsigned sock_negative_request_write_handler(struct selector_key * key){
     if(written_bytes < write_amount) // check if not connected
         return SOCK_NEGATIVE_REQUEST_WRITING;
     else{
-        struct sock_request_message * message = (struct sock_request_message *  ) client_data->parsed_message;
-        char buff[64];
-        sockaddr_to_human(buff,64,(struct sockaddr *) client_data->client_information);
-        printf("Client : %s\t",buff);
-        sockaddr_to_human(buff,64,(struct sockaddr * )client_data->origin_address);
-        printf("Origin:%s\t",buff);
-        printf("status=%d\n",message->connection_result);
+        print_connection_data(key);
         return CLOSING_CONNECTION;
     }
 }

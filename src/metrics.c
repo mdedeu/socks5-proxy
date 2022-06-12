@@ -58,7 +58,7 @@ bool remove_user_handler(uint8_t ulen, uint8_t * username){
     return false;
 }
 
-bool enable_spoofing_handler(uint8_t protocol){
+bool enable_spoofing_handler(/*uint8_t protocol*/){
     if(!volatile_metrics.password_dissector_enable) {
         volatile_metrics.password_dissector_enable = true;
         return  true;
@@ -66,7 +66,7 @@ bool enable_spoofing_handler(uint8_t protocol){
     return false;
 }
 
-bool disable_spoofing_handler(uint8_t protocol){
+bool disable_spoofing_handler(/*uint8_t protocol*/){
     if(volatile_metrics.password_dissector_enable){
         volatile_metrics.password_dissector_enable =false ;
         return true;

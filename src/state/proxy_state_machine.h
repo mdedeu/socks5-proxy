@@ -24,6 +24,7 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include "../metrics.h"
+#include "time.h"
 
 //states handlers
 #include "sock_hello_reading.h"
@@ -38,16 +39,7 @@
 #include "connected.h"
 #include "closing_connection.h"
 
-//char * sock_status_human[]={
-//        "succeeded",
-//        "server_failure",
-//        "connection_not_allowed_by_ruleset",
-//        "network_unreachable",
-//        "host_unreachable",
-//        "connection_refused",
-//        "ttl_expired",
-//        "command_not_supported"
-//};
+
 
 enum client_state{
     SOCK_HELLO_READING,
@@ -78,5 +70,7 @@ enum client_state{
 struct state_machine *init_proxy_state_machine();
 void destroy_sock_state(struct state_machine *sock_machine);
 unsigned  errno_to_sock(const int e );
+void print_connection_data(struct selector_key * key);
+
 
 #endif
