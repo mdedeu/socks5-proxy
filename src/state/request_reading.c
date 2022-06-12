@@ -119,6 +119,8 @@ static bool try_connection_aux(struct selector_key * key, struct sock_request_me
     }
 
     client_information->origin_fd = server_socket_fd;
+    if(client_information->origin_address == NULL )
+        return false;
     connect(server_socket_fd, (struct sockaddr *) (client_information->origin_address), address_length);
     switch (errno) {
         case ECONNREFUSED:

@@ -38,7 +38,16 @@
 #include "connected.h"
 #include "closing_connection.h"
 
-
+//char * sock_status_human[]={
+//        "succeeded",
+//        "server_failure",
+//        "connection_not_allowed_by_ruleset",
+//        "network_unreachable",
+//        "host_unreachable",
+//        "connection_refused",
+//        "ttl_expired",
+//        "command_not_supported"
+//};
 
 enum client_state{
     SOCK_HELLO_READING,

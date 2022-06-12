@@ -30,8 +30,17 @@ unsigned sock_request_writing_write_handler(struct selector_key * key){
 
     if(written_bytes < write_amount)
         return SOCK_REQUEST_WRITING;
-    else
-            return CONNECTED;
+    else{
+        char buff[32];
+        struct sock_request_message * message = (struct sock_request_message *  ) client_data->parsed_message;
+        sockaddr_to_human(buff,32,(struct sockaddr *) client_data->client_information);
+        printf("Client : %s\t",buff);
+        sockaddr_to_human(buff,32,(struct sockaddr * )client_data->origin_address);
+        printf("Origin:%s\t",buff);
+        printf("status=%d\n",message->connection_result);
+        return CONNECTED;
+    }
+
 }
 
 

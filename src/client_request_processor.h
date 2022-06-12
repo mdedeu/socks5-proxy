@@ -2,9 +2,6 @@
 #define CLIENT_REQUEST_PROCESSOR_H
 
 #include "selector.h"
-#include "parsing/sock_hello_parser.h"
-#include "client_request_processor.h"
-#include "sock_client.h"
 #include "buffer.h"
 #include "string.h"
 #include <sys/types.h>

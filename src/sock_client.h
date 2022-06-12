@@ -14,6 +14,7 @@
 
 typedef struct sock_client{
     uint8_t client_fd;
+    struct sockaddr_storage * client_information;
     uint8_t raw_read_buffer[BUFFER_SIZE];
     uint8_t raw_write_buffer[BUFFER_SIZE];
     buffer * read_buffer;
@@ -38,7 +39,7 @@ typedef struct sock_client{
 
 } sock_client;
 
-struct sock_client * init_new_client_connection(int fd);
+struct sock_client * init_new_client_connection(int fd,struct sockaddr * client_information);
 
 void destroy_sock_client(struct sock_client * sock_client);
 

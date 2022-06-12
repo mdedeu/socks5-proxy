@@ -30,10 +30,12 @@ bool process_hello_message(struct sock_hello_message * data, struct selector_key
     if(available_space < HELLO_ANSWER_LENGTH)
         return false;
 
-//    for(int i = 0; i < data->nmethods; i++){
-//        if(data->methods[i] == USERNAME_AUTHENTICATION)
-//            accepted_method_given = true;
-//    }
+    if(AUTHENTICATION){
+        for(int i = 0; i < data->nmethods; i++){
+            if(data->methods[i] == USERNAME_AUTHENTICATION)
+                accepted_method_given = true;
+        }
+    }
 
     buffer_write(client_data->write_buffer, CURRENT_SOCK_VERSION);
 

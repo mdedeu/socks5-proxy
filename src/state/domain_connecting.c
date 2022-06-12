@@ -38,6 +38,8 @@ unsigned domain_connecting_write_handler(struct selector_key * key){
         }
     }
 
+    if(client_information->current_origin_resolution!= NULL )
+        client_information->origin_address = (struct sockaddr_storage * )client_information->current_origin_resolution->ai_addr;
     return SOCK_REQUEST_WRITING;
 }
 
@@ -45,9 +47,11 @@ static bool try_one_ip_address(struct selector_key * key){
     if(key == NULL || key->data ==NULL)
         return false;
     sock_client * client_information = (sock_client *) key->data ;
-    struct addrinfo * current = client_information->current_origin_resolution == NULL ? client_information->origin_resolutions
-                                                                                                                                                            : client_information->current_origin_resolution;
-    if(current == NULL )
+     client_information->current_origin_resolution =( client_information->current_origin_resolution == NULL ? client_information->origin_resolutions
+                                                                                                                                                            : client_information->current_origin_resolution->ai_next);
+
+    struct addrinfo * current = client_information->current_origin_resolution;
+     if(current == NULL )
         return false;
 
     client_information->origin_fd = socket(current->ai_family, current->ai_socktype, current->ai_protocol);

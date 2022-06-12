@@ -328,9 +328,12 @@ void close_sock_request_parser(struct parser * using_parser){
 
 
 void  close_sock_request_message(struct sock_request_message * message){
-    //ipv or addres, port
     free(message->port);
-//    free(message->answer_buffer);
+    if(message->atyp == 1)
+        free(message->ipv4);
+    else if(message->atyp == 4  )
+        free(message->ipv6);
+    else free(message->address);
     free(message);
 }
 

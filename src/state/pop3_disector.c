@@ -5,6 +5,10 @@ static void pass_sent_handler(pop3_dissector *  current_dissector, char * buffer
 static void user_sent_handler(pop3_dissector *  current_dissector, char * buffer , size_t buffer_size);
 static void just_connected_handler(pop3_dissector *  current_dissector, char * buffer , size_t buffer_size);
 static void user_accepted_handler(pop3_dissector *  current_dissector, char * buffer , size_t buffer_size);
+static void clean_data_parser(pop3_dissector * current_dissector);
+static void clean_ack_parser(pop3_dissector * current_dissector);
+static char * USER = "USER";
+static char * PASS = "PASS";
 
 
 pop3_dissector *  new_pop3_dissector() {
@@ -49,44 +53,51 @@ void origin_data(pop3_dissector *current_dissector , char * buffer , size_t buff
 
 
 static void just_connected_handler(pop3_dissector *  current_dissector, char * buffer , size_t buffer_size){
-    if(current_dissector->data_message == NULL )
-        current_dissector->data_message = init_pop3_data_parser("USER",4);
+        if(current_dissector->data_message == NULL )
+        current_dissector->data_message = init_pop3_data_parser(USER, 4);
 
-    if(current_dissector->username != NULL )
+    if(current_dissector->username != NULL ){
         free(current_dissector->username);
+        current_dissector->username = NULL;
+    }
 
     bool finished = feed_pop3_data_parser(current_dissector->data_message,buffer,buffer_size);
+
     if(finished && current_dissector->data_message->connected){
         current_dissector->username = malloc(current_dissector->data_message->data_characters_read  +1 );
         memcpy(current_dissector->username,current_dissector->data_message->data,current_dissector->data_message->data_characters_read);
         current_dissector->status = USER_SENT;
-        close_pop3_data_parser(current_dissector->data_message);
-        current_dissector->data_message = NULL;
+        clean_data_parser(current_dissector);
     }else if(finished && !current_dissector->data_message->connected){
-        close_pop3_data_parser(current_dissector->data_message);
-        current_dissector->data_message=NULL;
+        clean_data_parser(current_dissector);
     }
+
 }
 
 static void user_accepted_handler(pop3_dissector *  current_dissector, char * buffer , size_t buffer_size){
-    if(current_dissector->data_message == NULL )
-        current_dissector->data_message = init_pop3_data_parser("PASS",4);
 
-    if(current_dissector->password != NULL )
+        if(current_dissector->data_message == NULL )
+        current_dissector->data_message = init_pop3_data_parser(PASS,4);
+
+    if(current_dissector->password != NULL ){
         free(current_dissector->password);
+        current_dissector->password =NULL;
+    }
 
     bool finished = feed_pop3_data_parser(current_dissector->data_message,buffer,buffer_size);
+
     if(finished && current_dissector->data_message->connected){
         current_dissector->password = malloc(current_dissector->data_message->data_characters_read + 1 );
         memcpy(current_dissector->password,current_dissector->data_message->data,current_dissector->data_message->data_characters_read);
         current_dissector->status = PASS_SENT;
-        close_pop3_data_parser(current_dissector->data_message);
-        current_dissector->data_message = NULL;
+        clean_data_parser(current_dissector);
     }else if(finished && !current_dissector->data_message->connected){
-        close_pop3_data_parser(current_dissector->data_message);
-        current_dissector->data_message=NULL;
+        clean_data_parser(current_dissector);
     }
+
 }
+
+
 
 
 static void user_sent_handler(pop3_dissector *  current_dissector, char * buffer , size_t buffer_size){
@@ -105,28 +116,38 @@ static void server_handler(pop3_dissector *  current_dissector, char * buffer , 
         current_dissector->ack_message = init_pop3_connected_parser("+OK",3);
 
     bool finished = feed_pop3_connected_parser(current_dissector->ack_message,buffer,buffer_size);
+
     if(finished && current_dissector->ack_message->connected){
         current_dissector->status = on_accepted;
-        close_pop3_connected_parser(current_dissector->ack_message);
-        current_dissector->ack_message = NULL;
+        clean_ack_parser(current_dissector);
     }else if ( finished && !current_dissector->ack_message->connected){
         current_dissector->status = on_deny;
-        if(current_dissector->ack_message != NULL ){
-            close_pop3_connected_parser(current_dissector->ack_message);
-            current_dissector->ack_message = NULL;
-        }
-        if(current_dissector->data_message!=NULL){
-            close_pop3_data_parser(current_dissector->data_message);
-            current_dissector->data_message = NULL;
-        }
+        clean_ack_parser(current_dissector);
+        clean_data_parser(current_dissector);
     }
+
 }
 
 void destroy_dissector(pop3_dissector * removing){
     if(removing == NULL) return;
     if(removing->password!=NULL) free(removing->password);
     if(removing->username!=NULL) free(removing->username);
-    if(removing->data_message!=NULL) close_pop3_data_parser(removing->data_message);
-    if(removing->ack_message!=NULL) close_pop3_connected_parser(removing->ack_message);
+    clean_data_parser(removing);
+    clean_ack_parser(removing);
     free(removing);
+}
+
+
+static void clean_data_parser(pop3_dissector * current_dissector){
+    if(current_dissector->data_message!=NULL){
+        close_pop3_data_parser(current_dissector->data_message);
+        current_dissector->data_message = NULL;
+    }
+}
+
+static void clean_ack_parser(pop3_dissector * current_dissector){
+    if(current_dissector->ack_message != NULL ){
+        close_pop3_connected_parser(current_dissector->ack_message);
+        current_dissector->ack_message = NULL;
+    }
 }
