@@ -48,6 +48,8 @@ int main(){
     uint8_t action, method;
     uint8_t parameters[PARAMS_LEN] = {0};
     uint8_t  buff_recv[RECV_BUFFER_SIZE] = {0};
+    uint16_t returned_status = 0;
+    int read_amount;
 
     int sock_fd = socket(AF_INET , SOCK_STREAM , 0);
 
@@ -63,6 +65,8 @@ int main(){
     if(connect(sock_fd, (struct sockaddr *) &server_address_4, sizeof(server_address_4)) < 0)
         return 1;
 
+    while(returned_status != 0xC001){
+
     printf("\n~~~~~~~~~~~Authentication~~~~~~~~~~~\n");
 
     ask_credentials(username, password);
@@ -71,19 +75,19 @@ int main(){
 
     struct simple_response_message * simple_response = init_simple_response_parser();
 
-    int read_amount;
     do {
         read_amount = recv(sock_fd, buff_recv, RECV_BUFFER_SIZE, 0);
         if(read_amount < 0)
             return 1;
     } while(!feed_simple_response_parser(simple_response, (char *) buff_recv, read_amount));
 
-    uint16_t returned_status = simple_response->status[0] << 8;
+    returned_status = simple_response->status[0] << 8;
     returned_status += simple_response->status[1];
-    
+
     print_status(returned_status);
 
     close_simple_response_parser(simple_response);
+    }
 
     while(1){
 
@@ -205,11 +209,12 @@ static int ask_password(uint8_t * password){
 }
 
 static int ask_protocol(uint8_t * protocol){
-    uint8_t protocol_str[4];
+    uint8_t protocol_str[6];
     printf("Protocol: ");
     fflush(stdout);
     if(fgets((char *) protocol_str, CREDS_LEN, stdin) == 0)
         return -1;
+    protocol_str[4]=0;
     *protocol = strtol((char *) protocol_str, NULL, 0);
     return 0;
 }
@@ -263,7 +268,13 @@ static int send_array(uint8_t socket_fd, uint8_t len, uint8_t * array){
 }
 
 static void print_status(uint16_t status){
-    printf("Status: %X\n", status);
+    if(status == 0xC001)
+        printf("Authentication Successful");
+    else if(status == 0x4B1D)
+        printf("Authentication Failed");
+    else{
+        printf("Please enter valid credentials");
+    }
 }
 
 static void print_response(uint8_t action, uint8_t method, uint8_t response_length, char * response){
