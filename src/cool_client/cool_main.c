@@ -67,7 +67,7 @@ int main(){
 
     while(returned_status != 0xC001){
 
-    printf("\n~~~~~~~~~~~Authentication~~~~~~~~~~~\n");
+    printf("\n~~~~~~~~~~~Authentication~~~~~~~~~~~\n\n");
 
     ask_credentials(username, password);
 
@@ -110,9 +110,6 @@ int main(){
     print_response(general_response->action, general_response->method, general_response->response_length, general_response->response);
 
     close_general_response_parser(general_response);
-
-    printf("\n=================================================\n");
-    printf("=================================================\n");
 
     }
 
@@ -271,11 +268,11 @@ static int send_array(uint8_t socket_fd, uint8_t len, uint8_t * array){
 
 static void print_status(uint16_t status){
     if(status == 0xC001)
-        printf("Authentication Successful");
+        printf("\nAuthentication Successful!");
     else if(status == 0x4B1D)
-        printf("Authentication Failed");
+        printf("\nAuthentication Failed");
     else{
-        printf("Please enter valid credentials");
+        printf("\nPlease enter valid credentials");
     }
 }
 

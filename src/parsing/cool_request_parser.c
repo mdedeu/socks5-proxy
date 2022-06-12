@@ -135,6 +135,7 @@ static struct parser_state_transition modify_action_read_transitions[] ={
         {.when=0,.dest=ADDING_USERNAME_METHOD_READ,.act1=modify_action_read},
         {.when=1,.dest=REMOVING_USERNAME_METHOD_READ,.act1=modify_action_read},
         {.when=2,.dest=PASSWORD_METHOD_READ,.act1=modify_action_read},
+        {.when=3,.dest=PASSWORD_METHOD_READ,.act1=modify_action_read}
 };
 
 static struct parser_state_transition adding_username_method_read_transitions[] ={
