@@ -277,8 +277,8 @@ static void print_status(uint16_t status){
 }
 
 static void print_response(uint8_t action, uint8_t method, uint8_t response_length, char * response){
-    printf("Action: %X\n", action);
-    printf("Method: %X\n", method);
+    //printf("Action: %X\n", action);
+    //printf("Method: %X\n", method);
     *(response + response_length) = 0;
-    printf("Response: %d\n", response[0]);
+    printf("\nResponse: %d\n", response[0]);
 }

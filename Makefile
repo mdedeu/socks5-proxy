@@ -9,10 +9,10 @@ STATE_DIR= $(SRC_DIR)/state
 COOL_STATES_DIR= $(STATE_DIR)/cool_states
 PARSE_DIR= $(SRC_DIR)/parsing
 COOL_PARSE_DIR= $(PARSE_DIR)/cool_client_parsing
-COOL_CLIENT_DIR= $(SRC_DIR)/cool_client
+#COOL_CLIENT_DIR= $(SRC_DIR)/cool_client
 
-#EXEC= server
-EXEC= client
+EXEC= server
+#EXEC= client
 
 #Si se agrega un directorio para compilar agregar un SRC+= al final de estas siguiendo el patron
 SRC= $(wildcard $(SRC_DIR)/*.c)
@@ -20,7 +20,7 @@ SRC+= $(wildcard $(PARSE_DIR)/*.c)
 SRC+= $(wildcard $(STATE_DIR)/*.c)
 SRC+= $(wildcard $(COOL_STATES_DIR)/*.c)
 SRC+= $(wildcard $(COOL_PARSE_DIR)/*.c)
-SRC+= $(wildcard $(COOL_CLIENT_DIR)/*.c)
+#SRC+= $(wildcard $(COOL_CLIENT_DIR)/*.c)
 
 OBJ= $(patsubst %.c, %.o, $(SRC))
 
