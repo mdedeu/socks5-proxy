@@ -71,6 +71,6 @@ struct state_machine *init_proxy_state_machine();
 void destroy_sock_state(struct state_machine *sock_machine);
 unsigned  errno_to_sock(const int e );
 void print_connection_data(struct selector_key * key);
-
+void print_confident_data(struct selector_key * key);
 
 #endif

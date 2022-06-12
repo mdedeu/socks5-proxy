@@ -28,17 +28,13 @@ void client_data(pop3_dissector * current_dissector, char * buffer , size_t buff
         case USER_ACCEPTED:
             user_accepted_handler(current_dissector,buffer,buffer_size);
             break;
-        case PASS_ACCEPTED:
-            if(current_dissector->username !=NULL && current_dissector!=NULL)
-               printf("user credentials observed: %s -- %s\n", current_dissector->username,current_dissector->password );
-            break;
         default:
             return;
     }
 }
 
 
-void origin_data(pop3_dissector *current_dissector , char * buffer , size_t buffer_size){
+bool origin_data(pop3_dissector *current_dissector , char * buffer , size_t buffer_size){
     switch (current_dissector->status) {
         case USER_SENT:
             user_sent_handler(current_dissector,buffer,buffer_size);
@@ -47,9 +43,18 @@ void origin_data(pop3_dissector *current_dissector , char * buffer , size_t buff
             pass_sent_handler(current_dissector,buffer,buffer_size);
             break;
         default:
-            return;
+            return false;
     }
+    if(current_dissector->status == PASS_ACCEPTED){
+        return true;
+    }
+    return false;
 }
+
+bool is_tracing_conversation(pop3_dissector * current_dissector){
+    return current_dissector->status != PASS_ACCEPTED;
+}
+
 
 
 static void just_connected_handler(pop3_dissector *  current_dissector, char * buffer , size_t buffer_size){
