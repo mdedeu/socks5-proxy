@@ -30,7 +30,7 @@ bool process_hello_message(struct sock_hello_message * data, struct selector_key
     if(available_space < HELLO_ANSWER_LENGTH)
         return false;
 
-    if(AUTHENTICATION){
+    if(clients_need_authentication()){
         for(int i = 0; i < data->nmethods; i++){
             if(data->methods[i] == USERNAME_AUTHENTICATION)
                 accepted_method_given = true;
@@ -39,7 +39,7 @@ bool process_hello_message(struct sock_hello_message * data, struct selector_key
 
     buffer_write(client_data->write_buffer, CURRENT_SOCK_VERSION);
 
-    if(AUTHENTICATION) {
+    if(clients_need_authentication()) {
     if(accepted_method_given)
         buffer_write(client_data->write_buffer, USERNAME_AUTHENTICATION);
     else
@@ -47,7 +47,7 @@ bool process_hello_message(struct sock_hello_message * data, struct selector_key
     }else   buffer_write(client_data->write_buffer,0);
 
 
-    return accepted_method_given || !AUTHENTICATION;
+    return accepted_method_given || !clients_need_authentication();
 
 }
 

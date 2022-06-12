@@ -14,6 +14,7 @@
 #include "cool_handlers.h"
 #include "parsing/sock_request_parser.h"
 #include <limits.h>
+#include "metrics.h"
 
 
 
@@ -118,6 +119,7 @@ int main(const int argc, const char **argv){
         return 1;
     }
 
+    set_clients_need_authentication(false);
     close(STDIN_FILENO);
 
     const char       *err_msg = NULL;

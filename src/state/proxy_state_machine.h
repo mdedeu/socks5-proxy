@@ -6,7 +6,6 @@
 #define REQUEST_CONNECT_ANSWER 20
 #define READ_AMOUNT 512
 #define POP_PORT 110
-#define AUTHENTICATION 0
 #include <errno.h>
 #include "stm.h"
 #include <string.h>
@@ -24,6 +23,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include "../metrics.h"
 
 //states handlers
 #include "sock_hello_reading.h"

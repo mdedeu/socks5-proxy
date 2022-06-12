@@ -23,6 +23,7 @@ struct metrics{
     uint8_t  registered_clients;
     struct server_user_info client_users[MAX_USERS];
     struct server_user_info admin_users[ADMIN_NUMBERS];
+    bool clients_need_authentication;
 };
 
 
@@ -31,6 +32,8 @@ bool enable_spoofing_handler(uint8_t protocol);
 bool disable_spoofing_handler(uint8_t protocol);
 void increment_current_connections();
 void decrement_current_connections();
+bool clients_need_authentication();
+
 
 uint64_t get_total_connections();
 uint64_t get_current_connections();
@@ -38,6 +41,7 @@ uint64_t get_max_current_connections();
 uint64_t get_total_bytes_sent();
 uint64_t get_total_bytes_recv();
 uint64_t get_connected_users();
+void set_clients_need_authentication(bool boolean);
 
 bool connect_user(char * username , char * password);
 void disconnect(char * username);

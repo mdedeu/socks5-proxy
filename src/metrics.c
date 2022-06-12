@@ -14,6 +14,7 @@
         .password_dissector_enable = true,
         .registered_clients = 0,
         .max_current_connections=0,
+        .clients_need_authentication = true,
 
 };
 
@@ -70,7 +71,7 @@ bool disable_spoofing_handler(uint8_t protocol){
         volatile_metrics.password_dissector_enable =false ;
         return true;
     }
-    return false; 
+    return false;
 }
 
 void increment_current_connections(){
@@ -127,6 +128,13 @@ bool connect_user(char * username , char * password){
     return false;
 }
 
+bool clients_need_authentication(){
+    return volatile_metrics.clients_need_authentication;
+}
+
+void set_clients_need_authentication(bool boolean){
+    volatile_metrics.clients_need_authentication = boolean;
+}
 
 void disconnect(char * username){
     for(int i = 0 ; i < volatile_metrics.registered_clients ; i++){
