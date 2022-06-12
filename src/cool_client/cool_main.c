@@ -87,11 +87,13 @@ int main(){
     print_status(returned_status);
 
     close_simple_response_parser(simple_response);
+
+    putchar('\n');
     }
 
     while(1){
 
-    printf("\n~~~~~~~~~~~Action & Method~~~~~~~~~~~\n");
+    printf("\n~~~~~~~~~~~Action & Method~~~~~~~~~~~\n\n");
 
     int param_len = ask_method_and_parameters(&action, &method, parameters);
 
