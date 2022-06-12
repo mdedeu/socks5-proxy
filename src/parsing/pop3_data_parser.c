@@ -112,7 +112,7 @@ struct pop3_data_message * init_pop3_data_parser(char * prefix_received,ssize_t 
     new_pop3_data_message->data_characters_read = 0;
     new_pop3_data_message->connected = true;
     new_pop3_data_message->check_characters_read = 0;
-    new_pop3_data_message->prefix_len = 0;
+    new_pop3_data_message->prefix_len = prefix_received_length;
     memcpy(new_pop3_data_message->prefix, prefix_received,  prefix_received_length);
     return new_pop3_data_message;
 }
