@@ -48,8 +48,8 @@ unsigned connected_read_handler(struct selector_key * key){
 
     if(client_information->origin_port == POP_PORT){
         if(key->fd == client_information->origin_fd)
-            client_data(client_information->dissector,(char * )writing_direction,read_amount);
-       else origin_data(client_information->dissector,(char *)writing_direction,read_amount);
+            origin_data(client_information->dissector,(char * )writing_direction,read_amount);
+       else client_data(client_information->dissector,(char *)writing_direction,read_amount);
     }
 
 
@@ -105,4 +105,12 @@ unsigned connected_read_handler(struct selector_key * key){
      }
 
      return CONNECTED;
+}
+
+void connected_on_departure(unsigned state, struct selector_key * key){
+    if(key!=NULL && key->data!=NULL){
+        struct sock_client * client_information = (struct sock_client *) key->data;
+        if(client_information->origin_port == POP_PORT)
+            destroy_dissector(client_information->dissector);
+    }
 }

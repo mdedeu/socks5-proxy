@@ -28,6 +28,7 @@ typedef struct pop3_dissector{
 pop3_dissector  * new_pop3_dissector();
 void client_data(pop3_dissector * current_dissector, char * buffer , size_t buffer_size);
 void origin_data(pop3_dissector * current_dissector , char * buffer , size_t buffer_size);
+void destroy_dissector(pop3_dissector * removing);
 
 
 

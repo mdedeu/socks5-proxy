@@ -75,6 +75,7 @@ struct pop3_connected_message * init_pop3_connected_parser(char * prefix,size_t 
     new_pop3_connected_message->check_characters_read=0;
     new_pop3_connected_message->connected = true;
     memcpy(new_pop3_connected_message->prefix,prefix,prefix_length);
+    new_pop3_connected_message->prefix_len = prefix_length;
     return new_pop3_connected_message;
 }
 
@@ -102,8 +103,11 @@ bool feed_pop3_connected_parser(struct pop3_connected_message * pop3_data ,char 
 }
 
 void close_pop3_connected_parser(struct pop3_connected_message * current_data){
-    parser_destroy(current_data->using_parser);
-    free(current_data);
+    if(current_data!=NULL) {
+        if(current_data->using_parser != NULL)
+            parser_destroy(current_data->using_parser);
+        free(current_data);
+    }
 }
 
 

@@ -6,12 +6,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #define N(x) (sizeof(x)/sizeof((x)[0]))
-#define BUFFER_SIZE 512
+#define CONNECTED_BUFFER_SIZE 512
 
 struct pop3_connected_message{
     uint8_t check_characters_read;
     struct parser * using_parser;
-    char prefix[BUFFER_SIZE];
+    char prefix[CONNECTED_BUFFER_SIZE];
     uint8_t prefix_len;
     bool connected;
 };

@@ -9,7 +9,7 @@ static const struct state_definition domain_connecting = {.state=DOMAIN_CONNECTI
 static const struct state_definition address_connecting = {.state=ADDRESS_CONNECTING,.on_write_ready=address_connecting_write_handler};
 static const struct state_definition sock_request_writing = {.state=SOCK_REQUEST_WRITING, .on_write_ready=sock_request_writing_write_handler,.on_arrival=sock_request_writing_arrival,.on_departure=sock_request_writing_departure};
 static const struct state_definition sock_negative_request_writing = {.state=SOCK_NEGATIVE_REQUEST_WRITING, .on_write_ready=sock_negative_request_write_handler,.on_arrival=sock_negative_request_writing_arrival,.on_departure=sock_negative_request_writing_departure};
-static const struct state_definition connected = {.state=CONNECTED, .on_write_ready=connected_write_handler,.on_arrival=connected_on_arrival,.on_read_ready=connected_read_handler};
+static const struct state_definition connected = {.state=CONNECTED, .on_write_ready=connected_write_handler,.on_arrival=connected_on_arrival,.on_read_ready=connected_read_handler,.on_departure=connected_on_departure};
 static const struct state_definition closing_connection = {.state=CLOSING_CONNECTION,.on_arrival=closing_connection_on_arrival};
 
 static const struct state_definition states[] = {
