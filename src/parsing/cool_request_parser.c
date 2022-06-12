@@ -144,7 +144,7 @@ static struct parser_state_transition removing_username_method_read_transitions[
         {.when=ANY,.dest=REMOVING_USERNAME_ULEN_READ,.act1=removing_ulen_read},
 };
 static struct parser_state_transition password_method_read_transitions[] ={
-        {.when=0,.dest=PASSWORD_PROTOCOL_READ,.act1=password_protocol_read} //end 
+        {.when=ANY,.dest=PASSWORD_PROTOCOL_READ,.act1=password_protocol_read} //end 
 };
 
 static struct parser_state_transition adding_username_ulen_read_transitions[] ={
@@ -235,6 +235,7 @@ void handle_modify_method_read_event(struct general_request_message* general_req
 
 void handle_password_protocol_read_event(struct general_request_message* general_request_data ,uint8_t current_character){
     general_request_data->protocol = current_character;
+    general_request_data->using_parser->state = END;
 }
 
 void handle_ulen_read_event(struct general_request_message* general_request_data ,uint8_t current_character){
