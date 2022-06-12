@@ -109,6 +109,9 @@ void process_request_message(struct sock_request_message * data, struct selector
         ipv6_address->sin6_port <<= 8;
         ipv6_address->sin6_port += data->port[1];
         ipv6_address->sin6_port = htons(ipv6_address->sin6_port);
+        //both required by valgrind
+        ipv6_address->sin6_flowinfo = 0;
+        ipv6_address->sin6_scope_id = 0;
         client_information->origin_port = ntohs(ipv6_address->sin6_port);
         client_information->origin_address = ((struct sockaddr_storage*) ipv6_address);
         client_information-> origin_address_length = IPV6SIZE ;

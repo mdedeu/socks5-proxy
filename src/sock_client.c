@@ -20,10 +20,17 @@ struct sock_client * init_new_client_connection(int fd,struct sockaddr * client_
         new_client->close_after_write = false;
         new_client->origin_resolutions = NULL ;
         new_client->current_origin_resolution = NULL;
-        new_client->client_information = malloc(sizeof (struct sockaddr));
+
+        if(client_information->sa_family == AF_INET)
+            new_client->client_information = malloc(sizeof (struct sockaddr_in));
+        else
+            new_client->client_information = malloc(sizeof(struct sockaddr_in6));
         if(new_client->client_information == NULL )
             goto free_client;
-        memcpy(new_client->client_information,client_information, sizeof(struct sockaddr));
+        if(client_information->sa_family == AF_INET)
+            memcpy(new_client->client_information,client_information, sizeof(struct sockaddr_in));
+        else
+            memcpy(new_client->client_information,client_information, sizeof(struct sockaddr_in6));
     }
 
     return new_client;
