@@ -86,6 +86,16 @@ void decrement_current_connections(){
         volatile_metrics.current_connections--;
 }
 
+void increment_data_sent(uint64_t data_quantity){
+    if(data_quantity < 0) return;
+    volatile_metrics.bytes_sent += data_quantity ;
+}
+
+
+void increment_data_received(uint64_t data_quantity){
+    if(data_quantity < 0) return;
+    volatile_metrics.bytes_received += data_quantity ;
+}
 
 
 uint64_t get_total_connections(){

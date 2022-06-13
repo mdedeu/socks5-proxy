@@ -34,6 +34,9 @@ void increment_current_connections();
 void decrement_current_connections();
 bool clients_need_authentication();
 
+void increment_data_sent(uint64_t data_quantity);
+void increment_data_received(uint64_t data_quantity);
+
 
 uint64_t get_total_connections();
 uint64_t get_current_connections();
