@@ -1,11 +1,15 @@
 #include "cool_authenticate_writing.h"
 
 void cool_authenticate_writing_arrival(const unsigned int leaving_state, struct selector_key *key){
+    if(key == NULL)
+        return;
     selector_set_interest_key(key,OP_WRITE);
 }
 
 
 unsigned cool_authenticate_write_handler(struct selector_key *key){
+    if(key == NULL || key->data == NULL)
+        return CLOSING_COOL_CONNECTION;
     cool_client *client_data = (cool_client *) key->data;
 
     if (!buffer_can_read(client_data->write_buffer))
@@ -24,5 +28,7 @@ unsigned cool_authenticate_write_handler(struct selector_key *key){
 }
 
 void cool_authenticate_writing_departure(const unsigned int leaving_state, struct selector_key *key){
+    if(key == NULL)
+        return;
     selector_set_interest_key(key,OP_NOOP);
 }

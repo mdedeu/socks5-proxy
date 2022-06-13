@@ -23,7 +23,7 @@
 #define TRUE 1
 #define RW_AMOUNT 30
 #define SOCKS_PASSIVE_SOCKET_SIZE 2
-#define SOCKS_COOL_PASSIVE_SOCKET_SIZE 1
+#define SOCKS_COOL_PASSIVE_SOCKET_SIZE 2
 #define DEFAULT_SOCK_PORT 1080
 
 static bool done = false;
@@ -232,7 +232,40 @@ int main(const int argc, const char **argv){
         goto finally;
     }
     current_sock_cool_passive_socket++;
-    
+
+    //=========================COOL_IPV6=================================
+
+	if ((cool_master_socket[current_sock_cool_passive_socket] = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP)) < 0)
+	{
+        err_msg = "unable to create socket for ipv6";
+        goto finally;
+	}
+    setsockopt(cool_master_socket[current_sock_cool_passive_socket], SOL_SOCKET, SO_REUSEADDR, (char *) &opt, sizeof(opt));
+
+    memset(&server_address_6, 0, sizeof(server_address_6));
+	server_address_6.sin6_family = AF_INET6;
+	server_address_6.sin6_port = htons(COOL_PORT);
+    inet_pton(AF_INET6, "::1", &server_address_6.sin6_addr);
+
+	if (bind(cool_master_socket[current_sock_cool_passive_socket], (struct sockaddr *) &server_address_6, sizeof(server_address_6)) < 0)
+	{
+        err_msg = "unable to bind  for ipv6";
+        goto finally;
+	}
+
+    if (listen(cool_master_socket[current_sock_cool_passive_socket], MAX_PENDING_CONNECTIONS) < 0)
+		{
+            err_msg = "unable to listen  for ipv6";
+            goto finally;
+		}
+
+    if(selector_fd_set_nio(cool_master_socket[current_sock_cool_passive_socket]) == -1) {
+        err_msg = "getting server socket flags";
+        goto finally;
+    }
+    current_sock_cool_passive_socket++;
+
+
     const struct selector_init conf = {
         .signal = SIGALRM,
         .select_timeout = {
