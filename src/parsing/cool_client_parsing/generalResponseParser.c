@@ -140,8 +140,14 @@ bool feed_general_response_parser(struct general_response_message * response_dat
 }
 
 void close_general_response_parser(struct general_response_message * current_data){
-    parser_destroy(current_data->using_parser);
-    free(current_data->response);
+    if(current_data == NULL)
+        return;
+
+    if(current_data->using_parser != NULL)
+        parser_destroy(current_data->using_parser);
+    if(current_data->response != NULL)
+        free(current_data->response);
+
     free(current_data);
 }
 

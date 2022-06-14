@@ -323,7 +323,8 @@ bool feed_sock_request_parser(struct parser * using_parser, struct sock_request_
 }
 
 void close_sock_request_parser(struct parser * using_parser){
-    parser_destroy(using_parser);
+    if(using_parser != NULL)
+        parser_destroy(using_parser);
 }
 
 

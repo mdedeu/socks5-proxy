@@ -29,8 +29,12 @@ unsigned cool_authenticate_write_handler(struct selector_key *key){
 
     if(written_bytes < write_amount)
         return COOL_AUTHENTICATE_WRITING;
-    else
+    else if(*reading_since==0x4B && *(reading_since+1)==0x1D)
+        return COOL_AUTHENTICATE_READING;
+    else if(*reading_since==0xC0 && *(reading_since+1)==0x01)
         return COOL_REQUEST_READING;
+    else
+        return CLOSING_COOL_CONNECTION;
 }
 
 void cool_authenticate_writing_departure(const unsigned int leaving_state, struct selector_key *key){

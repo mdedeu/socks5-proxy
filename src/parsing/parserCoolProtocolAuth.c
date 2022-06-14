@@ -207,7 +207,13 @@ void close_cool_protocol_authentication_parser(struct parser* using_parser){
 }
 
 void close_cool_protocol_authentication_message(struct cool_protocol_authentication_message * current_data) {
-	free(current_data->username);
-	free(current_data->password);
+	if(current_data == NULL)
+		return;
+
+	if(current_data->username != NULL)
+		free(current_data->username);
+	if(current_data->password != NULL)
+		free(current_data->password);
+
 	free(current_data);
 }

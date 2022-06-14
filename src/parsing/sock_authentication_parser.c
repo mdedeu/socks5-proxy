@@ -162,12 +162,19 @@ struct sock_authentication_message * init_sock_authentication_message(){
 }
 
 void close_sock_authentication_parser(struct parser*  using_parser){
-    parser_destroy(using_parser);
+    if(using_parser != NULL)
+        parser_destroy(using_parser);
 }
 
 void close_sock_authentication_message(struct sock_authentication_message *  current_data){
-    free(current_data->username);
-    free(current_data->password);
+    if(current_data == NULL)
+        return;
+
+    if(current_data->username != NULL)
+        free(current_data->username);
+    if(current_data->password != NULL)
+        free(current_data->password);
+
     free(current_data);
 }
 
