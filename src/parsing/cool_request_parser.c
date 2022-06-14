@@ -280,7 +280,7 @@ struct general_request_message * init_general_parser(){
     struct general_request_message * new_general_request_message = malloc(sizeof (struct general_request_message));
     memset(new_general_request_message, 0, sizeof(struct general_request_message));
     struct parser * using_parser = parser_init(parser_no_classes(),&general_parser_definition);
-    //new_general_request_message->using_parser = using_parser;
+    new_general_request_message->using_parser = using_parser;
     //new_general_request_message->username_characters_read=0;
     //new_general_request_message->password_characters_read=0;
     //new_general_request_message->plen = 0 ;
