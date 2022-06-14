@@ -12,12 +12,18 @@ unsigned cool_authenticate_write_handler(struct selector_key *key){
         return CLOSING_COOL_CONNECTION;
     cool_client *client_data = (cool_client *) key->data;
 
+    if(client_data->write_buffer == NULL)
+        return CLOSING_COOL_CONNECTION; 
+
     if (!buffer_can_read(client_data->write_buffer))
         return COOL_AUTHENTICATE_WRITING;
 
     size_t write_amount;
     uint8_t *reading_since = buffer_read_ptr(client_data->write_buffer, &write_amount);
     ssize_t written_bytes = send(client_data->client_fd, reading_since, write_amount, MSG_DONTWAIT);
+    if(written_bytes < 0)
+        return CLOSING_COOL_CONNECTION;
+
     buffer_read_adv(client_data->write_buffer, written_bytes);
     buffer_compact(client_data->write_buffer);
 

@@ -21,8 +21,6 @@ typedef struct cool_client{
         struct general_request_message * request_message;
     } current_parser;
 
-    int origin_fd;
-
     struct parser * using_parser;
     void * parsed_message;
 

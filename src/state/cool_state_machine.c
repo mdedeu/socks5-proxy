@@ -4,12 +4,14 @@ static const struct state_definition authenticate_reading_state= {.state=COOL_AU
 static const struct state_definition authenticate_writing_state= {.state=COOL_AUTHENTICATE_WRITING, .on_arrival=cool_authenticate_writing_arrival,.on_write_ready=cool_authenticate_write_handler,.on_departure=cool_authenticate_writing_departure};
 static const struct state_definition request_reading_state= {.state=COOL_REQUEST_READING, .on_arrival=cool_request_reading_arrival,.on_read_ready=cool_request_read_handler,.on_departure=cool_request_reading_departure};
 static const struct state_definition response_writing_state= {.state=COOL_RESPONSE_WRITING, .on_arrival=cool_response_writing_arrival,.on_write_ready=cool_response_write_handler,.on_departure=cool_response_writing_departure};
+static const struct state_definition closing_connection = {.state=CLOSING_COOL_CONNECTION,.on_arrival=closing_cool_connection_on_arrival};
 
 static const struct state_definition states[] = {
     authenticate_reading_state,
     authenticate_writing_state,
     request_reading_state,
-    response_writing_state
+    response_writing_state,
+    closing_connection
 };
 
 static struct state_machine cool_client_machine = {

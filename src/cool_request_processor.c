@@ -15,12 +15,23 @@ static struct user_info users[10]={
 void process_cool_authentication_message(struct cool_protocol_authentication_message * data, struct selector_key * key){
     //TODO: hace la comprarcion con un metodo del sistema de metricas
     bool valid_user = false;
+    if(data->username == NULL || data->password == NULL){
+        valid_user = false;
+        return;
+    }
+
     for(int i = 0; i < 10; i++){
             if(!strcmp(data->username, users[i].username) && !strcmp(data->password, users[i].password))
                 valid_user = true;
     }
 
+    if(key == NULL || key->data == NULL)
+        return;
+
     cool_client * client_data = (cool_client * ) key->data;
+    
+    if(client_data->write_buffer == NULL)
+        return;
 
     if(valid_user){
         buffer_write(client_data->write_buffer, 0xC0);
@@ -34,9 +45,15 @@ void process_cool_authentication_message(struct cool_protocol_authentication_mes
 
 //TODO: para ver como se implementan los metodos haca falta ver si se necesita un buffer auxiliar
 void process_cool_request_message(struct general_request_message * data, struct selector_key * key){
+    if(key == NULL || key->data == NULL)
+        return;
+
     cool_client * client_data = (cool_client * ) key->data;
     uint64_t result;
     int error = 0;
+
+    if(client_data->write_buffer == NULL)
+        return;
 
     buffer_write(client_data->write_buffer, data->action);
     buffer_write(client_data->write_buffer, data->method);
@@ -46,9 +63,13 @@ void process_cool_request_message(struct general_request_message * data, struct 
             buffer_write(client_data->write_buffer, 1);
             switch(data->method){
             case ADD_USER:
+                if(data->username == NULL || data->password == NULL)
+                    return;
                 buffer_write(client_data->write_buffer, add_user_handler(data->ulen, data->username, data->plen, data->password));
                 break;
             case REMOVE_USER:
+                if(data->username == NULL)
+                    return;
                 buffer_write(client_data->write_buffer, remove_user_handler(data->ulen, data->username));
                 break;
             case ENABLE_SPOOFING:

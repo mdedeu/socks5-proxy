@@ -17,7 +17,7 @@ void cool_request_reading_departure(const unsigned int leaving_state, struct sel
 
 unsigned cool_request_read_handler(struct selector_key *key){
     if(key == NULL || key->data == NULL)
-        return CLOSING_CONNECTION;
+        return CLOSING_COOL_CONNECTION;
 
     cool_client * client_data = (cool_client *) key->data;
 
@@ -26,7 +26,7 @@ unsigned cool_request_read_handler(struct selector_key *key){
     int received_amount = recv(key->fd, temp_buffer, MAX_READ_LENGTH, MSG_DONTWAIT);
 
     if(received_amount <= 0 || client_data->parsed_message == NULL)
-        return CLOSING_CONNECTION;
+        return CLOSING_COOL_CONNECTION;
 
     bool finished = feed_general_request_parser(
         (struct general_request_message *) (client_data->parsed_message),
@@ -42,8 +42,6 @@ void cool_request_reading_arrival(const unsigned int leaving_state, struct selec
     if(key == NULL || key->data == NULL)
         return;
     cool_client *client_data = (cool_client *) key->data;
-    if(client_data->current_parser == NULL)
-        return;
     client_data->current_parser.request_message = init_general_parser();
     selector_set_interest_key(key,OP_READ);
 }
