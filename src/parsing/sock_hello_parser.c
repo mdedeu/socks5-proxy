@@ -86,7 +86,8 @@ static struct parser_definition sock_parser_definition={
 
 struct sock_hello_message * init_sock_hello_message(){
     struct sock_hello_message * new_sock_hello_message = malloc(sizeof (struct sock_hello_message));
-    new_sock_hello_message->last_method_added=0;
+    memset(new_sock_hello_message, 0, sizeof(struct sock_hello_message));
+    //new_sock_hello_message->last_method_added=0;
     return new_sock_hello_message;
 
 }

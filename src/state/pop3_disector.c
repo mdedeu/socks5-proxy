@@ -13,11 +13,12 @@ static char * PASS = "PASS";
 
 pop3_dissector *  new_pop3_dissector() {
     struct pop3_dissector *  new_dissector = malloc(sizeof (struct pop3_dissector));
+    memset(new_dissector, 0, sizeof(struct pop3_dissector));
     new_dissector->status = JUST_CONNECTED;
-    new_dissector->username =NULL;
-    new_dissector->password = NULL ;
-    new_dissector->data_message = NULL;
-    new_dissector->ack_message = NULL;
+    //new_dissector->username =NULL;
+    //new_dissector->password = NULL ;
+    //new_dissector->data_message = NULL;
+    //new_dissector->ack_message = NULL;
     return new_dissector;
 }
 void client_data(pop3_dissector * current_dissector, char * buffer , size_t buffer_size){

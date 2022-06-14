@@ -155,10 +155,11 @@ static struct parser_definition cool_protocol_parser_definition = {
 
 struct cool_protocol_authentication_message * init_cool_protocol_authentication_message() {
 	struct cool_protocol_authentication_message * new_cool_protocol_authentication_message = malloc(sizeof (struct cool_protocol_authentication_message));
-	new_cool_protocol_authentication_message->password_length = 0;
-	new_cool_protocol_authentication_message->password_characters_read = 0;
-	new_cool_protocol_authentication_message->username_characters_read = 0;
-	new_cool_protocol_authentication_message->username_length = 0;
+	memset(new_cool_protocol_authentication_message, 0, sizeof(struct cool_protocol_authentication_message));
+	//new_cool_protocol_authentication_message->password_length = 0;
+	//new_cool_protocol_authentication_message->password_characters_read = 0;
+	//new_cool_protocol_authentication_message->username_characters_read = 0;
+	//new_cool_protocol_authentication_message->username_length = 0;
 	return new_cool_protocol_authentication_message;
 }
 
@@ -203,7 +204,8 @@ bool feed_cool_protocol_authentication_parser(struct parser * using_parser, stru
 }
 
 void close_cool_protocol_authentication_parser(struct parser* using_parser){
-    parser_destroy(using_parser);
+	if(using_parser != NULL)
+	    parser_destroy(using_parser);
 }
 
 void close_cool_protocol_authentication_message(struct cool_protocol_authentication_message * current_data) {

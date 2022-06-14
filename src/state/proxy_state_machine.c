@@ -40,7 +40,8 @@ struct state_machine *init_proxy_state_machine() {
 }
 
 void destroy_sock_state(struct state_machine *sock_machine) {
-    free(sock_machine);
+    if(sock_machine != NULL)
+        free(sock_machine);
 }
 
 

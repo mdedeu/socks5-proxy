@@ -262,11 +262,12 @@ struct parser * init_sock_request_parser(){
 
 struct sock_request_message * init_sock_request_message(){
     struct sock_request_message * new_sock_request_message = malloc(sizeof (struct sock_request_message));
-    new_sock_request_message->port_character_read=0;
-    new_sock_request_message->ipv6_character_read=0;
-    new_sock_request_message->ipv4_character_read=0;
-    new_sock_request_message->addr_character_read=0;
-    new_sock_request_message->connection_result = 0;
+    memset(new_sock_request_message, 0, sizeof(struct sock_request_message));
+    //new_sock_request_message->port_character_read=0;
+    //new_sock_request_message->ipv6_character_read=0;
+    //new_sock_request_message->ipv4_character_read=0;
+    //new_sock_request_message->addr_character_read=0;
+    //new_sock_request_message->connection_result = 0;
 //    new_sock_request_message->answer_buffer = malloc(sizeof (buffer));
 //    buffer_init(new_sock_request_message->answer_buffer,1024,new_sock_request_message->raw_buffer);
     return new_sock_request_message;

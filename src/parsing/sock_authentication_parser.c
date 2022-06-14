@@ -126,10 +126,11 @@ struct parser * init_sock_authentication_parser(){
 
 struct sock_authentication_message * init_sock_authentication_message(){
     struct sock_authentication_message * new_sock_authentication_message = malloc(sizeof (struct sock_authentication_message));
-    new_sock_authentication_message->password_length=0;
-    new_sock_authentication_message->password_characters_read=0;
-    new_sock_authentication_message->username_characters_read=0;
-    new_sock_authentication_message->username_length = 0;
+    memset(new_sock_authentication_message, 0, sizeof(struct sock_authentication_message));
+    //new_sock_authentication_message->password_length=0;
+    //new_sock_authentication_message->password_characters_read=0;
+    //new_sock_authentication_message->username_characters_read=0;
+    //new_sock_authentication_message->username_length = 0;
     return new_sock_authentication_message;
 }
 
