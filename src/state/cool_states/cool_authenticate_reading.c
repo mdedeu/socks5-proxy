@@ -6,7 +6,6 @@
     if(key == NULL || key->data == NULL)
         return;
     cool_client *client_data = (cool_client *) key->data;
-     //TODO: implementar los procesadores de la data
     if(client_data->parsed_message == NULL || client_data->using_parser == NULL)
         return;
 
