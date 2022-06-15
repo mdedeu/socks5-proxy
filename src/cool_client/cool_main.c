@@ -37,7 +37,7 @@
 #define CONNECTED_USERS 5
 
 #define MAX_AUTH_TRIES 3
-#define COMMAND_MAX_LEN 7
+#define COMMAND_MAX_LEN 64
 
 static int ask_method_and_parameters(int sock_fd, int * is_builtin, uint8_t * action, uint8_t * method, uint8_t * parameters);
 static int ask_parameters(uint8_t method, uint8_t * parameters);
