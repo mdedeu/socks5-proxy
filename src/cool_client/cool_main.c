@@ -34,7 +34,7 @@
 #define MAX_AUTH_TRIES 3
 #define COMMAND_MAX_LEN 128
 
-static int ask_method_and_parameters(uint8_t * action, uint8_t * method, uint8_t * parameters);
+static int ask_method_and_parameters(int sock_fd, int * is_builtin, uint8_t * action, uint8_t * method, uint8_t * parameters);
 static int ask_parameters(uint8_t method, uint8_t * parameters);
 static int ask_credentials(uint8_t * username, uint8_t * password);
 static int ask_username(uint8_t * username);
@@ -45,17 +45,32 @@ static int send_method_and_parameters(int sock_fd, uint8_t action, uint8_t metho
 static int send_array(uint8_t socket_fd, uint8_t len, uint8_t * array);
 static void print_status(uint16_t status);
 static void print_response(uint8_t action, uint8_t method, uint8_t response_length, char * response);
-static void print_help();
+static void handle_help(int sock_fd);
+static void handle_quit(int sock_fd);
 static int close_connection(int socket_fd);
 static void print_welcome();
 static int resolve_command(char * command, uint8_t * method, uint8_t * action, uint8_t * parameters);
+static int connect_to_ipv4();
+static int connect_to_ipv6();
 
+#define BUILTIN_TOTAL 1
 #define QUERIES_TOTAL 7
 #define MODIFIERS_TOTAL 5
+char * builtin_names[] = {"help", "quit"};
+void (*builtin[])(int) = {handle_help, handle_quit};
 char * queries[] = {"gthc", "gcc", "gmcc", "gtbs", "gnuc", "gmbs", "gul"};
 char * modifiers[] = {"au", "ru", "eps", "dps", "cbs"};
 
+
 int main(int argc, char * argv[]){
+
+    uint8_t username[CREDS_LEN] = {0}, password[CREDS_LEN] = {0};
+    uint8_t action, method;
+    uint8_t parameters[PARAMS_LEN] = {0};
+    uint8_t  buff_recv[RECV_BUFFER_SIZE] = {0};
+    uint16_t returned_status = 0;
+    int read_amount, is_builtin;
+
     if(argc != 2)
         return -1;
 
@@ -67,32 +82,26 @@ int main(int argc, char * argv[]){
     if(address_family != 4 && address_family != 6)
         return -1;
 
-
-    uint8_t username[CREDS_LEN] = {0}, password[CREDS_LEN] = {0};
-    uint8_t action, method;
-    uint8_t parameters[PARAMS_LEN] = {0};
-    uint8_t  buff_recv[RECV_BUFFER_SIZE] = {0};
-    uint16_t returned_status = 0;
-    int read_amount;
-
-    int sock_fd = socket(AF_INET , SOCK_STREAM , 0);
-
+    int sock_fd;
+    if(address_family == 4)
+        sock_fd = connect_to_ipv4();
+    else
+        sock_fd = connect_to_ipv6();
+    
     if(sock_fd < 0)
-        return 1;
-
-    struct sockaddr_in server_address_4;
-    memset(&server_address_4, 0, sizeof(server_address_4));
-    server_address_4.sin_family = AF_INET;
-    server_address_4.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-    server_address_4.sin_port = htons(COOL_PORT);
-
-    if(connect(sock_fd, (struct sockaddr *) &server_address_4, sizeof(server_address_4)) < 0)
-        return 1;
+        return -1;
+    
 
     int tries=0;
     while(returned_status != 0xC001){
 
-    ask_credentials(username, password);
+    if(tries++ >= MAX_AUTH_TRIES){
+        printf("Max number of tries reached, closing client.\n");
+        return close_connection(sock_fd);
+    }
+
+    if(ask_credentials(username, password) < 0)
+        continue;
 
     send_credentials(sock_fd, username, password);
 
@@ -101,7 +110,7 @@ int main(int argc, char * argv[]){
     do {
         read_amount = recv(sock_fd, buff_recv, RECV_BUFFER_SIZE, 0);
         if(read_amount < 0)
-            return 1;
+            return -1;
     } while(!feed_simple_response_parser(simple_response, (char *) buff_recv, read_amount));
 
     returned_status = simple_response->status[0] << 8;
@@ -112,16 +121,17 @@ int main(int argc, char * argv[]){
     close_simple_response_parser(simple_response);
 
     putchar('\n');
-
-    if(++tries >= MAX_AUTH_TRIES){
-        printf("Max number of tries reached, closing client\n.");
-        return close_connection(sock_fd);
-    }
     }
 
     while(1){
 
-    int param_len = ask_method_and_parameters(&action, &method, parameters);
+    int param_len = ask_method_and_parameters(sock_fd, &is_builtin, &action, &method, parameters);
+    if(param_len < 0){
+        close_connection(sock_fd);
+        return -1;
+    }
+    if(is_builtin)
+        continue;
 
     send_method_and_parameters(sock_fd, action, method, param_len, parameters);
 
@@ -130,7 +140,7 @@ int main(int argc, char * argv[]){
     do {
         read_amount = recv(sock_fd, buff_recv, RECV_BUFFER_SIZE, 0);
         if(read_amount < 0)
-            return 1;
+            return -1;
     } while(!feed_general_response_parser(general_response, (char *) buff_recv, read_amount));
 
     print_response(general_response->action, general_response->method, general_response->response_length, general_response->response);
@@ -142,14 +152,24 @@ int main(int argc, char * argv[]){
     return 0;
 }
 
-static int ask_method_and_parameters(uint8_t * action, uint8_t * method, uint8_t * parameters){
+static int ask_method_and_parameters(int sock_fd, int * is_builtin, uint8_t * action, uint8_t * method, uint8_t * parameters){
     char command[COMMAND_MAX_LEN];
     printf("> ");
-
     fflush(stdout);
-     if(fgets(command, COMMAND_MAX_LEN-1, stdin) == 0)
+
+    if(!fgets(command, COMMAND_MAX_LEN-1, stdin))
          return -1;
-     command[strlen(command)-1]=0;
+    command[strlen(command)-1]=0;
+
+    for(int i = 0; i < BUILTIN_TOTAL; i++){
+        if(!strcmp(builtin_names[i], command)){
+            *is_builtin = 1;
+            builtin[i](sock_fd);
+            return 0;
+        }
+    }
+
+    *is_builtin = 0;
 
     if(resolve_command(command, action, method, parameters) == -1)
         return -1;
@@ -198,11 +218,15 @@ static int ask_parameters(uint8_t method, uint8_t * parameters){
 }
 
 static int ask_credentials(uint8_t * username, uint8_t * password){
-    if(ask_username(username) < 0)
+    if(ask_username(username) < 0){
+        printf("Please enter valid credentials\n");
         return -1;
+    }
 
-    if(ask_password(password) < 0)
+    if(ask_password(password) < 0){
+        printf("Please enter valid credentials\n");
         return -1;
+    }
 
     return 0;
 }
@@ -210,7 +234,9 @@ static int ask_credentials(uint8_t * username, uint8_t * password){
 static int ask_username(uint8_t * username){
     printf("Enter username: ");
     fflush(stdout);
-    if(fgets((char *) username, CREDS_LEN, stdin) == 0)
+    if(!fgets((char *) username, CREDS_LEN, stdin))
+        return -1;
+    if(*username == '\n')
         return -1;
     return strlen((char *) username)-1;
 }
@@ -218,7 +244,9 @@ static int ask_username(uint8_t * username){
 static int ask_password(uint8_t * password){
     printf("Enter password: ");
     fflush(stdout);
-    if(fgets((char *) password, CREDS_LEN, stdin) == 0)
+    if(!fgets((char *) password, CREDS_LEN, stdin))
+        return -1;
+    if(*password == '\n')
         return -1;
     return strlen((char *) password)-1;
 }
@@ -300,11 +328,14 @@ static void print_response(uint8_t action, uint8_t method, uint8_t response_leng
 }
 
 static int close_connection(int socket_fd){
+    printf("Closing connection...\n");
     return close(socket_fd);
 }
 
 static void print_welcome(){
-    printf("Welcome to the cool sock5 proxy configuration\nEnter the help command in case you need any help\n");
+    printf("Welcome to the cool sock5 proxy configuration.\n");
+    printf("Enter \"help\" in the command prompt to see the posible configuration commands.\n");
+    printf("Enter \"quit\" in the command prompt to terminate the session.\n");
 }
 
 //If the command is invalid it returns -1, else 0
@@ -329,4 +360,43 @@ static int resolve_command(char * command, uint8_t * method, uint8_t * action, u
     }
 
     return -1;
+}
+
+static int connect_to_ipv4(){
+    int sock_fd = socket(AF_INET , SOCK_STREAM , 0);
+
+    if(sock_fd < 0)
+        return -1;
+
+    struct sockaddr_in server_address_4;
+    memset(&server_address_4, 0, sizeof(server_address_4));
+    server_address_4.sin_family = AF_INET;
+    server_address_4.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    server_address_4.sin_port = htons(COOL_PORT);
+
+    if(connect(sock_fd, (struct sockaddr *) &server_address_4, sizeof(server_address_4)) < 0){
+        close(sock_fd);
+        return -1;
+    }
+
+    return sock_fd;
+}
+
+static int connect_to_ipv6(){
+    return connect_to_ipv4();
+}
+
+static void handle_help(int sock_fd){
+    printf("Query methods:\n");
+    for(int i = 0; i < QUERIES_TOTAL; i++)
+        printf("%s\n", queries[i]);
+
+    printf("\nModification methods:\n");
+    for(int i = 0; i < MODIFIERS_TOTAL; i++)
+        printf("%s\n", modifiers[i]);
+}
+
+static void handle_quit(int sock_fd){
+    close_connection(sock_fd);
+    exit(0);
 }
