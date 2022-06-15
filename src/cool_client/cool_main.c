@@ -9,6 +9,8 @@
 #include <arpa/inet.h>
 #include <signal.h>
 #include <errno.h>
+#include <netinet/in.h>
+#include <netinet/ip.h>
 #include "../parsing/cool_client_parsing/simpleResponseParser.h"
 #include "../parsing/cool_client_parsing/generalResponseParser.h"
 
@@ -16,6 +18,8 @@
 #define RECV_BUFFER_SIZE 512
 #define CREDS_LEN 128
 #define PARAMS_LEN 64
+#define IPV6SIZE 16
+#define IPV4SIZE 4
 
 #define QUERY 0xD0
 #define MODIFY 0xBE
@@ -31,6 +35,7 @@
 #define TOTAL_BYTES_SENT 3
 #define TOTAL_BYTES_RECV 4
 #define CONNECTED_USERS 5
+
 #define MAX_AUTH_TRIES 3
 #define COMMAND_MAX_LEN 128
 
@@ -50,8 +55,8 @@ static void handle_quit(int sock_fd);
 static int close_connection(int socket_fd);
 static void print_welcome();
 static int resolve_command(char * command, uint8_t * method, uint8_t * action, uint8_t * parameters);
-static int connect_to_ipv4();
-static int connect_to_ipv6();
+static int connect_to_ipv4(struct sockaddr_in * ipv4_address);
+static int connect_to_ipv6(struct sockaddr_in6 * ipv6_address);
 
 #define BUILTIN_TOTAL 1
 #define QUERIES_TOTAL 7
@@ -70,6 +75,8 @@ int main(int argc, char * argv[]){
     uint8_t  buff_recv[RECV_BUFFER_SIZE] = {0};
     uint16_t returned_status = 0;
     int read_amount, is_builtin;
+    struct sockaddr_in6 ipv6_address;
+    struct sockaddr_in ipv4_address;
 
     if(argc != 2)
         return -1;
@@ -84,9 +91,9 @@ int main(int argc, char * argv[]){
 
     int sock_fd;
     if(address_family == 4)
-        sock_fd = connect_to_ipv4();
+        sock_fd = connect_to_ipv4(&ipv4_address);
     else
-        sock_fd = connect_to_ipv6();
+        sock_fd = connect_to_ipv6(&ipv6_address);
     
     if(sock_fd < 0)
         return -1;
@@ -331,9 +338,6 @@ static void print_status(uint16_t status){
 }
 
 static void print_response(uint8_t action, uint8_t method, uint8_t response_length, char * response){
-    //printf("Action: %X\n", action);
-    //printf("Method: %X\n", method);
-    *(response + response_length) = 0;
     printf("\nResponse: %d\n", response[0]);
 }
 
@@ -372,19 +376,17 @@ static int resolve_command(char * command, uint8_t * method, uint8_t * action, u
     return -1;
 }
 
-static int connect_to_ipv4(){
+static int connect_to_ipv4(struct sockaddr_in * ipv4_address){
     int sock_fd = socket(AF_INET , SOCK_STREAM , 0);
-
     if(sock_fd < 0)
         return -1;
 
-    struct sockaddr_in server_address_4;
-    memset(&server_address_4, 0, sizeof(server_address_4));
-    server_address_4.sin_family = AF_INET;
-    server_address_4.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-    server_address_4.sin_port = htons(COOL_PORT);
+    memset(ipv4_address, 0, sizeof(*ipv4_address));
+    ipv4_address->sin_family = AF_INET;
+    ipv4_address->sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    ipv4_address->sin_port = htons(COOL_PORT);
 
-    if(connect(sock_fd, (struct sockaddr *) &server_address_4, sizeof(server_address_4)) < 0){
+    if(connect(sock_fd, (struct sockaddr *) ipv4_address, sizeof(*ipv4_address)) < 0){
         close(sock_fd);
         return -1;
     }
@@ -392,8 +394,21 @@ static int connect_to_ipv4(){
     return sock_fd;
 }
 
-static int connect_to_ipv6(){
-    return connect_to_ipv4();
+static int connect_to_ipv6(struct sockaddr_in6 * ipv6_address){
+    int sock_fd = socket(AF_INET6, SOCK_STREAM , 0);
+    if(sock_fd < 0)
+        return -1;
+
+    ipv6_address->sin6_family = AF_INET6;
+    ipv6_address->sin6_port = htons(COOL_PORT);
+    inet_pton(AF_INET6, "::1", &ipv6_address->sin6_addr);
+
+    if(connect(sock_fd, (struct sockaddr *) ipv6_address, sizeof(*ipv6_address)) < 0){
+        close(sock_fd);
+        return -1;
+    }
+
+    return sock_fd;
 }
 
 static void handle_help(int sock_fd){
