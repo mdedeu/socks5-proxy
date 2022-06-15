@@ -37,7 +37,7 @@
 #define CONNECTED_USERS 5
 
 #define MAX_AUTH_TRIES 3
-#define COMMAND_MAX_LEN 128
+#define COMMAND_MAX_LEN 32
 
 static int ask_method_and_parameters(int sock_fd, int * is_builtin, uint8_t * action, uint8_t * method, uint8_t * parameters);
 static int ask_parameters(uint8_t method, uint8_t * parameters);
@@ -58,7 +58,7 @@ static int resolve_command(char * command, uint8_t * method, uint8_t * action, u
 static int connect_to_ipv4(struct sockaddr_in * ipv4_address);
 static int connect_to_ipv6(struct sockaddr_in6 * ipv6_address);
 
-#define BUILTIN_TOTAL 1
+#define BUILTIN_TOTAL 2
 #define QUERIES_TOTAL 7
 #define MODIFIERS_TOTAL 5
 char * builtin_names[] = {"help", "quit"};
@@ -78,8 +78,10 @@ int main(int argc, char * argv[]){
     struct sockaddr_in6 ipv6_address;
     struct sockaddr_in ipv4_address;
 
-    if(argc != 2)
+    if(argc != 2){
+        printf("You should enter the address family as a parameter, 4 for ipv4 and 6 for ipv6.\n");
         return -1;
+    }
 
     errno = 0;
     int address_family = strtol(argv[1], NULL, 10);
@@ -186,10 +188,14 @@ static int ask_method_and_parameters(int sock_fd, int * is_builtin, uint8_t * ac
         }
     }
 
+    if(resolve_command(command, action, method, parameters) == -1){
+        printf("Invalid command.\n");
+        *is_builtin = 1;
+        return 0;
+    }
+
     *is_builtin = 0;
 
-    if(resolve_command(command, action, method, parameters) == -1)
-        return -1;
     
     if(*parameters)
         return ask_parameters(*method, parameters);
