@@ -28,13 +28,16 @@
 #define REMOVE_USER 1
 #define ENABLE_SPOOFING 2
 #define DISABLE_SPOOFING 3
+#define CHANGE_BUFFER_SIZE 4
 
-#define TOTAL_CONNECTIONS 0
-#define CURRENT_CONNECTIONS 1
-#define MAX_CURRENT_CONNECTIONS 2
-#define TOTAL_BYTES_SENT 3
-#define TOTAL_BYTES_RECV 4
-#define CONNECTED_USERS 5
+#define TOTAL_CONNECTIONS 1
+#define CURRENT_CONNECTIONS 2
+#define MAX_CURRENT_CONNECTIONS 3
+#define TOTAL_BYTES_SENT 4
+#define TOTAL_BYTES_RECV 5
+#define CONNECTED_USERS 6
+#define MAX_BUFFER_SIZE 7
+#define USER_LIST 8
 
 #define MAX_AUTH_TRIES 3
 #define COMMAND_MAX_LEN 64
@@ -57,6 +60,7 @@ static void print_welcome();
 static int resolve_command(char * command, uint8_t * method, uint8_t * action, uint8_t * parameters);
 static int connect_to_ipv4(struct sockaddr_in * ipv4_address);
 static int connect_to_ipv6(struct sockaddr_in6 * ipv6_address);
+static int ask_buffer_size(uint8_t * size);
 
 #define BUILTIN_TOTAL 2
 #define QUERIES_TOTAL 7
@@ -104,13 +108,13 @@ int main(int argc, char * argv[]){
     int tries=0;
     while(returned_status != 0xC001){
 
+    if(ask_credentials(username, password) < 0)
+        continue;
+
     if(tries++ >= MAX_AUTH_TRIES){
         printf("Max number of tries reached, closing client.\n");
         return close_connection(sock_fd);
     }
-
-    if(ask_credentials(username, password) < 0)
-        continue;
 
     if(send_credentials(sock_fd, username, password) < 0){
         close_connection(sock_fd);
@@ -247,6 +251,11 @@ static int ask_parameters(uint8_t method, uint8_t * parameters){
             if(ask_protocol(parameters) < 0)
                 return -1;
             return 1;
+
+        case CHANGE_BUFFER_SIZE:
+            if(ask_buffer_size(parameters) < 0)
+                return -1;
+            return 1;
         }
     return -1;
 }
@@ -293,6 +302,18 @@ static int ask_protocol(uint8_t * protocol){
         return -1;
     protocol_str[4]=0;
     *protocol = strtol((char *) protocol_str, NULL, 0);
+    return 0;
+}
+
+static int ask_buffer_size(uint8_t * size){
+    uint8_t size_str[8];
+    printf("Size: ");
+    fflush(stdout);
+    if(fgets((char *) size_str, CREDS_LEN, stdin) == 0)
+        return -1;
+    size_str[6]=0;
+    *size =  (0xFF00 & strtol((char *) size_str, NULL, 0)) >> 8;
+    *(size + 1) =  0xFF & strtol((char *) size_str, NULL, 0);
     return 0;
 }
 

@@ -10,6 +10,7 @@ void cool_response_writing_arrival(const unsigned int leaving_state, struct sele
 unsigned cool_response_write_handler(struct selector_key *key){
     if(key == NULL || key->data == NULL)
         return CLOSING_COOL_CONNECTION;
+
     cool_client *client_data = (cool_client *) key->data;
 
     if (!buffer_can_read(client_data->write_buffer))
