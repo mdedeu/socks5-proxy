@@ -103,14 +103,19 @@ int main(int argc, char * argv[]){
     if(ask_credentials(username, password) < 0)
         continue;
 
-    send_credentials(sock_fd, username, password);
+    if(send_credentials(sock_fd, username, password) < 0){
+        close_connection(sock_fd);
+        return -1;
+    }
 
     struct simple_response_message * simple_response = init_simple_response_parser();
 
     do {
         read_amount = recv(sock_fd, buff_recv, RECV_BUFFER_SIZE, 0);
-        if(read_amount < 0)
+        if(read_amount <= 0){
+            close_connection(sock_fd);
             return -1;
+        }
     } while(!feed_simple_response_parser(simple_response, (char *) buff_recv, read_amount));
 
     returned_status = simple_response->status[0] << 8;
@@ -133,14 +138,19 @@ int main(int argc, char * argv[]){
     if(is_builtin)
         continue;
 
-    send_method_and_parameters(sock_fd, action, method, param_len, parameters);
+    if(send_method_and_parameters(sock_fd, action, method, param_len, parameters) < 0){
+        close_connection(sock_fd);
+        return -1;
+    }
 
     struct general_response_message * general_response = init_general_response_parser();
 
     do {
         read_amount = recv(sock_fd, buff_recv, RECV_BUFFER_SIZE, 0);
-        if(read_amount < 0)
+        if(read_amount <= 0){
+            close_connection(sock_fd);
             return -1;
+        }
     } while(!feed_general_response_parser(general_response, (char *) buff_recv, read_amount));
 
     print_response(general_response->action, general_response->method, general_response->response_length, general_response->response);
@@ -398,5 +408,6 @@ static void handle_help(int sock_fd){
 
 static void handle_quit(int sock_fd){
     close_connection(sock_fd);
+    //TODO: mirar si se puede cortar la ejecucion sin usar exit, o si esta bien usar exit
     exit(0);
 }
