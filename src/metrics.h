@@ -11,6 +11,8 @@ uint8_t enable_spoofing_handler(uint8_t protocol);
 
 uint8_t disable_spoofing_handler(uint8_t protocol);
 
+uint8_t change_buffer_size_handler(uint16_t size);
+
 uint64_t get_total_connections();
 
 uint64_t get_current_connections();
@@ -22,5 +24,9 @@ uint64_t get_total_bytes_sent();
 uint64_t get_total_bytes_recv();
 
 uint64_t get_connected_users();
+
+uint64_t get_max_buffer_size();
+
+uint64_t get_user_list();
 
 #endif

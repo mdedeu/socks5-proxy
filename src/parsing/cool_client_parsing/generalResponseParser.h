@@ -10,9 +10,13 @@
 struct general_response_message{
     uint8_t action;
     uint8_t method;
-    uint8_t response_length;
-    uint8_t response_characters_read;
+
+    uint16_t response_length;
+    uint8_t response_length_characaters_read;
+
     char * response;
+    uint8_t response_characters_read;
+
     struct parser * using_parser;
 };
 

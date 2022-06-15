@@ -12,6 +12,8 @@ static struct user_info users[10]={
     {.username="gbeade", .password="gbeade"},
 };
 
+static void write_error_response(buffer * buff, char * error_response, uint32_t * header);
+
 void process_cool_authentication_message(struct cool_protocol_authentication_message * data, struct selector_key * key){
     //TODO: hace la comprarcion con un metodo del sistema de metricas
     bool valid_user = false;
@@ -51,80 +53,108 @@ void process_cool_request_message(struct general_request_message * data, struct 
     cool_client * client_data = (cool_client * ) key->data;
     uint64_t result;
     int error = 0;
+    uint32_t header = 0;
 
     if(client_data->write_buffer == NULL)
         return;
 
-    buffer_write(client_data->write_buffer, data->action);
-    buffer_write(client_data->write_buffer, data->method);
+    uint8_t header_write = buffer_write_ptr(client_data->write_buffer, sizeof(header));
+    buffer_write_adv(client_data->write_buffer, sizeof(header));
+    header += data->action << 24;
+    header += data->method << 16;
 
     switch(data->action){
         case MODIFY:
-            buffer_write(client_data->write_buffer, 1);
             switch(data->method){
             case ADD_USER:
                 if(data->username == NULL || data->password == NULL)
                     return;
                 buffer_write(client_data->write_buffer, add_user_handler(data->ulen, data->username, data->plen, data->password));
+                header += 0x0001;
                 break;
             case REMOVE_USER:
                 if(data->username == NULL)
                     return;
                 buffer_write(client_data->write_buffer, remove_user_handler(data->ulen, data->username));
+                header += 0x0001;
                 break;
             case ENABLE_SPOOFING:
                 buffer_write(client_data->write_buffer, enable_spoofing_handler(data->protocol));
+                header += 0x0001;
                 break;
             case DISABLE_SPOOFING:
                 buffer_write(client_data->write_buffer, disable_spoofing_handler(data->protocol));
+                header += 0x0001;
                 break;
-                default:
-                    error = 1;
-                    break;
-            }
-            if(error){
-                buffer_write(client_data->write_buffer, 0);
-                buffer_write(client_data->write_buffer, 1);
-            }
-            break;
-        case QUERY:
-            switch(data->method){
-            case TOTAL_CONNECTIONS:
-                result = get_total_connections();
-                break;
-            case CURRENT_CONNECTIONS:
-                result = get_current_connections();
-                break;
-            case MAX_CURRENT_CONNECTIONS:
-                result = get_max_current_connections();
-                break;
-            case TOTAL_BYTES_SENT:
-                result = get_total_bytes_sent();
-                break;
-            case TOTAL_BYTES_RECV:
-                result = get_total_bytes_recv();
-                break;
-            case CONNECTED_USERS:
-                result = get_connected_users();
+            case CHANGE_BUFFER_SIZE:
+                buffer_write(client_data->write_buffer, change_buffer_size_handler(data->protocol));
+                header += 0x0001;
                 break;
             default:
                 error = 1;
                 break;
             }
             if(error){
-                buffer_write(client_data->write_buffer, 0);
-                buffer_write(client_data->write_buffer, 1);
+                write_error_response(client_data->write_buffer, "Invalid modifier", &header);
             }
-            else{
-                buffer_write(client_data->write_buffer, 1);
-                //for(int i = 0; i < 7; i++)
-                //    buffer_write(client_data->write_buffer, (result >> i*8) & 255);
+            break;
+        case QUERY:
+            switch(data->method){
+            case GET_TOTAL_CONNECTIONS:
+                result = get_total_connections();
+                header += 0x0001;
+                break;
+            case GET_CURRENT_CONNECTIONS:
+                result = get_current_connections();
+                header += 0x0001;
+                break;
+            case GET_MAX_CURRENT_CONNECTIONS:
+                result = get_max_current_connections();
+                header += 0x0001;
+                break;
+            case GET_TOTAL_BYTES_SENT:
+                result = get_total_bytes_sent();
+                header += 0x0001;
+                break;
+            case GET_TOTAL_BYTES_RECV:
+                result = get_total_bytes_recv();
+                header += 0x0001;
+                break;
+            case GET_CONNECTED_USERS:
+                result = get_connected_users();
+                header += 0x0001;
+                break;
+            case GET_MAX_BUFFER_SIZE:
+                result = get_max_buffer_size();
+                header += 0x0001;
+                break;
+            case GET_USER_LIST:
+                result = get_user_list();
+                header += 0x0001;
+                break;
+            default:
+                error = 1;
+                break;
+            }
+            if(error){
+                write_error_response(client_data->write_buffer, "Invalid query", &header);
+            }
+            else
                 buffer_write(client_data->write_buffer, (uint8_t) (result & 255));
-            }
             break;
         default:
-            buffer_write(client_data->write_buffer, 0);
-            buffer_write(client_data->write_buffer, 0);
+            write_error_response(client_data->write_buffer, "Invalid action", &header);
             break;
     }
+    memcpy(header_write, &header, sizeof(header));
+}
+
+
+static void write_error_response(buffer * buff, char * error_response, uint32_t * header){
+    *header |= 0xFFFF0000;
+    *header += strlen(error_response);
+    buffer_compact(buff);
+    uint8_t * response_write = buffer_write_ptr(buff, strlen(error_response));
+    memcpy(response_write, error_response, strlen(error_response));
+    buffer_write_adv(buff, strlen(error_response));
 }
