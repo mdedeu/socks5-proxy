@@ -49,9 +49,10 @@ static struct parser_definition simple_response_parser_definition={
 
 struct simple_response_message * init_simple_response_parser(){
     struct simple_response_message * new_simple_response_message = malloc(sizeof (struct simple_response_message));
+    memset(new_simple_response_message, 0, sizeof(struct simple_response_message));
     struct parser * simple_response_parser = parser_init(parser_no_classes(), &simple_response_parser_definition);
     new_simple_response_message->using_parser = simple_response_parser;
-    new_simple_response_message->status_bytes_read = 0;
+    //new_simple_response_message->status_bytes_read = 0;
     return new_simple_response_message;
 }
 

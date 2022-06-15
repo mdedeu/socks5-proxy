@@ -58,8 +58,9 @@ void process_cool_request_message(struct general_request_message * data, struct 
     if(client_data->write_buffer == NULL)
         return;
 
-    uint8_t header_write = buffer_write_ptr(client_data->write_buffer, sizeof(header));
-    buffer_write_adv(client_data->write_buffer, sizeof(header));
+    size_t len = sizeof(header);
+    uint8_t * header_write = buffer_write_ptr(client_data->write_buffer, &len);
+    buffer_write_adv(client_data->write_buffer, len);
     header += data->action << 24;
     header += data->method << 16;
 
@@ -154,7 +155,8 @@ static void write_error_response(buffer * buff, char * error_response, uint32_t 
     *header |= 0xFFFF0000;
     *header += strlen(error_response);
     buffer_compact(buff);
-    uint8_t * response_write = buffer_write_ptr(buff, strlen(error_response));
-    memcpy(response_write, error_response, strlen(error_response));
-    buffer_write_adv(buff, strlen(error_response));
+    size_t len = strlen(error_response);
+    uint8_t * response_write = buffer_write_ptr(buff, &len);
+    memcpy(response_write, error_response, len);
+    buffer_write_adv(buff, len);
 }

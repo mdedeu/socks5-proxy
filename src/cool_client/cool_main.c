@@ -355,7 +355,12 @@ static void print_status(uint16_t status){
 }
 
 static void print_response(uint8_t action, uint8_t method, uint8_t response_length, char * response){
-    printf("\nResponse: %d\n", response[0]);
+    if(action == 0xFF && method == 0xFF){
+        response[response_length] = 0;
+        printf("%s\n", response);
+    }
+    else
+        printf("\nResponse: %d\n", response[0]);
 }
 
 static int close_connection(int socket_fd){
