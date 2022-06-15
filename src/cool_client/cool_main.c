@@ -37,7 +37,7 @@
 #define CONNECTED_USERS 5
 
 #define MAX_AUTH_TRIES 3
-#define COMMAND_MAX_LEN 32
+#define COMMAND_MAX_LEN 7
 
 static int ask_method_and_parameters(int sock_fd, int * is_builtin, uint8_t * action, uint8_t * method, uint8_t * parameters);
 static int ask_parameters(uint8_t method, uint8_t * parameters);
@@ -176,9 +176,20 @@ static int ask_method_and_parameters(int sock_fd, int * is_builtin, uint8_t * ac
     printf("> ");
     fflush(stdout);
 
-    if(!fgets(command, COMMAND_MAX_LEN-1, stdin))
-         return -1;
-    command[strlen(command)-1]=0;
+    if(!fgets(command, COMMAND_MAX_LEN, stdin)){
+        return -1;
+    }
+
+    char * end = strchr(command, '\n');
+    if(end == NULL){
+        printf("Invalid command.\n");
+        while(getc(stdin) != '\n');
+        *is_builtin = 1;
+        return 0;
+    }
+    else
+        command[end-command] = 0; 
+
 
     for(int i = 0; i < BUILTIN_TOTAL; i++){
         if(!strcmp(builtin_names[i], command)){
