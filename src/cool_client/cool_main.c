@@ -470,7 +470,7 @@ static int close_connection(int socket_fd){
 
 static void print_welcome(){
     printf("\n===========================================================\n");
-    printf("Welcome to the cool sock5 proxy configuration.\n\n");
+    printf("Welcome to the super cool sock5 proxy configuration.\n\n");
     printf("Enter \"help\" in the command prompt to see the posible configuration commands.\n");
     printf("Enter \"quit\" in the command prompt to terminate the session.\n");
     printf("===========================================================\n");
