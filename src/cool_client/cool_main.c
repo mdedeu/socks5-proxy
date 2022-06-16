@@ -175,10 +175,11 @@ int main(int argc, char * argv[]){
     return 0;
 }
 
-static int ask_method_and_parameters(int sock_fd, int * is_builtin, uint8_t * action, uint8_t * method, uint8_t * parameters){
+static int ask_method_and_parameters(int sock_fd, int * skip, uint8_t * action, uint8_t * method, uint8_t * parameters){
     char command[COMMAND_MAX_LEN];
     printf("> ");
     fflush(stdout);
+    int len;
 
     if(!fgets(command, COMMAND_MAX_LEN, stdin)){
         return -1;
@@ -188,7 +189,7 @@ static int ask_method_and_parameters(int sock_fd, int * is_builtin, uint8_t * ac
     if(end == NULL){
         printf("Invalid command.\n");
         while(getc(stdin) != '\n');
-        *is_builtin = 1;
+        *skip= 1;
         return 0;
     }
     else
@@ -197,7 +198,7 @@ static int ask_method_and_parameters(int sock_fd, int * is_builtin, uint8_t * ac
 
     for(int i = 0; i < BUILTIN_TOTAL; i++){
         if(!strcmp(builtin_names[i], command)){
-            *is_builtin = 1;
+            *skip= 1;
             builtin[i](sock_fd);
             return 0;
         }
@@ -205,15 +206,23 @@ static int ask_method_and_parameters(int sock_fd, int * is_builtin, uint8_t * ac
 
     if(resolve_command(command, action, method, parameters) == -1){
         printf("Invalid command.\n");
-        *is_builtin = 1;
+        *skip = 1;
         return 0;
     }
 
-    *is_builtin = 0;
-
     
-    if(*parameters)
-        return ask_parameters(*method, parameters);
+    if(*parameters){
+        len = ask_parameters(*method, parameters);
+        if(len < 0){
+            printf("Invalid parameter\n");
+            *skip= 1;
+            return 0;
+        }
+        *skip = 0;
+        return len;
+    }
+
+    *skip= 0;
 
     return 0;
 }
@@ -279,9 +288,20 @@ static int ask_username(uint8_t * username){
     fflush(stdout);
     if(!fgets((char *) username, CREDS_LEN, stdin))
         return -1;
+
     if(*username == '\n')
         return -1;
-    return strlen((char *) username)-1;
+        
+    char * end = strchr((char *) username, '\n');
+    if(end == NULL){
+        while(getc(stdin) != '\n');
+        return -1;
+    }
+    else
+        username[end-(char *) username] = 0; 
+
+    size_t len = strlen((char *) username);
+    return len;
 }
 
 static int ask_password(uint8_t * password){
@@ -289,17 +309,36 @@ static int ask_password(uint8_t * password){
     fflush(stdout);
     if(!fgets((char *) password, CREDS_LEN, stdin))
         return -1;
+
     if(*password == '\n')
         return -1;
-    return strlen((char *) password)-1;
+
+    char * end = strchr((char *) password, '\n');
+    if(end == NULL){
+        while(getc(stdin) != '\n');
+        return -1;
+    }
+    else
+        password[end-(char *) password] = 0; 
+
+    return strlen((char *) password);
 }
 
 static int ask_protocol(uint8_t * protocol){
-    uint8_t protocol_str[6];
+    uint8_t protocol_str[32];
     printf("Protocol: ");
     fflush(stdout);
     if(fgets((char *) protocol_str, CREDS_LEN, stdin) == 0)
         return -1;
+
+    char * end = strchr((char *) protocol, '\n');
+    if(end == NULL){
+        while(getc(stdin) != '\n');
+        protocol[31] = 0;
+    }
+    else
+        protocol[end-(char *)protocol] = 0; 
+        
     protocol_str[4]=0;
     *protocol = strtol((char *) protocol_str, NULL, 0);
     return 0;
@@ -318,8 +357,8 @@ static int ask_buffer_size(uint8_t * size){
 }
 
 static int send_credentials(int socket_fd, uint8_t * username, uint8_t * password){
-    uint8_t ulen = strlen((char *) username)-1;
-    uint8_t plen = strlen((char *) password)-1;
+    uint8_t ulen = strlen((char *) username);
+    uint8_t plen = strlen((char *) password);
     uint8_t version = 1;
 
     if(send(socket_fd, &version, 1, 0) <= 0)
