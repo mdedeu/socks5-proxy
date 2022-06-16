@@ -112,7 +112,7 @@ int main(int argc, char * argv[]){
         continue;
 
     if(tries++ >= MAX_AUTH_TRIES){
-        printf("Max number of tries reached, closing client.\n");
+        printf("Max number of tries reached\n");
         return close_connection(sock_fd);
     }
 
@@ -187,7 +187,7 @@ static int ask_method_and_parameters(int sock_fd, int * skip, uint8_t * action, 
 
     char * end = strchr(command, '\n');
     if(end == NULL){
-        printf("Invalid command.\n");
+        printf("Invalid command\n");
         while(getc(stdin) != '\n');
         *skip= 1;
         return 0;
@@ -205,7 +205,7 @@ static int ask_method_and_parameters(int sock_fd, int * skip, uint8_t * action, 
     }
 
     if(resolve_command(command, action, method, parameters) == -1){
-        printf("Invalid command.\n");
+        printf("Invalid command\n");
         *skip = 1;
         return 0;
     }
@@ -271,12 +271,12 @@ static int ask_parameters(uint8_t method, uint8_t * parameters){
 
 static int ask_credentials(uint8_t * username, uint8_t * password){
     if(ask_username(username) < 0){
-        printf("Please enter valid credentials\n");
+        printf("Please enter credentials with valid format\n");
         return -1;
     }
 
     if(ask_password(password) < 0){
-        printf("Please enter valid credentials\n");
+        printf("Please enter credentials with valid format\n");
         return -1;
     }
 
@@ -408,9 +408,9 @@ static void print_status(uint16_t status){
     if(status == 0xC001)
         print_welcome();
     else if(status == 0x4B1D)
-        printf("Invalid credentials, please try again.\n");
+        printf("Invalid credentials, please try again");
     else{
-        printf("Please enter valid credentials\n");
+        printf("Please enter valid credentials");
     }
 }
 
@@ -429,9 +429,11 @@ static int close_connection(int socket_fd){
 }
 
 static void print_welcome(){
+    printf("\n===========================================================\n");
     printf("Welcome to the cool sock5 proxy configuration.\n");
     printf("Enter \"help\" in the command prompt to see the posible configuration commands.\n");
     printf("Enter \"quit\" in the command prompt to terminate the session.\n");
+    printf("===========================================================\n");
 }
 
 //If the command is invalid it returns -1, else 0
