@@ -443,7 +443,7 @@ static void print_response(uint8_t action, uint8_t method, uint8_t response_leng
         printf("%s\n", response);
     }
     else
-        printf("\nResponse: %d\n", response[0]);
+        printf("Response: %d\n", response[0]);
 }
 
 static int close_connection(int socket_fd){
