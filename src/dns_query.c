@@ -36,7 +36,8 @@ void * request_resolving_blocking(void * data){
 
 
     selector_notify_block(key->s, key->fd);
-    free(data);
+    if(data != NULL)
+        free(data);
 
     return 0;
 }

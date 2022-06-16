@@ -13,7 +13,13 @@ struct cool_client * init_cool_client_connection(int fd){
 }
 
 void destroy_cool_client(struct cool_client * cool_client){
-    free(cool_client->write_buffer);
+    if(cool_client == NULL)
+        return;
+
+    if(cool_client->write_buffer)
+        free(cool_client->write_buffer);
     destroy_cool_state(cool_client->client_state_machine);
+    if(cool_client->client_state_machine)
+        free(cool_client->client_state_machine);
     free(cool_client);
 }

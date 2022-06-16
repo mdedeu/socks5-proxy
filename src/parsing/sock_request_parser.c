@@ -325,7 +325,9 @@ void close_sock_request_parser(struct parser * using_parser){
 
 
 void  close_sock_request_message(struct sock_request_message * message){
-    free(message->port);
+    if(message == NULL)
+        return;
+    if(message->port != NULL) free(message->port);
     if(message->atyp == 1)
         free(message->ipv4);
     else if(message->atyp == 4  )

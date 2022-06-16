@@ -28,5 +28,6 @@ struct state_machine *init_cool_state_machine() {
 }
 
 void destroy_cool_state(struct state_machine *cool_machine) {
-    free(cool_machine);
+    if(cool_machine != NULL)
+        free(cool_machine);
 }

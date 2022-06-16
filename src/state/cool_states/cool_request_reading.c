@@ -43,6 +43,7 @@ void cool_request_reading_arrival(const unsigned int leaving_state, struct selec
         return;
     cool_client *client_data = (cool_client *) key->data;
     client_data->current_parser.request_message = init_general_parser();
+    client_data->parsed_message = init_general_parser();
     selector_set_interest_key(key,OP_READ);
 }
 
