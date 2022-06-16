@@ -19,7 +19,5 @@ void destroy_cool_client(struct cool_client * cool_client){
     if(cool_client->write_buffer)
         free(cool_client->write_buffer);
     destroy_cool_state(cool_client->client_state_machine);
-    if(cool_client->client_state_machine)
-        free(cool_client->client_state_machine);
     free(cool_client);
 }

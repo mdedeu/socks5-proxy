@@ -11,6 +11,7 @@
 #include <errno.h>
 #include <netinet/in.h>
 #include <netinet/ip.h>
+#include <inttypes.h>
 #include "../parsing/cool_client_parsing/simpleResponseParser.h"
 #include "../parsing/cool_client_parsing/generalResponseParser.h"
 
@@ -464,8 +465,24 @@ static void print_response(uint8_t action, uint8_t method, uint8_t response_leng
         response[response_length] = 0;
         printf("%s\n", response);
     }
+    else if(action == 0xBE)
+        printf("\nModification Successful!\n");
+    else if(action == 0xD0){
+        if(method == USER_LIST)
+            printf("%s\n");
+        else{
+            if(response_length > 8){
+                printf("\nUint to big to be printed\n");
+                return;
+            }
+            uint64_t response_value = 0;
+            for(int i = 0; i < response_length; i++)
+                response_value += response[i] << (8*(response_length-i-1));
+            printf("%"PRIu64"\n", response_value);
+        }
+    }
     else
-        printf("Response: %d\n", response[0]);
+        printf("\nAn error ocurred\n");
 }
 
 static int close_connection(int socket_fd){
