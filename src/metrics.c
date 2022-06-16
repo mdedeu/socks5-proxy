@@ -21,22 +21,26 @@
 bool add_user_handler(uint8_t ulen, uint8_t * username, uint8_t plen, uint8_t * password){
     bool already_included = false;
     for(int i = 0 ; i < volatile_metrics.registered_clients ; i++){
-        if( strcmp(volatile_metrics.client_users[i].username,(char*)username) == 0){
+        if( strcmp(volatile_metrics.client_users[i]->username,(char*)username) == 0){
             already_included = true;
             break;
         }
     }
     if(!already_included){
-        struct server_user_info adding_user_info ;
-        adding_user_info.username = malloc(sizeof(ulen));
-        if(adding_user_info.username == NULL )
+        struct server_user_info * adding_user_info = calloc(1, sizeof(struct server_user_info));
+        if(adding_user_info == NULL)
             return false;
-        memcpy(adding_user_info.username,(char*)username,ulen);
-        adding_user_info.password = malloc(sizeof(plen));
-        if(adding_user_info.password == NULL )
+        adding_user_info->username = malloc(ulen+1);
+        if(adding_user_info->username == NULL )
             return false;
-        memcpy(adding_user_info.password,password, plen);
-        adding_user_info.connected = false;
+        memcpy(adding_user_info->username,(char*)username,ulen);
+        adding_user_info->username[ulen] = 0;
+        adding_user_info->password = malloc(plen+1);
+        if(adding_user_info->password == NULL )
+            return false;
+        memcpy(adding_user_info->password,password, plen);
+        adding_user_info->password[plen] = 0;
+        adding_user_info->connected = false;
         volatile_metrics.client_users[volatile_metrics.registered_clients++] = adding_user_info;
     }
 
@@ -45,13 +49,15 @@ bool add_user_handler(uint8_t ulen, uint8_t * username, uint8_t plen, uint8_t * 
 
 bool remove_user_handler(uint8_t ulen, uint8_t * username){
     for(int i = 0 ; i < volatile_metrics.registered_clients ; i++){
-        if(strcmp(volatile_metrics.client_users[i].username,(char*)username) == 0){
-            free(volatile_metrics.client_users[i].username);
-            volatile_metrics.client_users[i].username=NULL;
-            free(volatile_metrics.client_users[i].password);
-            volatile_metrics.client_users[i].password=NULL;
-            volatile_metrics.client_users[i] = volatile_metrics.client_users[volatile_metrics.registered_clients];
-            volatile_metrics.registered_clients -- ;
+        if(strcmp(volatile_metrics.client_users[i]->username,(char*)username) == 0){
+            if(volatile_metrics.client_users[i]->username)
+                free(volatile_metrics.client_users[i]->username);
+            if(volatile_metrics.client_users[i]->password)
+                free(volatile_metrics.client_users[i]->password);
+            if(volatile_metrics.client_users[i])
+                free(volatile_metrics.client_users[i]);
+            if(volatile_metrics.registered_clients-- >= 0)
+                volatile_metrics.client_users[i] = volatile_metrics.client_users[volatile_metrics.registered_clients];
             return true;
         }
     }
@@ -133,7 +139,7 @@ uint64_t get_user_list(){
 uint64_t get_connected_users(){
     uint8_t connected_users = 0 ;
     for(int i = 0 ; i < volatile_metrics.registered_clients ; i++){
-        if( volatile_metrics.client_users[i].connected )
+        if( volatile_metrics.client_users[i]->connected )
             connected_users ++ ;
     }
     return connected_users;
@@ -141,9 +147,9 @@ uint64_t get_connected_users(){
 
 bool connect_user(char * username , char * password){
     for(int i = 0; i < volatile_metrics.registered_clients ; i++){
-        if(strcmp(volatile_metrics.client_users[i].username, username)==0 &&
-        0==strcmp(volatile_metrics.client_users[i].password, password)){
-            volatile_metrics.client_users[i].connected=true;
+        if(strcmp(volatile_metrics.client_users[i]->username, username)==0 &&
+        0==strcmp(volatile_metrics.client_users[i]->password, password)){
+            volatile_metrics.client_users[i]->connected=true;
             return true;
         }
     }
@@ -160,8 +166,8 @@ void set_clients_need_authentication(bool boolean){
 
 void disconnect(char * username){
     for(int i = 0 ; i < volatile_metrics.registered_clients ; i++){
-        if( strcmp(volatile_metrics.client_users[i].username,(char*)username) == 0){
-           volatile_metrics.client_users[i].connected=false;
+        if( strcmp(volatile_metrics.client_users[i]->username,(char*)username) == 0){
+           volatile_metrics.client_users[i]->connected=false;
         }
     }
 }

@@ -21,7 +21,7 @@ struct metrics{
     uint64_t bytes_sent;
     uint64_t bytes_received;
     uint8_t  registered_clients;
-    struct server_user_info client_users[MAX_USERS];
+    struct server_user_info * client_users[MAX_USERS];
     struct server_user_info admin_users[ADMIN_NUMBERS];
     bool clients_need_authentication;
 };
