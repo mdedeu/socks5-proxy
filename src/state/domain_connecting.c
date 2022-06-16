@@ -1,6 +1,7 @@
 #include "domain_connecting.h"
 
 static bool try_one_ip_address(struct selector_key * key);
+static uint16_t  port_from_addrinfo(struct sockaddr * info);
 
 
 void domain_connecting_arrival(unsigned state, struct selector_key * key){
@@ -74,10 +75,24 @@ static bool try_one_ip_address(struct selector_key * key){
             client_message->connection_result = status_network_unreachable;
             return false;
         case EINPROGRESS:
-            if(SELECTOR_SUCCESS == selector_register(key->s, client_information->origin_fd, &socks5_handler, OP_WRITE, client_information))
+            if(SELECTOR_SUCCESS == selector_register(key->s, client_information->origin_fd, &socks5_handler, OP_WRITE, client_information)){
+                client_information->origin_port = port_from_addrinfo(current->ai_addr);
                 return true;
+            }
         default:
             client_message->connection_result = status_general_socks_server_failure;
             return false;
     }
+}
+
+
+static uint16_t port_from_addrinfo(struct sockaddr * current){
+    if(current->sa_family == AF_INET){
+        struct sockaddr_in * current_ipv4= (struct sockaddr_in * ) current;
+        return ntohs(current_ipv4->sin_port);
+    }else{
+        struct sockaddr_in6 * current_ipv6= (struct sockaddr_in6 * ) current;
+        return ntohs(current_ipv6->sin6_port);
+    }
+
 }

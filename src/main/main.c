@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <string.h>
-#include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
 #include <arpa/inet.h>
@@ -14,17 +13,19 @@
 #include "../cool_handlers.h"
 #include "../parsing/sock_request_parser.h"
 #include <limits.h>
+#include "../args.h"
+#include "../metrics.h"
 
 
 
 #define MAX_PENDING_CONNECTIONS 500
 #define OTHER_PORT 9090
-#define COOL_PORT 42069
 #define TRUE 1
 #define RW_AMOUNT 30
 #define SOCKS_PASSIVE_SOCKET_SIZE 2
 #define SOCKS_COOL_PASSIVE_SOCKET_SIZE 2
 #define DEFAULT_SOCK_PORT 1080
+#define COOL_PORT 42069
 
 static bool done = false;
 
@@ -93,30 +94,30 @@ void coolTcpConnectionHandler(struct selector_key *key){
     }
 }
 
-int main(const int argc, const char **argv){
+int main(const int argc,  char **argv){
 
     signal(SIGTERM, sigterm_handler);
     signal(SIGINT,  sigterm_handler);
     int ret ;
     unsigned port = DEFAULT_SOCK_PORT;
 
-    if(argc == 1) {
-        // utilizamos el default
-    } else if(argc == 2) {
-        char *end     = 0;
-        const long sl = strtol(argv[1], &end, 10);
+    struct socks5args received_args;
+    parse_args(argc, argv, &received_args);
 
-        if (end == argv[1]|| '\0' != *end
-            || ((LONG_MIN == sl || LONG_MAX == sl) && ERANGE == errno)
-            || sl < 0 || sl > USHRT_MAX) {
-            fprintf(stderr, "port should be an integer: %s\n", argv[1]);
-            return 1;
-        }
-        port = sl;
-    } else {
-        fprintf(stderr, "Usage: %s <port>\n", argv[0]);
-        return 1;
+
+    /*initializing metrics.h*/
+    port = received_args.socks_port;
+    if(!received_args.disectors_enabled)
+       disable_spoofing_handler();
+
+    set_clients_need_authentication(received_args.disectors_enabled);
+
+    for(int i = 0 ; i < 10 ; i ++){
+        if(received_args.users[i].name != NULL && received_args.users[i].pass != NULL )
+        add_user_handler(strlen(received_args.users[i].name),(uint8_t * )received_args.users[i].name,
+                         strlen(received_args.users[i].pass),(uint8_t*)received_args.users[i].pass);
     }
+
 
     close(STDIN_FILENO);
 
@@ -135,7 +136,7 @@ int main(const int argc, const char **argv){
     struct sockaddr_in server_address_4;
     memset(&server_address_4, 0, sizeof(server_address_4));
     server_address_4.sin_family      = AF_INET;
-    server_address_4.sin_addr.s_addr = htonl(INADDR_ANY);
+    inet_pton(AF_INET, received_args.socks_addr, &server_address_4.sin_addr.s_addr);
     server_address_4.sin_port        = htons(port);
 
     if( (master_socket[current_sock_passive_socket] = socket(AF_INET , SOCK_STREAM , IPPROTO_TCP)) < 0)
@@ -181,7 +182,8 @@ int main(const int argc, const char **argv){
 	server_address_6.sin6_port = htons(port);
     inet_pton(AF_INET6, "::1", &server_address_6.sin6_addr);
 
-	if (bind(master_socket[current_sock_passive_socket], (struct sockaddr *) &server_address_6, sizeof(server_address_6)) < 0)
+
+    if (bind(master_socket[current_sock_passive_socket], (struct sockaddr *) &server_address_6, sizeof(server_address_6)) < 0)
 	{
         err_msg = "unable to bind  for ipv6";
         goto finally;
@@ -203,27 +205,30 @@ int main(const int argc, const char **argv){
 
     memset(&server_address_4, 0, sizeof(server_address_4));
     server_address_4.sin_family      = AF_INET;
+    //inet_pton(AF_INET, received_args.mng_addr, &server_address_4.sin_addr.s_addr);
+    //server_address_4.sin_port        = htons(received_args.mng_port);
     server_address_4.sin_addr.s_addr = htonl(INADDR_ANY);
     server_address_4.sin_port        = htons(COOL_PORT);
 
     if( (cool_master_socket[current_sock_cool_passive_socket] = socket(AF_INET , SOCK_STREAM , IPPROTO_TCP)) < 0)
     {
-        err_msg = "unable to create socket for ipv4";
+        err_msg = "unable to create socket for cool_ipv4";
         goto finally;
     }
 
     setsockopt(cool_master_socket[current_sock_cool_passive_socket], SOL_SOCKET, SO_REUSEADDR, (char *)&opt, sizeof(opt)) ;
+    //fprintf(stdout, "Listening on TCP port %d\n", received_args.mng_port);
     fprintf(stdout, "Listening on TCP port %d\n", COOL_PORT);
 
 
     if (bind(cool_master_socket[current_sock_cool_passive_socket], (struct sockaddr *)&server_address_4, sizeof(server_address_4))<0)
         {
-            err_msg = "unable to bind socket for ipv4";
+            err_msg = "unable to bind socket for cool_ipv4";
             goto finally;
         }
 
     if (listen(cool_master_socket[0], MAX_PENDING_CONNECTIONS) < 0){
-        err_msg = "unable to listen for ipv4";
+        err_msg = "unable to listen for cool_ipv4";
         goto finally;
     }
 
@@ -237,7 +242,7 @@ int main(const int argc, const char **argv){
 
 	if ((cool_master_socket[current_sock_cool_passive_socket] = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP)) < 0)
 	{
-        err_msg = "unable to create socket for ipv6";
+        err_msg = "unable to create socket for cool_ipv6";
         goto finally;
 	}
     setsockopt(cool_master_socket[current_sock_cool_passive_socket], SOL_SOCKET, SO_REUSEADDR, (char *) &opt, sizeof(opt));
@@ -249,13 +254,13 @@ int main(const int argc, const char **argv){
 
 	if (bind(cool_master_socket[current_sock_cool_passive_socket], (struct sockaddr *) &server_address_6, sizeof(server_address_6)) < 0)
 	{
-        err_msg = "unable to bind  for ipv6";
+        err_msg = "unable to bind for cool_ipv6";
         goto finally;
 	}
 
     if (listen(cool_master_socket[current_sock_cool_passive_socket], MAX_PENDING_CONNECTIONS) < 0)
 		{
-            err_msg = "unable to listen  for ipv6";
+            err_msg = "unable to listen for cool_ipv6";
             goto finally;
 		}
 

@@ -1,4 +1,5 @@
 #include "proxy_state_machine.h"
+static char * ISO_FORMATTER(char * time_buff , size_t time_buff_len);
 
 static const struct state_definition sock_hello_reading_state= {.state=SOCK_HELLO_READING, .on_arrival=sock_hello_reading_on_arrival,.on_read_ready=sock_hello_read_handler,.on_departure=sock_hello_reading_on_departure};
 static const struct state_definition sock_hello_writing_state = {.state=SOCK_HELLO_WRITING, .on_arrival=sock_hello_writing_on_arrival,.on_write_ready=sock_hello_write_handler,.on_departure=sock_hello_writing_on_departure};
@@ -60,4 +61,42 @@ unsigned  errno_to_sock(const int e ){
         default:
             return status_general_socks_server_failure;
     }
+}
+
+void print_connection_data(struct selector_key *  key){
+
+    size_t time_buff_len=64;
+    char time_buff[time_buff_len];
+    ISO_FORMATTER(time_buff,time_buff_len);
+
+
+    sock_client * client_data = (sock_client *) key->data;
+    struct sock_request_message * message = (struct sock_request_message *  ) client_data->parsed_message;
+
+    char buff[64] ;
+    sockaddr_to_human(buff,64,(struct sockaddr *) client_data->client_information);
+    printf("%s\t%s \t %s\t",time_buff,client_data->username==NULL?"unknown":client_data->username,buff);
+
+    sockaddr_to_human(buff,64,(struct sockaddr * )client_data->origin_address);
+    printf("%s\t",buff);
+    printf("status=%d\n",message->connection_result);
+}
+
+void print_confident_data(struct selector_key *  key) {
+    size_t time_buff_len=64;
+    char time_buff[time_buff_len];
+    ISO_FORMATTER(time_buff,time_buff_len);
+    sock_client * client_data = (sock_client *) key->data;
+    char buff[64] ;
+    sockaddr_to_human(buff,64,(struct sockaddr * )client_data->origin_address);
+    printf("%s\t%s \t POP3\t%s\t",time_buff,client_data->username==NULL?"unknown":client_data->username,buff);
+    printf("%s\t%s\n", client_data->dissector->username,client_data->dissector->password);
+}
+
+static char * ISO_FORMATTER(char * time_buff , size_t time_buff_len){
+    time_t seconds_from;
+    seconds_from= time(NULL);
+    struct tm * current_time =localtime(&seconds_from);
+    strftime(time_buff, time_buff_len,"%Y-%m-%dT%H-%M-%SZ", current_time);
+    return time_buff;
 }

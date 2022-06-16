@@ -1,16 +1,5 @@
 #include "client_request_processor.h"
 
-struct user_info{
-    char username[30];
-    char password[30];
-};
-
-struct user_info users[]={
-        {.username="shadad", .password="shadad"},
-        {.username="mdedeu", .password="mdedeu"},
-        {.username="scastagnino", .password="scastagnino"},
-        {.username="gbeade", .password="gbeade"},
-};
 
 bool process_hello_message(struct sock_hello_message * data, struct selector_key * key){
     if(data==NULL || key == NULL || key->data ==NULL )
@@ -30,7 +19,7 @@ bool process_hello_message(struct sock_hello_message * data, struct selector_key
     if(available_space < HELLO_ANSWER_LENGTH)
         return false;
 
-    if(AUTHENTICATION){
+    if(clients_need_authentication()){
         for(int i = 0; i < data->nmethods; i++){
             if(data->methods[i] == USERNAME_AUTHENTICATION)
                 accepted_method_given = true;
@@ -39,7 +28,7 @@ bool process_hello_message(struct sock_hello_message * data, struct selector_key
 
     buffer_write(client_data->write_buffer, CURRENT_SOCK_VERSION);
 
-    if(AUTHENTICATION) {
+    if(clients_need_authentication()) {
     if(accepted_method_given)
         buffer_write(client_data->write_buffer, USERNAME_AUTHENTICATION);
     else
@@ -47,7 +36,7 @@ bool process_hello_message(struct sock_hello_message * data, struct selector_key
     }else   buffer_write(client_data->write_buffer,0);
 
 
-    return accepted_method_given || !AUTHENTICATION;
+    return accepted_method_given || !clients_need_authentication();
 
 }
 
@@ -65,17 +54,16 @@ bool process_authentication_message(struct sock_authentication_message * data, s
     if(available_space < AUTHENTICATION_ANSWER_LENGTH)
         return false;
 
-    bool valid_user = false;
-    for(int i = 0; users != NULL && i < N(users) ; i++){
-        if(strcmp(data->username, users[i].username)==0 && 0==strcmp(data->password, users[i].password)){
-            valid_user = true;
-            break;
-        }
-    }
+    bool valid_user = connect_user((char *)data->username,(char * )data->password) ;
 
     buffer_write(client_data->write_buffer, CURRENT_SOCK_VERSION);
-    if(valid_user)
+    if(valid_user){
         buffer_write(client_data->write_buffer, VALID_USER);
+        client_data->username = malloc(data->username_length);
+        if(client_data->username ==NULL)
+            return false;
+        memcpy(client_data->username, data->username,data->username_length);
+    }
     else
         buffer_write(client_data->write_buffer, NO_VALID_USER);
     return valid_user; 
@@ -109,6 +97,9 @@ void process_request_message(struct sock_request_message * data, struct selector
         ipv6_address->sin6_port <<= 8;
         ipv6_address->sin6_port += data->port[1];
         ipv6_address->sin6_port = htons(ipv6_address->sin6_port);
+        //both required by valgrind
+        ipv6_address->sin6_flowinfo = 0;
+        ipv6_address->sin6_scope_id = 0;
         client_information->origin_port = ntohs(ipv6_address->sin6_port);
         client_information->origin_address = ((struct sockaddr_storage*) ipv6_address);
         client_information-> origin_address_length = IPV6SIZE ;

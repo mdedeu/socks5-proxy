@@ -16,6 +16,7 @@ void * request_resolving_blocking(void * data){
         .ai_canonname = NULL,
         .ai_addr = NULL,
         .ai_next = NULL,
+        .ai_addrlen=0,
     };
 
     uint16_t  port = 0 ;

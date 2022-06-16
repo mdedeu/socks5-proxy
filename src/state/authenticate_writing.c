@@ -26,8 +26,9 @@ unsigned authenticate_write_handler(struct selector_key *key){
         return SOCK_AUTHENTICATE_WRITING;
     else if (client_data->close_after_write)
         return CLOSING_CONNECTION;
-    else
+    else{
         return SOCK_REQUEST_READING;
+    }
 }
 
 void authenticate_writing_departure(const unsigned int leaving_state, struct selector_key *key){

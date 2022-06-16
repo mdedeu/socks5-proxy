@@ -29,7 +29,7 @@ unsigned sock_hello_write_handler(struct selector_key *key) {
     else if(client_data->close_after_write)
         return CLOSING_CONNECTION;
     else
-        if(AUTHENTICATION){
+        if(clients_need_authentication()){
             return SOCK_AUTHENTICATE_READING;
         }else return SOCK_REQUEST_READING;
 }

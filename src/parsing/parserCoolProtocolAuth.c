@@ -29,11 +29,11 @@ enum errors {
 
 //actions
 
-static void error(struct parser_event * event, uint8_t c) {
-	event->type = ERROR_EVENT;
-	event->data[0] = WRONG_VERSION;
-	event->n = 1;
-}
+//static void error(struct parser_event * event, uint8_t c) {
+//	event->type = ERROR_EVENT;
+//	event->data[0] = WRONG_VERSION;
+//	event->n = 1;
+//}
 
 static void check_version(struct  parser_event * event , uint8_t c) {
 	event->type = VERSION_READ_EVENT;
