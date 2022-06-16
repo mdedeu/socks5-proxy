@@ -64,12 +64,29 @@ static int connect_to_ipv6(struct sockaddr_in6 * ipv6_address);
 static int ask_buffer_size(uint8_t * size);
 
 #define BUILTIN_TOTAL 2
-#define QUERIES_TOTAL 7
+#define QUERIES_TOTAL 8
 #define MODIFIERS_TOTAL 5
 char * builtin_names[] = {"help", "quit"};
 void (*builtin[])(int) = {handle_help, handle_quit};
-char * queries[] = {"gthc", "gcc", "gmcc", "gtbs", "gnuc", "gmbs", "gul"};
+
+char * queries[] = {"gthc", "gcc", "gmcc", "gtbs", "gtbr", "gnuc", "gmbs", "gul"};
+char * query_description[] = {
+    "gthc - Get Total Historic Connections",
+    "gcc - Get Current Connections",
+    "gmcc - Get Max. Concurrent Connections",
+    "gtbs - Get Total Bytes Sent",
+    "gtbr - Get Total Bytes Received",
+    "gnuc - Get Number of Users Connected",
+    "gmbs - Get Max. Buffer Size",
+    "gul - Get User List"};
+
 char * modifiers[] = {"au", "ru", "eps", "dps", "cbs"};
+char * modifier_description[] = {
+    "au - Add User",
+    "ru - Remove User",
+    "eps - Enable Password Spoofing",
+    "dps - Disable Password Spoofing",
+    "cbs - Change Buffer Size"};
 
 
 int main(int argc, char * argv[]){
@@ -519,13 +536,16 @@ static int connect_to_ipv6(struct sockaddr_in6 * ipv6_address){
 }
 
 static void handle_help(int sock_fd){
+    printf("Super cool socks5 proxy client\n");
+    printf("Commands can be of two types, queries or modifiers\n");
+    printf("Entries follow the format: <command> - <description>\n\n");
     printf("Query methods:\n");
     for(int i = 0; i < QUERIES_TOTAL; i++)
-        printf("%s\n", queries[i]);
+        printf("%s\n", query_description[i]);
 
     printf("\nModification methods:\n");
     for(int i = 0; i < MODIFIERS_TOTAL; i++)
-        printf("%s\n", modifiers[i]);
+        printf("%s\n", modifier_description[i]);
 }
 
 static void handle_quit(int sock_fd){

@@ -21,9 +21,9 @@ enum states_and_events{
     REMOVING_USERNAME_ULEN_READ,
     REMOVING_USERNAME_USERNAME_READING,
 
+    BUFFER_SIZE_READING,
 
-
-    PASSWORD_METHOD_READ ,
+    PASSWORD_METHOD_READ,
 
     PASSWORD_PROTOCOL_READ,
     QUERY_METHOD_READ,
@@ -44,7 +44,8 @@ enum states_and_events{
     ADDING_USERNAME_USERNAME_READING_EVENT,
     REMOVING_USERNAME_USERNAME_READING_EVENT,
     ADDING_USERNAME_PLEN_READ_EVENT,
-    ADDING_USERNAME_PASSWORD_READING_EVENT ,
+    ADDING_USERNAME_PASSWORD_READING_EVENT,
+    BUFFER_SIZE_READING_EVENT,
 
     END
 
@@ -70,7 +71,9 @@ static void query_action_read(struct  parser_event * event , uint8_t c){
 static void modify_action_read(struct  parser_event * event , uint8_t c){
     if( c == 0 ) event->type = ADDING_USERNAME_METHOD_READ_EVENT;
     else if (c == 1 ) event->type = REMOVING_USERNAME_METHOD_READ_EVENT; 
-    else  event->type = PASSWORD_METHOD_READ_EVENT;
+    else if (c == 2) event->type = PASSWORD_METHOD_READ_EVENT;
+    else if (c == 3) event->type = PASSWORD_METHOD_READ_EVENT;
+    else event->type = BUFFER_SIZE_READING_EVENT;
     event->data[0]=c;
     event->n=1;
 }
@@ -111,8 +114,14 @@ static void adding_plen_read(struct  parser_event * event , uint8_t c){
     event->n=1;
 }
 
-static void adding_password_reading(struct  parser_event * event , uint8_t c){
+static void adding_password_reading(struct  parser_event * event, uint8_t c){
     event->type = ADDING_USERNAME_PASSWORD_READING_EVENT; 
+    event->data[0]=c;
+    event->n=1;
+}
+
+static void buffer_size_reading(struct  parser_event * event, uint8_t c){
+    event->type = BUFFER_SIZE_READING_EVENT; 
     event->data[0]=c;
     event->n=1;
 }
@@ -124,18 +133,16 @@ static struct parser_state_transition initial_state_transitions[] ={
         {.when=MODIFY,.dest=MODIFY_ACTION_READ,.act1=initial_state},
 };
 
-
-
 static struct parser_state_transition query_action_read_transitions[] ={
         {.when=ANY,.dest=QUERY_METHOD_READ,.act1=query_action_read},
 };
-
 
 static struct parser_state_transition modify_action_read_transitions[] ={
         {.when=0,.dest=ADDING_USERNAME_METHOD_READ,.act1=modify_action_read},
         {.when=1,.dest=REMOVING_USERNAME_METHOD_READ,.act1=modify_action_read},
         {.when=2,.dest=PASSWORD_METHOD_READ,.act1=modify_action_read},
-        {.when=3,.dest=PASSWORD_METHOD_READ,.act1=modify_action_read}
+        {.when=3,.dest=PASSWORD_METHOD_READ,.act1=modify_action_read},
+        {.when=4,.dest=BUFFER_SIZE_READING,.act1=modify_action_read}
 };
 
 static struct parser_state_transition adding_username_method_read_transitions[] ={
@@ -162,7 +169,6 @@ static struct parser_state_transition removing_username_username_reading_transit
         {.when=ANY,.dest=REMOVING_USERNAME_USERNAME_READING,.act1=removing_username_read} //end
 };
 
-
 static struct parser_state_transition adding_username_username_read_transitions[] ={
         {.when=ANY,.dest=ADDING_USERNAME_PLEN_READ,.act1=adding_plen_read}
 };
@@ -173,6 +179,10 @@ static struct parser_state_transition adding_username_plen_read_transitions[] ={
 
 static struct parser_state_transition adding_username_password_reading_transitions[] ={
         {.when=ANY,.dest=ADDING_USERNAME_PASSWORD_READING,.act1=adding_password_reading} //end
+};
+
+static struct parser_state_transition buffer_size_reading_transitions[] ={
+        {.when=ANY,.dest=BUFFER_SIZE_READING,.act1=buffer_size_reading} //end
 };
 
 
@@ -190,6 +200,7 @@ static const struct parser_state_transition  * general_parser_transitions[] = {
         removing_username_ulen_read_transitions,
         removing_username_username_reading_transitions,
         password_method_read_transitions,
+        buffer_size_reading_transitions
 };
 
 static const size_t  general_parser_transitions_count[] = {
@@ -206,6 +217,7 @@ static const size_t  general_parser_transitions_count[] = {
         N(removing_username_ulen_read_transitions),
         N(removing_username_username_reading_transitions),
         N(password_method_read_transitions),
+        N(buffer_size_reading_transitions)
 };
 
 
@@ -274,6 +286,13 @@ if(general_request_data->password_characters_read == general_request_data->plen)
     general_request_data->password[general_request_data->password_characters_read] = 0;
     general_request_data->using_parser->state = END;
 }
+}
+
+void handle_buffer_size_reading_event(struct general_request_message* general_request_data ,uint8_t current_character){
+    general_request_data->buffer_size += current_character << (8 * ( 1 - general_request_data->buffer_size_bytes_read++));
+    if(general_request_data->buffer_size_bytes_read == 2){
+        general_request_data->using_parser->state = END;
+    }
 }
 
 struct general_request_message * init_general_parser(){
@@ -349,6 +368,9 @@ bool feed_general_request_parser(struct general_request_message * general_reques
                 break;
             case ADDING_USERNAME_PASSWORD_READING_EVENT:
                 handle_adding_username_password_reading_event(general_request_data,current_character);
+                break;
+            case BUFFER_SIZE_READING_EVENT:
+                handle_buffer_size_reading_event(general_request_data,current_character);
                 break;
             case END :
 //                end_parser_handler(general_request_data,current_character);
