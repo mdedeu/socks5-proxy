@@ -282,7 +282,7 @@ static int ask_parameters(uint8_t method, uint8_t * parameters){
         case CHANGE_BUFFER_SIZE:
             if(ask_buffer_size(parameters) < 0)
                 return -1;
-            return 1;
+            return 2;
         }
     return -1;
 }
@@ -389,7 +389,9 @@ static int ask_buffer_size(uint8_t * size){
         
     errno = 0;
     char * endptr = 0;
-    *size = strtol((char *) size_str, &endptr, 0);
+    uint16_t received_size = strtol((char *) size_str, &endptr, 0);
+    *(size) = received_size >> 8;
+    *(size+1) = received_size & 0xFF;
     if(errno || *endptr)
         return -1;
 
