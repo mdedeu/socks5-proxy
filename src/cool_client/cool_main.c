@@ -17,6 +17,7 @@
 #define COOL_PORT 42069
 #define RECV_BUFFER_SIZE 512
 #define CREDS_LEN 128
+#define NUMERIC_INPUT_LEN 32
 #define PARAMS_LEN 64
 #define IPV6SIZE 16
 #define IPV4SIZE 4
@@ -325,34 +326,56 @@ static int ask_password(uint8_t * password){
 }
 
 static int ask_protocol(uint8_t * protocol){
-    uint8_t protocol_str[32];
+    uint8_t protocol_str[NUMERIC_INPUT_LEN];
     printf("Protocol: ");
     fflush(stdout);
-    if(fgets((char *) protocol_str, CREDS_LEN, stdin) == 0)
+    if(fgets((char *) protocol_str, NUMERIC_INPUT_LEN, stdin) == 0)
         return -1;
 
-    char * end = strchr((char *) protocol, '\n');
+    if(*protocol_str == '\n')
+        return -1;
+
+    char * end = strchr((char *) protocol_str, '\n');
     if(end == NULL){
         while(getc(stdin) != '\n');
-        protocol[31] = 0;
+        return -1;
     }
     else
-        protocol[end-(char *)protocol] = 0; 
+        protocol_str[end-(char *)protocol_str] = 0; 
         
-    protocol_str[4]=0;
-    *protocol = strtol((char *) protocol_str, NULL, 0);
+    errno = 0;
+    char * endptr = 0;
+    *protocol = strtol((char *) protocol_str, &endptr, 0);
+    if(errno || *endptr)
+        return -1;
+
     return 0;
 }
 
 static int ask_buffer_size(uint8_t * size){
-    uint8_t size_str[8];
+    uint8_t size_str[NUMERIC_INPUT_LEN];
     printf("Size: ");
     fflush(stdout);
-    if(fgets((char *) size_str, CREDS_LEN, stdin) == 0)
+    if(fgets((char *) size_str, NUMERIC_INPUT_LEN, stdin) == 0)
         return -1;
-    size_str[6]=0;
-    *size =  (0xFF00 & strtol((char *) size_str, NULL, 0)) >> 8;
-    *(size + 1) =  0xFF & strtol((char *) size_str, NULL, 0);
+
+    if(*size_str == '\n')
+        return -1;
+
+    char * end = strchr((char *) size_str, '\n');
+    if(end == NULL){
+        while(getc(stdin) != '\n');
+        return -1;
+    }
+    else
+        size_str[end-(char *)size_str] = 0; 
+        
+    errno = 0;
+    char * endptr = 0;
+    *size = strtol((char *) size_str, &endptr, 0);
+    if(errno || *endptr)
+        return -1;
+
     return 0;
 }
 
@@ -430,7 +453,7 @@ static int close_connection(int socket_fd){
 
 static void print_welcome(){
     printf("\n===========================================================\n");
-    printf("Welcome to the cool sock5 proxy configuration.\n");
+    printf("Welcome to the cool sock5 proxy configuration.\n\n");
     printf("Enter \"help\" in the command prompt to see the posible configuration commands.\n");
     printf("Enter \"quit\" in the command prompt to terminate the session.\n");
     printf("===========================================================\n");
