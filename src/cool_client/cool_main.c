@@ -110,8 +110,11 @@ int main(int argc, char * argv[]){
 
     if(errno != 0)
         return -1;
-    if(address_family != 4 && address_family != 6)
+
+    if(address_family != 4 && address_family != 6){
+        printf("You should enter the address family as a parameter, 4 for ipv4 and 6 for ipv6.\n");
         return -1;
+    }
 
     int sock_fd;
     if(address_family == 4)
@@ -513,6 +516,7 @@ static int connect_to_ipv4(struct sockaddr_in * ipv4_address){
     ipv4_address->sin_port = htons(COOL_PORT);
 
     if(connect(sock_fd, (struct sockaddr *) ipv4_address, sizeof(*ipv4_address)) < 0){
+        printf("Unable to connect\n");
         close(sock_fd);
         return -1;
     }
@@ -530,6 +534,7 @@ static int connect_to_ipv6(struct sockaddr_in6 * ipv6_address){
     inet_pton(AF_INET6, "::1", &ipv6_address->sin6_addr);
 
     if(connect(sock_fd, (struct sockaddr *) ipv6_address, sizeof(*ipv6_address)) < 0){
+        printf("Unable to connect\n");
         close(sock_fd);
         return -1;
     }
