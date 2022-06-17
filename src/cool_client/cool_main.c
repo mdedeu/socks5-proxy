@@ -63,7 +63,6 @@ static void print_welcome();
 static int resolve_command(char * command, uint8_t * method, uint8_t * action, uint8_t * parameters);
 static int connect_to_ipv4(struct sockaddr_in * ipv4_address);
 static int connect_to_ipv6(struct sockaddr_in6 * ipv6_address);
-static int ask_buffer_size(uint8_t * size);
 
 #define BUILTIN_TOTAL 2
 #define QUERIES_TOTAL 8
@@ -375,35 +374,6 @@ static int ask_protocol(uint8_t * protocol){
     errno = 0;
     char * endptr = 0;
     *protocol = strtol((char *) protocol_str, &endptr, 0);
-    if(errno || *endptr)
-        return -1;
-
-    return 0;
-}
-
-static int ask_buffer_size(uint8_t * size){
-    uint8_t size_str[NUMERIC_INPUT_LEN];
-    printf("Size: ");
-    fflush(stdout);
-    if(fgets((char *) size_str, NUMERIC_INPUT_LEN, stdin) == 0)
-        return -1;
-
-    if(*size_str == '\n')
-        return -1;
-
-    char * end = strchr((char *) size_str, '\n');
-    if(end == NULL){
-        while(getc(stdin) != '\n');
-        return -1;
-    }
-    else
-        size_str[end-(char *)size_str] = 0; 
-        
-    errno = 0;
-    char * endptr = 0;
-    uint16_t received_size = strtol((char *) size_str, &endptr, 0);
-    *(size) = received_size >> 8;
-    *(size+1) = received_size & 0xFF;
     if(errno || *endptr)
         return -1;
 
