@@ -12,9 +12,9 @@ The keywords MUST, MUST NOT, SHOULD, SHOULD NOT, MAY in this document will be in
 2. Introduction
 
     The goal of this protocol is to provide an interface for interacting with a running Socks5d Server. The client MAY ask for:
-        o A list of historical connections
-        o A list of total users
-        o A list of concurrent connections
+        o The total number of historical connections
+        o The list of all registered users
+        o The total number of concurrent connections
         o Amounts of bytes transferred
     The client SHOULD also be able to modify information or properties of the server on runtime, such as adding or deleting users, setting up password sniffing for at least POP3 protocol and modifying the buffer size.
     In order to maintain security, authentication with the server upon connection is required. 
