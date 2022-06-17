@@ -442,6 +442,10 @@ static void print_response(uint8_t action, uint8_t method, uint16_t response_len
         printf("\nModification Successful!\n");
     else if(action == 0xD0){
         if(method == USER_LIST){
+            if(!response_length){
+                printf("\nNo users to show :P\n");
+                return;
+            }
             int username_len;
             unsigned char username[CREDS_LEN + 1];
             while(response_length > 0){

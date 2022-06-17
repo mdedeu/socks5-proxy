@@ -48,6 +48,10 @@ static void handle_method_read_event(struct general_response_message * current_d
 static void handle_rlen_read_event(struct general_response_message * current_data, uint8_t response_length){
     current_data->response_length += response_length << (8 * ( 1 - current_data->response_length_characaters_read++));
     if(current_data->response_length_characaters_read == 2){
+        if(!current_data->response_length){
+            current_data->using_parser->state = END;
+            return;
+        }
         current_data->response = malloc(current_data->response_length + 1);
         current_data->response[current_data->response_length] = 0;
         current_data->using_parser->state = READING_RESPONSE;
