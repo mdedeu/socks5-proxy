@@ -317,10 +317,6 @@ struct general_request_message * init_general_parser(){
     memset(new_general_request_message, 0, sizeof(struct general_request_message));
     struct parser * using_parser = parser_init(parser_no_classes(),&general_parser_definition);
     new_general_request_message->using_parser = using_parser;
-    //new_general_request_message->username_characters_read=0;
-    //new_general_request_message->password_characters_read=0;
-    //new_general_request_message->plen = 0 ;
-    //new_general_request_message->ulen = 0 ; 
     return new_general_request_message;
 }
 
@@ -336,6 +332,9 @@ void destroy_general_request_message(struct general_request_message * message){
         free(message->username);
     if(message->plen != 0 )
     free(message->password);               
+
+    if(message->using_parser != NULL)
+        free(message->using_parser);
 
     free(message); 
 }

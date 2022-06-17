@@ -534,6 +534,8 @@ static int connect_to_ipv6(struct sockaddr_in6 * ipv6_address){
 
     ipv6_address->sin6_family = AF_INET6;
     ipv6_address->sin6_port = htons(COOL_PORT);
+    ipv6_address->sin6_flowinfo = 0;
+    ipv6_address->sin6_scope_id = 0;
     inet_pton(AF_INET6, "::1", &ipv6_address->sin6_addr);
 
     if(connect(sock_fd, (struct sockaddr *) ipv6_address, sizeof(*ipv6_address)) < 0){
