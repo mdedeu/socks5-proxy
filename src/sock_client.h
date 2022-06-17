@@ -35,7 +35,7 @@ typedef struct sock_client{
     bool close_after_write;
     pop3_dissector * dissector;
 
-    char * username ;
+    char * username;
 
 
 } sock_client;

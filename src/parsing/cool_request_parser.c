@@ -130,10 +130,10 @@ static void buffer_size_reading(struct  parser_event * event, uint8_t c){
 }
 
 
-
 static struct parser_state_transition initial_state_transitions[] ={
         {.when=QUERY,.dest=QUERY_ACTION_READ,.act1=initial_state},
         {.when=MODIFY,.dest=MODIFY_ACTION_READ,.act1=initial_state},
+        //{.when=ANY,.}
 };
 
 static struct parser_state_transition query_action_read_transitions[] ={

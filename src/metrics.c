@@ -81,8 +81,8 @@ bool disable_spoofing_handler(/*uint8_t protocol*/){
 }
 
 void increment_current_connections(){
-    volatile_metrics.historical_total_connections ++;
-    volatile_metrics.current_connections ++ ;
+    volatile_metrics.historical_total_connections++;
+    volatile_metrics.current_connections++ ;
     if(volatile_metrics.current_connections > volatile_metrics.max_current_connections)
         volatile_metrics.max_current_connections = volatile_metrics.current_connections;
 }
@@ -153,6 +153,8 @@ bool connect_user(char * username , char * password){
     for(int i = 0; i < volatile_metrics.registered_clients ; i++){
         if(strcmp(volatile_metrics.client_users[i]->username, username)==0 &&
         0==strcmp(volatile_metrics.client_users[i]->password, password)){
+            if(volatile_metrics.client_users[i]->connected == false)
+                increment_current_connections();
             volatile_metrics.client_users[i]->connected=true;
             return true;
         }
@@ -171,7 +173,9 @@ void set_clients_need_authentication(bool boolean){
 void disconnect(char * username){
     for(int i = 0 ; i < volatile_metrics.registered_clients ; i++){
         if( strcmp(volatile_metrics.client_users[i]->username,(char*)username) == 0){
-           volatile_metrics.client_users[i]->connected=false;
+            if(volatile_metrics.client_users[i]->connected == true)
+                decrement_current_connections();
+            volatile_metrics.client_users[i]->connected=false;
         }
     }
 }
