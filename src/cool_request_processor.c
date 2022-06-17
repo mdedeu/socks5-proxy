@@ -75,21 +75,25 @@ void process_cool_request_message(struct general_request_message * data, struct 
             case ADD_USER:
                 if(data->username == NULL || data->password == NULL)
                     return;
-                buffer_write(client_data->write_buffer, add_user_handler(data->ulen, data->username, data->plen, data->password));
+                add_user_handler(data->ulen, data->username, data->plen, data->password);
+                buffer_write(client_data->write_buffer, 1);
                 header[3] = 0x01;
                 break;
             case REMOVE_USER:
                 if(data->username == NULL)
                     return;
-                buffer_write(client_data->write_buffer, remove_user_handler(data->ulen, data->username));
+                remove_user_handler(data->ulen, data->username);
+                buffer_write(client_data->write_buffer, 1);
                 header[3] = 0x01;
                 break;
             case ENABLE_SPOOFING:
-                buffer_write(client_data->write_buffer, enable_spoofing_handler(data->protocol));
+                enable_spoofing_handler(data->protocol);
+                buffer_write(client_data->write_buffer, 1);
                 header[3] = 0x01;
                 break;
             case DISABLE_SPOOFING:
-                buffer_write(client_data->write_buffer, disable_spoofing_handler(data->protocol));
+                disable_spoofing_handler(data->protocol);
+                buffer_write(client_data->write_buffer, 1);
                 header[3] = 0x01;
                 break;
             case CHANGE_BUFFER_SIZE:
