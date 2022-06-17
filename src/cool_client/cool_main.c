@@ -560,6 +560,5 @@ static void handle_help(int sock_fd){
 
 static void handle_quit(int sock_fd){
     close_connection(sock_fd);
-    //TODO: mirar si se puede cortar la ejecucion sin usar exit, o si esta bien usar exit
     exit(0);
 }
