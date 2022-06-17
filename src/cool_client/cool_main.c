@@ -54,7 +54,7 @@ static int send_credentials(int socket_fd, uint8_t * username, uint8_t * passwor
 static int send_method_and_parameters(int sock_fd, uint8_t action, uint8_t method, uint8_t param_len, uint8_t * parameters);
 static int send_array(uint8_t socket_fd, uint8_t len, uint8_t * array);
 static void print_status(uint16_t status);
-static void print_response(uint8_t action, uint8_t method, uint8_t response_length, unsigned char * response);
+static void print_response(uint8_t action, uint8_t method, uint16_t response_length, unsigned char * response);
 static void handle_help(int sock_fd);
 static void handle_quit(int sock_fd);
 static int close_connection(int socket_fd);
@@ -460,7 +460,7 @@ static void print_status(uint16_t status){
     }
 }
 
-static void print_response(uint8_t action, uint8_t method, uint8_t response_length, unsigned char * response){
+static void print_response(uint8_t action, uint8_t method, uint16_t response_length, unsigned char * response){
     if(action == 0xFF && method == 0xFF){
         response[response_length] = 0;
         printf("%s\n", response);
