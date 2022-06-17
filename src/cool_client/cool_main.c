@@ -39,8 +39,7 @@
 #define TOTAL_BYTES_SENT 4
 #define TOTAL_BYTES_RECV 5
 #define CONNECTED_USERS 6
-#define MAX_BUFFER_SIZE 7
-#define USER_LIST 8
+#define USER_LIST 7
 
 #define MAX_AUTH_TRIES 3
 #define COMMAND_MAX_LEN 64
@@ -65,12 +64,12 @@ static int connect_to_ipv4(struct sockaddr_in * ipv4_address);
 static int connect_to_ipv6(struct sockaddr_in6 * ipv6_address);
 
 #define BUILTIN_TOTAL 2
-#define QUERIES_TOTAL 8
+#define QUERIES_TOTAL 7
 #define MODIFIERS_TOTAL 6
 char * builtin_names[] = {"help", "quit"};
 void (*builtin[])(int) = {handle_help, handle_quit};
 
-char * queries[] = {"gthc", "gcc", "gmcc", "gtbs", "gtbr", "gnuc", "gmbs", "gul"};
+char * queries[] = {"gthc", "gcc", "gmcc", "gtbs", "gtbr", "gnuc", "gul"};
 char * query_description[] = {
     "gthc - Get Total Historic Connections",
     "gcc - Get Current Connections",
@@ -78,7 +77,6 @@ char * query_description[] = {
     "gtbs - Get Total Bytes Sent",
     "gtbr - Get Total Bytes Received",
     "gnuc - Get Number of Users Connected",
-    "gmbs - Get Max. Buffer Size",
     "gul - Get User List"};
 
 char * modifiers[] = {"au", "ru", "eps", "dps", "aa", "da"};

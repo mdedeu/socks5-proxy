@@ -132,10 +132,6 @@ uint64_t get_total_bytes_recv(){
     return volatile_metrics.bytes_received;
 }
 
-uint64_t get_max_buffer_size(){
-    return 11;
-}
-
 struct server_user_info ** get_user_list(){
     return volatile_metrics.client_users;
 }

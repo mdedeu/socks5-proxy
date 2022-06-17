@@ -153,13 +153,6 @@ void process_cool_request_message(struct general_request_message * data, struct 
                 for(int i = 0; i < number_len; i++)
                     buffer_write(client_data->write_buffer, (uint8_t) (result >> (8*(number_len - i - 1))));
                 break;
-            case GET_MAX_BUFFER_SIZE:
-                result = get_max_buffer_size();
-                header[3] = 0x08;
-                number_len = sizeof(result)/sizeof(uint8_t);
-                for(int i = 0; i < number_len; i++)
-                    buffer_write(client_data->write_buffer, (uint8_t) (result >> (8*(number_len - i - 1))));
-                break;
             case GET_USER_LIST:
                 user_list = get_user_list();
                 uint16_t response_len = 0;
