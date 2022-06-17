@@ -485,7 +485,7 @@ static int resolve_command(char * command, uint8_t * action, uint8_t * method, u
 
     for(int i = 0; i < QUERIES_TOTAL; i++){
         if(!strcmp(command, queries[i])){
-            *action = 30;
+            *action = QUERY;
             *method = i+1;
             *parameters = 0;
             return 0;
