@@ -15,6 +15,7 @@ void connected_on_arrival(unsigned state, struct selector_key * key){
     buffer_reset(client_information->read_buffer);
     selector_set_interest(key->s,client_information->client_fd, OP_READ);
     selector_set_interest(key->s,client_information->origin_fd, OP_READ);
+    increment_current_connections();
 }
 
 unsigned connected_read_handler(struct selector_key * key){
@@ -47,7 +48,7 @@ unsigned connected_read_handler(struct selector_key * key){
         selector_set_interest(key->s,other_socket,OP_WRITE);
         return CONNECTED;
     }else if (reading_from_client)
-        increment_data_received(read_amount);
+        increment_data_received((uint64_t) read_amount);
 
 
     if(client_information->origin_port == POP_PORT && is_tracing_conversation(client_information->dissector) ){
@@ -121,5 +122,6 @@ void connected_on_departure(unsigned state, struct selector_key * key){
         struct sock_client * client_information = (struct sock_client *) key->data;
         if(client_information->origin_port == POP_PORT)
             destroy_dissector(client_information->dissector);
+        decrement_current_connections();
     }
 }
