@@ -112,7 +112,7 @@ struct general_response_message * init_general_response_parser(){
     return new_general_response_message;
 }
 
-bool feed_general_response_parser(struct general_response_message * response_data, char * input, int input_size){
+bool feed_general_response_parser(struct general_response_message * response_data, unsigned char * input, int input_size){
     const struct parser_event * current_event;
     for(int i = 0 ; i < input_size  && (response_data->using_parser->state != END  ); i++){
         current_event = parser_feed(response_data->using_parser,input[i]);

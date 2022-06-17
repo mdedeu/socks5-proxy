@@ -14,7 +14,7 @@ struct simple_response_message{
 };
 
 struct simple_response_message * init_simple_response_parser();
-bool feed_simple_response_parser(struct simple_response_message * sock_data, char * input, int input_size);
+bool feed_simple_response_parser(struct simple_response_message * sock_data, unsigned char * input, int input_size);
 void close_simple_response_parser(struct simple_response_message * current_data);
 
 #endif

@@ -54,7 +54,7 @@ static int send_credentials(int socket_fd, uint8_t * username, uint8_t * passwor
 static int send_method_and_parameters(int sock_fd, uint8_t action, uint8_t method, uint8_t param_len, uint8_t * parameters);
 static int send_array(uint8_t socket_fd, uint8_t len, uint8_t * array);
 static void print_status(uint16_t status);
-static void print_response(uint8_t action, uint8_t method, uint8_t response_length, char * response);
+static void print_response(uint8_t action, uint8_t method, uint8_t response_length, unsigned char * response);
 static void handle_help(int sock_fd);
 static void handle_quit(int sock_fd);
 static int close_connection(int socket_fd);
@@ -151,7 +151,7 @@ int main(int argc, char * argv[]){
             close_connection(sock_fd);
             return -1;
         }
-    } while(!feed_simple_response_parser(simple_response, (char *) buff_recv, read_amount));
+    } while(!feed_simple_response_parser(simple_response, (unsigned char *) buff_recv, read_amount));
 
     returned_status = simple_response->status[0] << 8;
     returned_status += simple_response->status[1];
@@ -186,7 +186,7 @@ int main(int argc, char * argv[]){
             close_connection(sock_fd);
             return -1;
         }
-    } while(!feed_general_response_parser(general_response, (char *) buff_recv, read_amount));
+    } while(!feed_general_response_parser(general_response, (unsigned char *) buff_recv, read_amount));
 
     print_response(general_response->action, general_response->method, general_response->response_length, general_response->response);
 
@@ -460,7 +460,7 @@ static void print_status(uint16_t status){
     }
 }
 
-static void print_response(uint8_t action, uint8_t method, uint8_t response_length, char * response){
+static void print_response(uint8_t action, uint8_t method, uint8_t response_length, unsigned char * response){
     if(action == 0xFF && method == 0xFF){
         response[response_length] = 0;
         printf("%s\n", response);
@@ -469,15 +469,15 @@ static void print_response(uint8_t action, uint8_t method, uint8_t response_leng
         printf("\nModification Successful!\n");
     else if(action == 0xD0){
         if(method == USER_LIST)
-            printf("%s\n");
+            printf("%s\n", response);
         else{
-            if(response_length > 8){
-                printf("\nUint to big to be printed\n");
+            if(response_length != 8){
+                printf("\nUint too big to be printed\n");
                 return;
             }
             uint64_t response_value = 0;
             for(int i = 0; i < response_length; i++)
-                response_value += response[i] << (8*(response_length-i-1));
+                response_value += (uint64_t) (response[i] << (8*(response_length-i-1)));
             printf("%"PRIu64"\n", response_value);
         }
     }

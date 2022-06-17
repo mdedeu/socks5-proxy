@@ -14,14 +14,14 @@ struct general_response_message{
     uint16_t response_length;
     uint8_t response_length_characaters_read;
 
-    char * response;
+    unsigned char * response;
     uint8_t response_characters_read;
 
     struct parser * using_parser;
 };
 
 struct general_response_message * init_general_response_parser();
-bool feed_general_response_parser(struct general_response_message * sock_data, char * input, int input_size);
+bool feed_general_response_parser(struct general_response_message * sock_data, unsigned char * input, int input_size);
 void close_general_response_parser(struct general_response_message * current_data);
 
 #endif
