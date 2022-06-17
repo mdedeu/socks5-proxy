@@ -125,7 +125,6 @@ int main(int argc, char * argv[]){
     
     if(sock_fd < 0)
         return -1;
-    
 
     int tries=0;
     while(returned_status != 0xC001){
