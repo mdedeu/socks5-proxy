@@ -104,7 +104,11 @@ void increment_data_received(uint64_t data_quantity){
 }
 
 uint8_t change_buffer_size_handler(uint16_t size){
-    return 4;
+    if(size)
+        volatile_metrics.clients_need_authentication = true;
+    else
+        volatile_metrics.clients_need_authentication = false;
+    return 0;
 }
 
 

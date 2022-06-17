@@ -30,7 +30,8 @@
 #define REMOVE_USER 1
 #define ENABLE_SPOOFING 2
 #define DISABLE_SPOOFING 3
-#define CHANGE_BUFFER_SIZE 4
+#define ACTIVATE_AUTHENTICATION 4
+#define DEACTIVATE_AUTHENTICATION 5
 
 #define TOTAL_CONNECTIONS 1
 #define CURRENT_CONNECTIONS 2
@@ -45,7 +46,7 @@
 #define COMMAND_MAX_LEN 64
 
 static int ask_method_and_parameters(int sock_fd, int * is_builtin, uint8_t * action, uint8_t * method, uint8_t * parameters);
-static int ask_parameters(uint8_t method, uint8_t * parameters);
+static int ask_parameters(uint8_t * method, uint8_t * parameters);
 static int ask_credentials(uint8_t * username, uint8_t * password);
 static int ask_username(uint8_t * username);
 static int ask_password(uint8_t * password);
@@ -66,7 +67,7 @@ static int ask_buffer_size(uint8_t * size);
 
 #define BUILTIN_TOTAL 2
 #define QUERIES_TOTAL 8
-#define MODIFIERS_TOTAL 5
+#define MODIFIERS_TOTAL 6
 char * builtin_names[] = {"help", "quit"};
 void (*builtin[])(int) = {handle_help, handle_quit};
 
@@ -81,13 +82,14 @@ char * query_description[] = {
     "gmbs - Get Max. Buffer Size",
     "gul - Get User List"};
 
-char * modifiers[] = {"au", "ru", "eps", "dps", "cbs"};
+char * modifiers[] = {"au", "ru", "eps", "dps", "aa", "da"};
 char * modifier_description[] = {
     "au - Add User",
     "ru - Remove User",
     "eps - Enable Password Spoofing",
     "dps - Disable Password Spoofing",
-    "cbs - Change Buffer Size"};
+    "aa - Activate Authentication",
+    "da - Deactivate Authentication"};
 
 
 int main(int argc, char * argv[]){
@@ -233,7 +235,7 @@ static int ask_method_and_parameters(int sock_fd, int * skip, uint8_t * action, 
 
     
     if(*parameters){
-        len = ask_parameters(*method, parameters);
+        len = ask_parameters(method, parameters);
         if(len < 0){
             printf("Invalid parameter\n");
             *skip= 1;
@@ -249,9 +251,9 @@ static int ask_method_and_parameters(int sock_fd, int * skip, uint8_t * action, 
 }
 
 //Returns the number of bytes in the parameters and -1 in case of error
-static int ask_parameters(uint8_t method, uint8_t * parameters){
+static int ask_parameters(uint8_t * method, uint8_t * parameters){
     int ulen, plen;
-    switch(method){
+    switch(*method){
         case ADD_USER:
             ulen = ask_username(parameters+1);
             if(ulen < 0)
@@ -282,10 +284,17 @@ static int ask_parameters(uint8_t method, uint8_t * parameters){
                 return -1;
             return 1;
 
-        case CHANGE_BUFFER_SIZE:
-            if(ask_buffer_size(parameters) < 0)
-                return -1;
+        case ACTIVATE_AUTHENTICATION:
+            parameters[0] = 0;
+            parameters[1] = 1;
             return 2;
+
+        case DEACTIVATE_AUTHENTICATION:
+            *method = 4;
+            parameters[0] = 0;
+            parameters[1] = 0;
+            return 2;
+
         }
     return -1;
 }
@@ -509,12 +518,12 @@ static void print_welcome(){
 }
 
 //If the command is invalid it returns -1, else 0
-static int resolve_command(char * command, uint8_t * method, uint8_t * action, uint8_t * parameters){
+static int resolve_command(char * command, uint8_t * action, uint8_t * method, uint8_t * parameters){
 
     for(int i = 0; i < QUERIES_TOTAL; i++){
         if(!strcmp(command, queries[i])){
-            *method = QUERY;
-            *action = i+1;
+            *action = QUERY;
+            *method = i+1;
             *parameters = 0;
             return 0;
         }
@@ -522,8 +531,8 @@ static int resolve_command(char * command, uint8_t * method, uint8_t * action, u
 
     for(int i = 0; i < MODIFIERS_TOTAL; i++){
         if(!strcmp(command, modifiers[i])){
-            *method = MODIFY;
-            *action = i;
+            *action = MODIFY;
+            *method = i;
             *parameters = 1;
             return 0;
         }
