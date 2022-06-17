@@ -55,6 +55,7 @@ void process_cool_request_message(struct general_request_message * data, struct 
     uint64_t result;
     int error = 0;
     uint8_t header[4] = {0};
+    struct server_user_info ** user_list;
 
     if(client_data->write_buffer == NULL)
         return;
@@ -108,34 +109,68 @@ void process_cool_request_message(struct general_request_message * data, struct 
             case GET_TOTAL_CONNECTIONS:
                 result = get_total_connections();
                 header[3] = 0x08;
+                number_len = sizeof(result)/sizeof(uint8_t);
+                for(int i = 0; i < number_len; i++)
+                    buffer_write(client_data->write_buffer, (uint8_t) (result >> (8*(number_len - i - 1))));
                 break;
             case GET_CURRENT_CONNECTIONS:
                 result = get_current_connections();
                 header[3] = 0x08;
+                number_len = sizeof(result)/sizeof(uint8_t);
+                for(int i = 0; i < number_len; i++)
+                    buffer_write(client_data->write_buffer, (uint8_t) (result >> (8*(number_len - i - 1))));
                 break;
             case GET_MAX_CURRENT_CONNECTIONS:
                 result = get_max_current_connections();
                 header[3] = 0x08;
+                number_len = sizeof(result)/sizeof(uint8_t);
+                for(int i = 0; i < number_len; i++)
+                    buffer_write(client_data->write_buffer, (uint8_t) (result >> (8*(number_len - i - 1))));
                 break;
             case GET_TOTAL_BYTES_SENT:
                 result = get_total_bytes_sent();
                 header[3] = 0x08;
+                number_len = sizeof(result)/sizeof(uint8_t);
+                for(int i = 0; i < number_len; i++)
+                    buffer_write(client_data->write_buffer, (uint8_t) (result >> (8*(number_len - i - 1))));
                 break;
             case GET_TOTAL_BYTES_RECV:
                 result = get_total_bytes_recv();
                 header[3] = 0x08;
+                number_len = sizeof(result)/sizeof(uint8_t);
+                for(int i = 0; i < number_len; i++)
+                    buffer_write(client_data->write_buffer, (uint8_t) (result >> (8*(number_len - i - 1))));
                 break;
             case GET_CONNECTED_USERS:
                 result = get_connected_users();
                 header[3] = 0x08;
+                number_len = sizeof(result)/sizeof(uint8_t);
+                for(int i = 0; i < number_len; i++)
+                    buffer_write(client_data->write_buffer, (uint8_t) (result >> (8*(number_len - i - 1))));
                 break;
             case GET_MAX_BUFFER_SIZE:
                 result = get_max_buffer_size();
                 header[3] = 0x08;
+                number_len = sizeof(result)/sizeof(uint8_t);
+                for(int i = 0; i < number_len; i++)
+                    buffer_write(client_data->write_buffer, (uint8_t) (result >> (8*(number_len - i - 1))));
                 break;
             case GET_USER_LIST:
-                result = get_user_list();
-                header[3] = 0x01;
+                user_list = get_user_list();
+                uint16_t response_len = 0;
+                int clients_num = get_registered_clients();
+                size_t username_len;
+                for(int i = 0; i < clients_num; i++){
+                    username_len = strlen(user_list[i]->username);
+                    buffer_write(client_data->write_buffer, username_len);
+                    size_t available_space;
+                    uint8_t * write_from = buffer_write_ptr(client_data->write_buffer, &available_space);
+                    memcpy(write_from, user_list[i]->username, username_len);
+                    buffer_write_adv(client_data->write_buffer, username_len);
+                    response_len += username_len + 1;
+                }
+                header[2] = (uint8_t) (response_len & (uint16_t) 0xFF00);
+                header[3] = (uint8_t) (response_len & (uint16_t) 0x00FF);
                 break;
             default:
                 error = 1;
@@ -143,11 +178,6 @@ void process_cool_request_message(struct general_request_message * data, struct 
             }
             if(error){
                 write_error_response(client_data->write_buffer, "Invalid query", header);
-            }
-            else{
-                number_len = sizeof(result)/sizeof(uint8_t);
-                for(int i = 0; i < number_len; i++)
-                    buffer_write(client_data->write_buffer, (uint8_t) (result >> (8*(number_len - i - 1))));
             }
             break;
         default:

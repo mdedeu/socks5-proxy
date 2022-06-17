@@ -468,8 +468,19 @@ static void print_response(uint8_t action, uint8_t method, uint8_t response_leng
     else if(action == 0xBE)
         printf("\nModification Successful!\n");
     else if(action == 0xD0){
-        if(method == USER_LIST)
-            printf("%s\n", response);
+        if(method == USER_LIST){
+            int username_len;
+            unsigned char username[CREDS_LEN + 1];
+            while(response_length > 0){
+                username_len = response[0];
+                response++;
+                memcpy(username, response, username_len);
+                username[username_len] = 0;
+                response += username_len;
+                printf("%s\n", username);
+                response_length -= username_len + 1;
+            }
+        }
         else{
             if(response_length != 8){
                 printf("\nUint too big to be printed\n");

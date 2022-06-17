@@ -47,6 +47,7 @@ uint64_t get_max_current_connections();
 uint64_t get_total_bytes_sent();
 uint64_t get_total_bytes_recv();
 uint64_t get_connected_users();
+uint8_t get_registered_clients();
 void set_clients_need_authentication(bool boolean);
 
 bool connect_user(char * username , char * password);
@@ -54,6 +55,6 @@ void disconnect(char * username);
 
 uint64_t get_max_buffer_size();
 
-uint64_t get_user_list();
+struct server_user_info ** get_user_list();
 
 #endif

@@ -132,8 +132,12 @@ uint64_t get_max_buffer_size(){
     return 11;
 }
 
-uint64_t get_user_list(){
-    return 12;
+struct server_user_info ** get_user_list(){
+    return volatile_metrics.client_users;
+}
+
+uint8_t get_registered_clients(){
+    return volatile_metrics.registered_clients;
 }
 
 uint64_t get_connected_users(){
