@@ -76,7 +76,8 @@ void tcpConnectionHandler(struct selector_key *key){
     if(new_client_fd > 0 ){
         struct sock_client * new_client_data = init_new_client_connection(new_client_fd,&new_client_information);
         if(new_client_data != NULL)
-            selector_register(key->s, new_client_fd, &active_handlers, OP_READ, new_client_data);
+            if( SELECTOR_SUCCESS != selector_register(key->s, new_client_fd, &active_handlers, OP_READ, new_client_data) )
+                destroy_sock_client(new_client_data);
     }
 }
 
@@ -88,7 +89,8 @@ void coolTcpConnectionHandler(struct selector_key *key){
     if(new_client_fd > 0 ){
         struct cool_client * new_client_data = init_cool_client_connection(new_client_fd);
         if(new_client_data != NULL)
-            selector_register(key->s, new_client_fd, &cool_active_handlers, OP_READ, new_client_data);
+            if(SELECTOR_SUCCESS != selector_register(key->s, new_client_fd, &cool_active_handlers, OP_READ, new_client_data) )
+                destroy_cool_client(new_client_data);
     }
 }
 

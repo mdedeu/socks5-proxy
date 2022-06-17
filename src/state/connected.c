@@ -39,7 +39,7 @@ unsigned connected_read_handler(struct selector_key * key){
         return CONNECTED;
 
     uint8_t * writing_direction = buffer_write_ptr(current_buffer, &available_write);
-    ssize_t read_amount = recv(key->fd, writing_direction, available_write, MSG_DONTWAIT);
+    ssize_t read_amount = recv(key->fd, writing_direction, available_write, MSG_DONTWAIT) ;
 
     if(read_amount <= 0 ){
         client_information->close_after_write = true;

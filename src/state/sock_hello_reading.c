@@ -21,7 +21,7 @@ unsigned sock_hello_read_handler(struct selector_key *key) {
         return CLOSING_CONNECTION ;
 
     char receiving_buffer[SOCK_HELLO_MAX_LENGTH];
-    int read_amount = recv(key->fd, receiving_buffer, SOCK_HELLO_MAX_LENGTH, MSG_DONTWAIT);
+    int read_amount = recv(key->fd, receiving_buffer, SOCK_HELLO_MAX_LENGTH, MSG_DONTWAIT| MSG_NOSIGNAL);
 
     if(read_amount <= 0 )
         return  CLOSING_CONNECTION;

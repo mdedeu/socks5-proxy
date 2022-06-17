@@ -13,7 +13,7 @@ unsigned cool_authenticate_write_handler(struct selector_key *key){
 
     size_t write_amount;
     uint8_t *reading_since = buffer_read_ptr(client_data->write_buffer, &write_amount);
-    ssize_t written_bytes = send(client_data->client_fd, reading_since, write_amount, MSG_DONTWAIT);
+    ssize_t written_bytes = send(client_data->client_fd, reading_since, write_amount, MSG_DONTWAIT| MSG_NOSIGNAL);
     buffer_read_adv(client_data->write_buffer, written_bytes);
     buffer_compact(client_data->write_buffer);
 
