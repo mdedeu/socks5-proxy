@@ -436,8 +436,7 @@ static void print_status(uint16_t status){
 
 static void print_response(uint8_t action, uint8_t method, uint16_t response_length, unsigned char * response){
     if(action == 0xFF && method == 0xFF){
-        response[response_length] = 0;
-        printf("%s\n", response);
+        printf("\nAn error ocurred\n");
     }
     else if(action == 0xBE)
         printf("\nModification Successful!\n");
@@ -466,8 +465,6 @@ static void print_response(uint8_t action, uint8_t method, uint16_t response_len
             printf("%"PRIu64"\n", response_value);
         }
     }
-    else
-        printf("\nAn error ocurred\n");
 }
 
 static int close_connection(int socket_fd){
@@ -488,7 +485,7 @@ static int resolve_command(char * command, uint8_t * action, uint8_t * method, u
 
     for(int i = 0; i < QUERIES_TOTAL; i++){
         if(!strcmp(command, queries[i])){
-            *action = QUERY;
+            *action = 30;
             *method = i+1;
             *parameters = 0;
             return 0;

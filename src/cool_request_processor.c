@@ -12,7 +12,7 @@ static struct user_info users[10]={
     {.username="gbeade", .password="gbeade"},
 };
 
-static void write_error_response(buffer * buff, char * error_response, uint8_t * header);
+static void write_error_response(buffer * buff, uint8_t * header);
 
 void process_cool_authentication_message(struct cool_protocol_authentication_message * data, struct selector_key * key){
     //TODO: hace la comprarcion con un metodo del sistema de metricas
@@ -106,7 +106,7 @@ void process_cool_request_message(struct general_request_message * data, struct 
                 break;
             }
             if(error){
-                write_error_response(client_data->write_buffer, "Invalid modifier", header);
+                write_error_response(client_data->write_buffer, header);
             }
             break;
         case QUERY:
@@ -175,25 +175,21 @@ void process_cool_request_message(struct general_request_message * data, struct 
                 break;
             }
             if(error){
-                write_error_response(client_data->write_buffer, "Invalid query", header);
+                write_error_response(client_data->write_buffer, header);
             }
             break;
         default:
-            write_error_response(client_data->write_buffer, "Invalid action", header);
+            write_error_response(client_data->write_buffer, header);
             break;
     }
     memcpy(header_write, header, sizeof(header));
 }
 
 
-static void write_error_response(buffer * buff, char * error_response, uint8_t * header){
+static void write_error_response(buffer * buff, uint8_t * header){
     header[0] = 0xFF;
     header[1] = 0xFF;
-    header[3] = strlen(error_response);
-    buffer_compact(buff);
-    size_t len = strlen(error_response);
-    size_t available_write;
-    uint8_t * response_write = buffer_write_ptr(buff, &available_write);
-    memcpy(response_write, error_response, len);
-    buffer_write_adv(buff, len);
+    header[2] = 0x00;
+    header[3] = 0x01;
+    buffer_write(buff, 1);
 }

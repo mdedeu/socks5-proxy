@@ -27,6 +27,8 @@ enum states_and_events{
     NEED_AUTH_METHOD_READ,
     NEED_AUTH_READ,
 
+    ERROR,
+
     PASSWORD_PROTOCOL_READ,
     QUERY_METHOD_READ,
 
@@ -49,6 +51,7 @@ enum states_and_events{
     ADDING_USERNAME_PASSWORD_READING_EVENT,
     NEED_AUTH_METHOD_READ_EVENT,
     NEED_AUTH_READ_EVENT,
+    ON_ERROR_EVENT,
 
     END
 
@@ -129,11 +132,17 @@ static void need_auth_read(struct  parser_event * event, uint8_t c){
     event->n=1;
 }
 
+static void on_error(struct  parser_event * event, uint8_t c){
+    event->type = ON_ERROR_EVENT; 
+    event->data[0]=c;
+    event->n=1;
+}
+
 
 static struct parser_state_transition initial_state_transitions[] ={
         {.when=QUERY,.dest=QUERY_ACTION_READ,.act1=initial_state},
         {.when=MODIFY,.dest=MODIFY_ACTION_READ,.act1=initial_state},
-        //{.when=ANY,.}
+        {.when=ANY,.dest=ERROR,.act1=on_error}
 };
 
 static struct parser_state_transition query_action_read_transitions[] ={
@@ -145,7 +154,8 @@ static struct parser_state_transition modify_action_read_transitions[] ={
         {.when=1,.dest=REMOVING_USERNAME_METHOD_READ,.act1=modify_action_read},
         {.when=2,.dest=PASSWORD_METHOD_READ,.act1=modify_action_read},
         {.when=3,.dest=PASSWORD_METHOD_READ,.act1=modify_action_read},
-        {.when=4,.dest=NEED_AUTH_METHOD_READ,.act1=modify_action_read}
+        {.when=4,.dest=NEED_AUTH_METHOD_READ,.act1=modify_action_read},
+        {.when=ANY,.dest=ERROR,.act1=on_error}
 };
 
 static struct parser_state_transition adding_username_method_read_transitions[] ={
@@ -296,6 +306,12 @@ void handle_need_auth_read_event(struct general_request_message* general_request
     general_request_data->using_parser->state = END;
 }
 
+void handle_on_error_event(struct general_request_message* general_request_data, uint8_t current_character){
+    general_request_data->method = 0xFF;
+    general_request_data->action = 0xFF;
+    general_request_data->using_parser->state = END;
+}
+
 struct general_request_message * init_general_parser(){
     struct general_request_message * new_general_request_message = malloc(sizeof (struct general_request_message));
     memset(new_general_request_message, 0, sizeof(struct general_request_message));
@@ -375,6 +391,9 @@ bool feed_general_request_parser(struct general_request_message * general_reques
                 break;
             case NEED_AUTH_READ_EVENT:
                 handle_need_auth_read_event(general_request_data,current_character);
+                break;
+            case ON_ERROR_EVENT:
+                handle_on_error_event(general_request_data,current_character);
                 break;
             case END :
 //                end_parser_handler(general_request_data,current_character);
