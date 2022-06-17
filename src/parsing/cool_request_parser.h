@@ -18,8 +18,7 @@ struct general_request_message {
     uint8_t * password; 
     uint8_t username_characters_read; 
     uint8_t password_characters_read; 
-    uint16_t buffer_size;
-    uint8_t buffer_size_bytes_read;
+    bool clients_need_authentication;
     struct parser * using_parser; 
 };
 

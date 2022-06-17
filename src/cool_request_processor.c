@@ -97,7 +97,7 @@ void process_cool_request_message(struct general_request_message * data, struct 
                 header[3] = 0x01;
                 break;
             case CHANGE_BUFFER_SIZE:
-                set_clients_need_authentication(data->buffer_size ? true : false);
+                set_clients_need_authentication(data->clients_need_authentication);
                 buffer_write(client_data->write_buffer, 1);
                 header[3] = 0x01;
                 break;

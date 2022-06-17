@@ -282,15 +282,13 @@ static int ask_parameters(uint8_t * method, uint8_t * parameters){
             return 1;
 
         case ACTIVATE_AUTHENTICATION:
-            parameters[0] = 0;
-            parameters[1] = 1;
-            return 2;
+            parameters[0] = 1;
+            return 1;
 
         case DEACTIVATE_AUTHENTICATION:
             *method = 4;
             parameters[0] = 0;
-            parameters[1] = 0;
-            return 2;
+            return 1;
 
         }
     return -1;

@@ -24,8 +24,8 @@ enum states_and_events{
 
     PASSWORD_METHOD_READ,
 
-    BUFFER_SIZE_METHOD_READ,
-    BUFFER_SIZE_READING,
+    NEED_AUTH_METHOD_READ,
+    NEED_AUTH_READ,
 
     PASSWORD_PROTOCOL_READ,
     QUERY_METHOD_READ,
@@ -47,8 +47,8 @@ enum states_and_events{
     REMOVING_USERNAME_USERNAME_READING_EVENT,
     ADDING_USERNAME_PLEN_READ_EVENT,
     ADDING_USERNAME_PASSWORD_READING_EVENT,
-    BUFFER_SIZE_METHOD_READ_EVENT,
-    BUFFER_SIZE_READING_EVENT,
+    NEED_AUTH_METHOD_READ_EVENT,
+    NEED_AUTH_READ_EVENT,
 
     END
 
@@ -76,7 +76,7 @@ static void modify_action_read(struct  parser_event * event , uint8_t c){
     else if (c == 1 ) event->type = REMOVING_USERNAME_METHOD_READ_EVENT; 
     else if (c == 2) event->type = PASSWORD_METHOD_READ_EVENT;
     else if (c == 3) event->type = PASSWORD_METHOD_READ_EVENT;
-    else event->type = BUFFER_SIZE_METHOD_READ_EVENT;
+    else event->type = NEED_AUTH_METHOD_READ_EVENT;
     event->data[0]=c;
     event->n=1;
 }
@@ -123,8 +123,8 @@ static void adding_password_reading(struct  parser_event * event, uint8_t c){
     event->n=1;
 }
 
-static void buffer_size_reading(struct  parser_event * event, uint8_t c){
-    event->type = BUFFER_SIZE_READING_EVENT; 
+static void need_auth_read(struct  parser_event * event, uint8_t c){
+    event->type = NEED_AUTH_READ_EVENT; 
     event->data[0]=c;
     event->n=1;
 }
@@ -145,7 +145,7 @@ static struct parser_state_transition modify_action_read_transitions[] ={
         {.when=1,.dest=REMOVING_USERNAME_METHOD_READ,.act1=modify_action_read},
         {.when=2,.dest=PASSWORD_METHOD_READ,.act1=modify_action_read},
         {.when=3,.dest=PASSWORD_METHOD_READ,.act1=modify_action_read},
-        {.when=4,.dest=BUFFER_SIZE_METHOD_READ,.act1=modify_action_read}
+        {.when=4,.dest=NEED_AUTH_METHOD_READ,.act1=modify_action_read}
 };
 
 static struct parser_state_transition adding_username_method_read_transitions[] ={
@@ -184,11 +184,8 @@ static struct parser_state_transition adding_username_password_reading_transitio
         {.when=ANY,.dest=ADDING_USERNAME_PASSWORD_READING,.act1=adding_password_reading} //end
 };
 
-static struct parser_state_transition buffer_size_method_read_transitions[] ={
-        {.when=ANY,.dest=BUFFER_SIZE_READING,.act1=buffer_size_reading} //end 
-};
-static struct parser_state_transition buffer_size_reading_transitions[] ={
-        {.when=ANY,.dest=BUFFER_SIZE_READING,.act1=buffer_size_reading} //end
+static struct parser_state_transition need_auth_method_read_transitions[] ={
+        {.when=ANY,.dest=NEED_AUTH_READ,.act1=need_auth_read} //end 
 };
 
 
@@ -206,8 +203,7 @@ static const struct parser_state_transition  * general_parser_transitions[] = {
         removing_username_ulen_read_transitions,
         removing_username_username_reading_transitions,
         password_method_read_transitions,
-        buffer_size_method_read_transitions,
-        buffer_size_reading_transitions
+        need_auth_method_read_transitions,
 };
 
 static const size_t  general_parser_transitions_count[] = {
@@ -224,8 +220,7 @@ static const size_t  general_parser_transitions_count[] = {
         N(removing_username_ulen_read_transitions),
         N(removing_username_username_reading_transitions),
         N(password_method_read_transitions),
-        N(buffer_size_method_read_transitions),
-        N(buffer_size_reading_transitions)
+        N(need_auth_method_read_transitions),
 };
 
 
@@ -296,11 +291,9 @@ if(general_request_data->password_characters_read == general_request_data->plen)
 }
 }
 
-void handle_buffer_size_reading_event(struct general_request_message* general_request_data ,uint8_t current_character){
-    general_request_data->buffer_size += current_character << (8 * ( 1 - general_request_data->buffer_size_bytes_read++));
-    if(general_request_data->buffer_size_bytes_read == 2){
-        general_request_data->using_parser->state = END;
-    }
+void handle_need_auth_read_event(struct general_request_message* general_request_data, uint8_t current_character){
+    general_request_data->clients_need_authentication = current_character ? true : false;
+    general_request_data->using_parser->state = END;
 }
 
 struct general_request_message * init_general_parser(){
@@ -356,7 +349,7 @@ bool feed_general_request_parser(struct general_request_message * general_reques
             case PASSWORD_METHOD_READ_EVENT:
                 handle_modify_method_read_event(general_request_data,current_character);
                 break;
-            case BUFFER_SIZE_METHOD_READ_EVENT:
+            case NEED_AUTH_METHOD_READ_EVENT:
                 handle_modify_method_read_event(general_request_data,current_character);
                 break;
             case ADDING_ULEN_READ_EVENT:
@@ -380,8 +373,8 @@ bool feed_general_request_parser(struct general_request_message * general_reques
             case ADDING_USERNAME_PASSWORD_READING_EVENT:
                 handle_adding_username_password_reading_event(general_request_data,current_character);
                 break;
-            case BUFFER_SIZE_READING_EVENT:
-                handle_buffer_size_reading_event(general_request_data,current_character);
+            case NEED_AUTH_READ_EVENT:
+                handle_need_auth_read_event(general_request_data,current_character);
                 break;
             case END :
 //                end_parser_handler(general_request_data,current_character);
