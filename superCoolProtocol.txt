@@ -13,13 +13,14 @@ The keywords MUST, MUST NOT, SHOULD, SHOULD NOT, MAY in this document will be in
 
     The goal of this protocol is to provide an interface for interacting with a running Socks5d Server. The client MAY ask for:
         o The total number of historical connections
-        o The list of all registered users
         o The total number of concurrent connections
         o Amounts of bytes transferred
-    The client SHOULD also be able to modify information or properties of the server on runtime, such as adding or deleting users, setting up password sniffing for at least POP3 protocol and modifying the buffer size.
+        o The list of all registered users
+    The client SHOULD also be able to modify information or properties of the server on runtime, such as adding or deleting users, setting up password sniffing for at least POP3 protocol and activating or deactivating authentication for the socks5 proxy.
     In order to maintain security, authentication with the server upon connection is required. 
     Once authenticated, the connection follows a Request/Response structure, where the client makes the requests, and the Server processes and responds.
     All bytes on this RFC are interpreted as Big Endian.
+
 3. Connection and Authentication
 
    3.1. Connection
@@ -51,16 +52,16 @@ The keywords MUST, MUST NOT, SHOULD, SHOULD NOT, MAY in this document will be in
         A STATUS field of X'C001' indicates the authentication was successful.
         A STATUS field of X'4B1D' indicates the authentication failed.
         
-        If the server returns a failure status, it MUST close the connection.
+        If the server returns a failure status, it will wait for another authentication request.
 
-        If the server returns a success status, then the session is fully established.
+        If the server returns a success status, then the session is established.
 
 4. General Request and Response Structure
 
     Once the client is authenticated, the following messages will follow Request/Response structure.
     The client sends a Request and the server answers with a corresponding Response message.
 
-    All messages from now on include the fields ACTION and METHOD which are 1 byte long. All bytes are interpreted as big endian.
+    All messages from now on include the fields ACTION and METHOD which are 1 byte long. All bytes are interpreted as Big Endian.
 
     4.1. General Request Structure
 
@@ -83,27 +84,23 @@ The keywords MUST, MUST NOT, SHOULD, SHOULD NOT, MAY in this document will be in
 
         The associated METHODS for the Query ACTION (X'D0') are:
 
-            o   X'01'   Get Total Historic Connections - returns value on success, in 4 bytes. 
-            o   X'02'   Get Current Connections - returns value on success, in 4 bytes.
-            o   X'03'   Get Max. Concurrent Connections - returns value on success, in 4 bytes. 
-            o   X'04'   Get Total Bytes Sent - returns value on success, in 4 bytes. 
-            o   X'05'   Get Total Bytes Received - returns value on success, in 4 bytes. 
-            o   X'06'   Get Number of Users Connected - returns value on success, in 4 bytes. 
-            o   X'07'   Get Maximum Buffer Size - returns value on success, in 4 bytes. 
-            o   X'08'   Get User List - returns all the unames separated by 00.
+            o   X'01'   Get Total Historic Connections - returns value on success, in 8 bytes. 
+            o   X'02'   Get Current Connections - returns value on success, in 8 bytes.
+            o   X'03'   Get Max. Concurrent Connections - returns value on success, in 8 bytes. 
+            o   X'04'   Get Total Bytes Sent - returns value on success, in 8 bytes. 
+            o   X'05'   Get Total Bytes Received - returns value on success, in 8 bytes. 
+            o   X'06'   Get Number of Users Connected - returns value on success, in 8 bytes. 
+            o   X'07'   Get User List - returns the list of all registered unames, each uname preceded by a byte containing it's length.
           
         On the other hand, methods associated with the Modification ACTION are meant to modify the Server configuration. These methods do take parameters, whose syntax is described on Section 5. 
 
         The associated METHODS for the Modification ACTION (X'BE') are:
 
-            o   X'00'   Add User - returns 0 on success in 1 byte.
-            o   X'01'   Remove User - returns 0 on success in 1 byte.
-            o   X'02'   Enable Password Spoofing - returns 0 on success in 1 byte.
-            o   X'03'   Disable Password Spoofing - returns 0 on success in 1 byte.
-            o   X'04'   Change Buffer Size - returns 0 on success in 1 byte.
-
-        The action Goodbye should only be used with METHOD X'FF' to signal the termination of the connection.
-
+            o   X'00'   Add User - returns 1 on success in 1 byte.
+            o   X'01'   Remove User - returns 1 on success in 1 byte.
+            o   X'02'   Enable Password Spoofing - returns 1 on success in 1 byte.
+            o   X'03'   Disable Password Spoofing - returns 1 on success in 1 byte.
+            o   X'04'   Modify Proxy Authentication - returns 1 on success in 1 byte.
 
     4.2 General Response Structure
 
@@ -123,14 +120,14 @@ The keywords MUST, MUST NOT, SHOULD, SHOULD NOT, MAY in this document will be in
             |  X'FF'  |  X'FF' |   2    | 1 to 65535 |
             +---------+--------+--------+------------+
 
-            Where ACTION and METHOD are set to X'FF' and RESPONSE MAY include details on the errors.  
-            The values X'FF'  for ACTION and METHOD SHOULD never be included in a Request message, as they are reserved to notify errors.
+            Where ACTION and METHOD are set to X'FF' and RESPONSE takes the value of 1 in 1 byte.  
+            The values X'FF' for ACTION and METHOD SHOULD never be included in a Request message, as they are reserved to notify errors.
 
         If a valid ACTION and METHOD is sent to the Server, the Server MUST respond with the following structure:
 
             o The fields ACTION and METHOD are those of the orginal request.
-            o The field RLEN is set to the length of the response, X'01' unless otherwise specified. 
-            o The field RESPONSE is set to the response of the Server of length 4 unless otherwise specified. 
+            o The field RLEN is set to the length of the response. 
+            o The field RESPONSE is set to the specified return value. 
 
 5. Modification
 
@@ -182,15 +179,15 @@ The keywords MUST, MUST NOT, SHOULD, SHOULD NOT, MAY in this document will be in
 
                 The PCOL field contains a 1 byte which represents the protocol for which we are spoofing passwords. In this version of the procotol (X'01'), the only possible value is X'00' , representing the POP3 protocol.
 
-        5.1.5 Change Buffer Size
+        5.1.5 Modify Proxy Authentication
 
                 +--------+--------+---------+
                 | ACTION | METHOD |  NSIZE  |
                 +--------+--------+---------+
-                |  X'BE' |  X'03' |    2    |
+                |  X'BE' |  X'04' |    1    |
                 +--------+--------+---------+
 
-                The NSIZE field contains 2 bytes which represents the length of the new buffer. 
+                The NSIZE field contains 1 byte, containing a value of 0 to to deactivate the proxy authentication and a nonzero value to activate the proxy authentication. 
 
         5.2 Response
         
