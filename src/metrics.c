@@ -166,8 +166,9 @@ bool clients_need_authentication(){
     return volatile_metrics.clients_need_authentication;
 }
 
-void set_clients_need_authentication(bool boolean){
+bool set_clients_need_authentication(bool boolean){
     volatile_metrics.clients_need_authentication = boolean;
+    return true;
 }
 
 void disconnect(char * username){
