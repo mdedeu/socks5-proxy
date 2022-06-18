@@ -17,7 +17,7 @@
 
 
 
-#define MAX_PENDING_CONNECTIONS 500
+#define MAX_PENDING_CONNECTIONS 20
 #define OTHER_PORT 9090
 #define TRUE 1
 #define RW_AMOUNT 30
@@ -43,21 +43,24 @@ fd_handler passive_handlers = {
         .handle_read = &tcpConnectionHandler,
         .handle_write = NULL,
         .handle_block = NULL,
-        .handle_close = NULL
+        .handle_close = NULL,
+        .handle_timeout = NULL
 };
 
 fd_handler active_handlers = {
     .handle_read = &socks5_read,
     .handle_write = &socks5_write,
     .handle_block = &socks5_block,
-    .handle_close = NULL/*&socks5_close*/
+    .handle_close = NULL/*&socks5_close*/,
+    .handle_timeout=&socks5_timeout
 };
 
 fd_handler cool_passive_handlers = {
         .handle_read = &coolTcpConnectionHandler,
         .handle_write = NULL,
         .handle_block = NULL,
-        .handle_close = NULL
+        .handle_close = NULL,
+        .handle_timeout = NULL
 };
 
 fd_handler cool_active_handlers = {
@@ -238,7 +241,7 @@ int main(const int argc,  char **argv){
     const struct selector_init conf = {
         .signal = SIGALRM,
         .select_timeout = {
-                .tv_sec  = 10,
+                .tv_sec  = 1,
                 .tv_nsec = 0,
         },
     };
@@ -248,7 +251,7 @@ int main(const int argc,  char **argv){
         goto finally;
     }
 
-    selector = selector_new(1024);
+    selector = selector_new(FD_SETSIZE);
     if(selector == NULL) {
         err_msg = "unable to create selector";
         goto finally;

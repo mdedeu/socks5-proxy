@@ -20,6 +20,15 @@
 
 #define ERROR_DEFAULT_MSG "something failed"
 
+struct fd_status{
+    int inactivity_count;
+    bool blocked_by_server;
+};
+
+static struct  fd_status clients_status[1024];
+static int initial_elements_global;
+static void increment_no_participation_count(fd_selector s);
+
 /** retorna una descripción humana del fallo */
 const char *
 selector_error(const selector_status status) {
@@ -199,6 +208,8 @@ items_init(fd_selector s, const size_t last) {
     assert(last <= s->fd_size);
     for(size_t i = last; i < s->fd_size; i++) {
         item_init(s->fds + i);
+        clients_status[(s->fds+i)->fd].inactivity_count=0;
+        clients_status[(s->fds+i)->fd].blocked_by_server=false;
     }
 }
 
@@ -300,6 +311,7 @@ selector_new(const size_t initial_elements) {
             ret = NULL;
         }
     }
+    initial_elements_global = initial_elements;
     return ret;
 }
 
@@ -360,6 +372,10 @@ selector_register(fd_selector        s,
         item->interest = interest;
         item->data     = data;
 
+        //set as  active
+        clients_status->inactivity_count = 0;
+        clients_status->blocked_by_server = false;
+
         // actualizo colaterales
         if(fd > s->max_fd) {
             s->max_fd = fd;
@@ -399,6 +415,8 @@ selector_unregister_fd(fd_selector       s,
     item->interest = OP_NOOP;
     items_update_fdset_for_fd(s, item);
 
+    clients_status[item->fd].inactivity_count = 0;
+    clients_status[item->fd].blocked_by_server= false;
     memset(item, 0x00, sizeof(*item));
     item_init(item);
     s->max_fd = items_max_fd(s);
@@ -439,6 +457,31 @@ selector_set_interest_key(struct selector_key *key, fd_interest i) {
     return ret;
 }
 
+
+static void
+handle_timeout(fd_selector s) {
+    int n = s->max_fd;
+    struct selector_key key = {
+            .s = s,
+    };
+    for (int i = 0; i <= n; i++) {
+        if(clients_status[i].blocked_by_server)
+            continue;
+        struct item *item = s->fds + i;
+            if(ITEM_USED(item) ){
+                key.fd   = item->fd;
+                key.data = item->data;
+                if(  0 != item->handler->handle_timeout) {//avoid removing passive sockets
+                    if(clients_status[i].inactivity_count >= INACTIVITY_TOLERATION)
+                        item->handler->handle_timeout(&key);
+                }
+            }
+    }
+}
+
+
+
+
 /**
  * se encarga de manejar los resultados del select.
  * se encuentra separado para facilitar el testing
@@ -460,6 +503,7 @@ handle_iteration(fd_selector s) {
                     if(0 == item->handler->handle_read) {
                         assert(("OP_READ arrived but no handler. bug!" == 0));
                     } else {
+                        clients_status[key.fd].inactivity_count=0;
                         item->handler->handle_read(&key);
                     }
                 }
@@ -469,6 +513,7 @@ handle_iteration(fd_selector s) {
                     if(0 == item->handler->handle_write) {
                         assert(("OP_WRITE arrived but no handler. bug!" == 0));
                     } else {
+                        clients_status[key.fd].inactivity_count=0;
                         item->handler->handle_write(&key);
                     }
                 }
@@ -493,6 +538,7 @@ handle_block_notifications(fd_selector s) {
             key.fd   = item->fd;
             key.data = item->data;
             item->handler->handle_block(&key);
+            clients_status[key.fd].blocked_by_server = false;
         }
         aux  = j->next;
         free(j);
@@ -541,6 +587,8 @@ selector_select(fd_selector s) {
 
     int fds = pselect(s->max_fd + 1, &s->slave_r, &s->slave_w, 0, &s->slave_t,
                       &emptyset);
+    increment_no_participation_count(s);
+
     if(-1 == fds) {
         switch(errno) {
             case EAGAIN:
@@ -564,12 +612,20 @@ selector_select(fd_selector s) {
                 goto finally;
 
         }
-    } else {
+
+    }else {
         handle_iteration(s);
     }
+
+
     if(ret == SELECTOR_SUCCESS) {
         handle_block_notifications(s);
     }
+
+    handle_timeout(s);
+
+
+
 finally:
     return ret;
 }
@@ -587,3 +643,22 @@ selector_fd_set_nio(const int fd) {
     }
     return ret;
 }
+
+
+static void
+increment_no_participation_count(fd_selector s){
+    for(int i = 0 ; i < initial_elements_global ; i++){
+        struct item *item = s->fds + i;
+        if(ITEM_USED(item) && !clients_status[i].blocked_by_server) {
+            clients_status[i].inactivity_count++;
+        }
+    }
+}
+
+
+void set_as_blocked_by_server(struct selector_key * key ){
+    clients_status[key->fd].inactivity_count=0;
+    clients_status[key->fd].blocked_by_server = true ;
+}
+
+

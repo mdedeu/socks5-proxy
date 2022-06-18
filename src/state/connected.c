@@ -25,6 +25,7 @@ unsigned connected_read_handler(struct selector_key * key){
     int other_socket;
     bool reading_from_client = false ;
 
+
     if(key->fd == client_information->origin_fd){
         current_buffer = client_information->read_buffer;
         other_socket = client_information->client_fd;

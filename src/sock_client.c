@@ -44,12 +44,16 @@ struct sock_client * init_new_client_connection(int fd,struct sockaddr * client_
 }
 
 void destroy_sock_client(struct sock_client * sock_client){
-    if(sock_client->origin_resolutions != NULL)   freeaddrinfo(sock_client->origin_resolutions);
-    else free(sock_client->origin_address);
+    if(sock_client == NULL )
+        return ;
+    if(sock_client->origin_resolutions != NULL)
+        freeaddrinfo(sock_client->origin_resolutions);
+    else if(sock_client->origin_address != NULL )free(sock_client->origin_address);
     if(sock_client->username != NULL) free(sock_client->username);
-    free(sock_client->write_buffer);
-    free(sock_client->read_buffer);
-    destroy_sock_state(sock_client->client_state_machine);
-    free(sock_client->client_information);
+    if(sock_client->write_buffer!=NULL) free(sock_client->write_buffer);
+    if(sock_client->read_buffer!=NULL)free(sock_client->read_buffer);
+    if(sock_client->client_state_machine!=NULL) destroy_sock_state(sock_client->client_state_machine);
+    if(sock_client->client_information != NULL )free(sock_client->client_information);
+    memset(sock_client,0, sizeof(struct sock_client));
     free(sock_client);
 }

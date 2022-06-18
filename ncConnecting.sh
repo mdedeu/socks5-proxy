@@ -1,12 +1,7 @@
 #!/usr/bin/bash
 
 make_dns_query(){
-	i=$RANDOM;
-	while [ $i -ge 0 ] ; do
- 		curl -x socks5h://localhost:1080 google.com.ar &> /dev/null >&1;
- 		let i=($i-1); 
- 		sleep 1;  
-	done
+ 	nc localhost 1080 ;
 }
 
 
@@ -18,4 +13,4 @@ done
 
 sleep 10; 
 pkill -P $$ --signal 9 &> /dev/null >&1;  
-pkill curl 
+pkill nc
