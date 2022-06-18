@@ -56,5 +56,6 @@ void disconnect(char * username);
 uint64_t get_max_buffer_size();
 
 struct server_user_info ** get_user_list();
+bool remove_all_users();
 
 #endif

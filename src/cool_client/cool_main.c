@@ -15,7 +15,7 @@
 #include "../parsing/cool_client_parsing/simpleResponseParser.h"
 #include "../parsing/cool_client_parsing/generalResponseParser.h"
 
-#define COOL_PORT 42069
+#define COOL_PORT 8080
 #define RECV_BUFFER_SIZE 512
 #define CREDS_LEN 128
 #define NUMERIC_INPUT_LEN 32

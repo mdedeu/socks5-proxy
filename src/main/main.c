@@ -216,10 +216,8 @@ int main(const int argc,  char **argv){
 
     memset(&server_address_4, 0, sizeof(server_address_4));
     server_address_4.sin_family      = AF_INET;
-    //inet_pton(AF_INET, received_args.mng_addr, &server_address_4.sin_addr.s_addr);
-    //server_address_4.sin_port        = htons(received_args.mng_port);
-    server_address_4.sin_addr.s_addr = htonl(INADDR_ANY);
-    server_address_4.sin_port        = htons(COOL_PORT);
+    inet_pton(AF_INET, received_args.mng_addr, &server_address_4.sin_addr.s_addr);
+    server_address_4.sin_port        = htons(received_args.mng_port);
 
     if( (cool_master_socket[current_sock_cool_passive_socket] = socket(AF_INET , SOCK_STREAM , IPPROTO_TCP)) < 0)
     {
@@ -228,9 +226,7 @@ int main(const int argc,  char **argv){
     }
 
     setsockopt(cool_master_socket[current_sock_cool_passive_socket], SOL_SOCKET, SO_REUSEADDR, (char *)&opt, sizeof(opt)) ;
-    //fprintf(stdout, "Listening on TCP port %d\n", received_args.mng_port);
-    fprintf(stdout, "Listening on TCP port %d\n", COOL_PORT);
-
+    fprintf(stdout, "Listening on TCP port %d\n", received_args.mng_port);
 
     if (bind(cool_master_socket[current_sock_cool_passive_socket], (struct sockaddr *)&server_address_4, sizeof(server_address_4))<0)
         {
@@ -357,6 +353,8 @@ finally:
             if(cool_master_socket[i] > 0 )
                 close(cool_master_socket[i]);
         }
+
+        remove_all_users();
 
         return ret;
 }

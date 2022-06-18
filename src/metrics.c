@@ -47,6 +47,15 @@ bool add_user_handler(uint8_t ulen, uint8_t * username, uint8_t plen, uint8_t * 
     return !already_included; //exit if it was not on the list
 }
 
+bool remove_all_users(){
+    uint8_t total_clients = volatile_metrics.registered_clients;
+    for(int i = 0; i < total_clients; i++){
+        if(!remove_user_handler(strlen(volatile_metrics.client_users[0]->username),(uint8_t *) volatile_metrics.client_users[0]->username))
+            return false;
+    }
+    return true;
+}
+
 bool remove_user_handler(uint8_t ulen, uint8_t * username){
     for(int i = 0 ; i < volatile_metrics.registered_clients ; i++){
         if(strcmp(volatile_metrics.client_users[i]->username,(char*)username) == 0){
