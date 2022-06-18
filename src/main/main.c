@@ -215,9 +215,9 @@ int main(const int argc,  char **argv){
     //=======================COOL_IPV4==============================
 
     memset(&server_address_4, 0, sizeof(server_address_4));
-    server_address_4.sin_family      = AF_INET;
+    server_address_4.sin_family = AF_INET;
     inet_pton(AF_INET, received_args.mng_addr, &server_address_4.sin_addr.s_addr);
-    server_address_4.sin_port        = htons(received_args.mng_port);
+    server_address_4.sin_port = htons(received_args.mng_port);
 
     if( (cool_master_socket[current_sock_cool_passive_socket] = socket(AF_INET , SOCK_STREAM , IPPROTO_TCP)) < 0)
     {
@@ -256,7 +256,9 @@ int main(const int argc,  char **argv){
 
     memset(&server_address_6, 0, sizeof(server_address_6));
 	server_address_6.sin6_family = AF_INET6;
-	server_address_6.sin6_port = htons(COOL_PORT);
+	server_address_6.sin6_port = htons(received_args.mng_port);
+    //inet_pton(AF_INET6, received_args.mng_addr, &server_address_6.sin6_addr);
+    //TODO: mirar como dinamizar la ip para ipv4 e ipv6
     inet_pton(AF_INET6, "::1", &server_address_6.sin6_addr);
 
 	if (bind(cool_master_socket[current_sock_cool_passive_socket], (struct sockaddr *) &server_address_6, sizeof(server_address_6)) < 0)

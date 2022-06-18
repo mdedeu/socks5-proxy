@@ -76,17 +76,15 @@ bool remove_user_handler(uint8_t ulen, uint8_t * username){
 bool enable_spoofing_handler(/*uint8_t protocol*/){
     if(!volatile_metrics.password_dissector_enable) {
         volatile_metrics.password_dissector_enable = true;
-        return  true;
     }
-    return false;
+    return true;
 }
 
 bool disable_spoofing_handler(/*uint8_t protocol*/){
     if(volatile_metrics.password_dissector_enable){
         volatile_metrics.password_dissector_enable =false ;
-        return true;
     }
-    return false;
+    return true;
 }
 
 void increment_current_connections(){

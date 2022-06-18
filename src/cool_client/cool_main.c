@@ -350,28 +350,27 @@ static int ask_password(uint8_t * password){
 }
 
 static int ask_protocol(uint8_t * protocol){
-    uint8_t protocol_str[NUMERIC_INPUT_LEN];
+    char protocol_str[NUMERIC_INPUT_LEN];
     printf("Protocol: ");
     fflush(stdout);
-    if(fgets((char *) protocol_str, NUMERIC_INPUT_LEN, stdin) == 0)
+    if(fgets(protocol_str, NUMERIC_INPUT_LEN, stdin) == 0)
         return -1;
 
     if(*protocol_str == '\n')
         return -1;
 
-    char * end = strchr((char *) protocol_str, '\n');
+    char * end = strchr(protocol_str, '\n');
     if(end == NULL){
         while(getc(stdin) != '\n');
         return -1;
     }
     else
-        protocol_str[end-(char *)protocol_str] = 0; 
-        
-    errno = 0;
-    char * endptr = 0;
-    *protocol = strtol((char *) protocol_str, &endptr, 0);
-    if(errno || *endptr)
+        protocol_str[end-protocol_str] = 0; 
+    
+    if(strcmp("pop3", protocol_str))
         return -1;
+
+    *protocol = 0x00;
 
     return 0;
 }
