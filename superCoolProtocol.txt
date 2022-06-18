@@ -24,7 +24,7 @@ The keywords MUST, MUST NOT, SHOULD, SHOULD NOT, MAY in this document will be in
 3. Connection and Authentication
 
    3.1. Connection
-        When a TCP-based Client wishes to establish a connection to the socks5d Server it MUST open a TCP connection to the appropriate port on the server system. The Socks5d Administration service is conventionally located on port 42069.
+        When a TCP-based Client wishes to establish a connection to the socks5d Server it MUST open a TCP connection to the appropriate port on the server system. The Socks5d Administration service is conventionally located on port 8080.
         
    3.2. Authentication
         Once the connection with the socks5d server has started, the client produces an authentication request:

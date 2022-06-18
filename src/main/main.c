@@ -27,6 +27,11 @@
 #define DEFAULT_SOCK_PORT 1080
 #define COOL_PORT 42069
 
+#define IPV4_LOOPBACK_STRING "127.0.0.1"
+#define IPV6_LOOPBACK_STRING "::1"
+#define IPV4_ADDR_ANY_STRING "0.0.0.0"
+#define IPV6_ADDR_ANY_STRING "::1"
+
 static bool done = false;
 
 static void
@@ -147,6 +152,8 @@ int main(const int argc,  char **argv){
     struct sockaddr_in server_address_4;
     memset(&server_address_4, 0, sizeof(server_address_4));
     server_address_4.sin_family      = AF_INET;
+    if(!strcmp(received_args.socks_addr, IPV4_ADDR_ANY_STRING) || !strcmp(received_args.socks_addr, IPV6_ADDR_ANY_STRING))
+        received_args.socks_addr = IPV4_ADDR_ANY_STRING;
     inet_pton(AF_INET, received_args.socks_addr, &server_address_4.sin_addr.s_addr);
     server_address_4.sin_port        = htons(port);
 
@@ -191,7 +198,9 @@ int main(const int argc,  char **argv){
     memset(&server_address_6, 0, sizeof(server_address_6));
 	server_address_6.sin6_family = AF_INET6;
 	server_address_6.sin6_port = htons(port);
-    inet_pton(AF_INET6, "::1", &server_address_6.sin6_addr);
+    if(!strcmp(received_args.socks_addr, IPV4_ADDR_ANY_STRING) || !strcmp(received_args.socks_addr, IPV6_ADDR_ANY_STRING))
+        received_args.socks_addr = IPV6_ADDR_ANY_STRING;
+    inet_pton(AF_INET6, received_args.socks_addr, &server_address_6.sin6_addr);
 
 
     if (bind(master_socket[current_sock_passive_socket], (struct sockaddr *) &server_address_6, sizeof(server_address_6)) < 0)
@@ -216,6 +225,8 @@ int main(const int argc,  char **argv){
 
     memset(&server_address_4, 0, sizeof(server_address_4));
     server_address_4.sin_family = AF_INET;
+    if(!strcmp(received_args.mng_addr, IPV4_LOOPBACK_STRING) || !strcmp(received_args.mng_addr, IPV6_LOOPBACK_STRING))
+        received_args.mng_addr = IPV4_LOOPBACK_STRING;
     inet_pton(AF_INET, received_args.mng_addr, &server_address_4.sin_addr.s_addr);
     server_address_4.sin_port = htons(received_args.mng_port);
 
@@ -257,9 +268,9 @@ int main(const int argc,  char **argv){
     memset(&server_address_6, 0, sizeof(server_address_6));
 	server_address_6.sin6_family = AF_INET6;
 	server_address_6.sin6_port = htons(received_args.mng_port);
-    //inet_pton(AF_INET6, received_args.mng_addr, &server_address_6.sin6_addr);
-    //TODO: mirar como dinamizar la ip para ipv4 e ipv6
-    inet_pton(AF_INET6, "::1", &server_address_6.sin6_addr);
+    if(!strcmp(received_args.mng_addr, IPV4_LOOPBACK_STRING) || !strcmp(received_args.mng_addr, IPV6_LOOPBACK_STRING))
+        received_args.mng_addr = IPV6_LOOPBACK_STRING;
+    inet_pton(AF_INET6, received_args.mng_addr, &server_address_6.sin6_addr);
 
 	if (bind(cool_master_socket[current_sock_cool_passive_socket], (struct sockaddr *) &server_address_6, sizeof(server_address_6)) < 0)
 	{
