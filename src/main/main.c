@@ -301,7 +301,7 @@ int main(const int argc,  char **argv){
         goto finally;
     }
 
-    for(int i = 0 ; i < N(master_socket) ; i++){
+    for(long unsigned int  i = 0 ; i < N(master_socket) ; i++){
         selector_status_returned = selector_register(selector, master_socket[i], &passive_handlers, OP_READ, NULL);
         if(SELECTOR_SUCCESS != selector_status_returned ){
             err_msg = "registering fd";
@@ -309,7 +309,7 @@ int main(const int argc,  char **argv){
         }
     }
 
-    for(int i = 0 ; i < N(cool_master_socket) ; i++){
+    for(long unsigned int  i = 0 ; i < N(cool_master_socket) ; i++){
         selector_status_returned = selector_register(selector, cool_master_socket[i], &cool_passive_handlers, OP_READ, NULL);
         if(SELECTOR_SUCCESS != selector_status_returned ){
             err_msg = "registering fd";
@@ -348,12 +348,12 @@ finally:
         }
         selector_close();
 
-        for(int i = 0  ;i < N(master_socket); i++){
+        for(long unsigned int  i = 0  ;i < N(master_socket); i++){
             if(master_socket[i] > 0 )
                 close(master_socket[i]);
         }
 
-        for(int i = 0; i < N(cool_master_socket); i++){
+        for(long unsigned int  i = 0; i < N(cool_master_socket); i++){
             if(cool_master_socket[i] > 0 )
                 close(cool_master_socket[i]);
         }

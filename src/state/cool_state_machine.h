@@ -12,7 +12,6 @@
 #include "../selector.h"
 #include <sys/types.h>
 #include <sys/socket.h>
-#include "../bufferService.h"
 #include "../cool_request_processor.h"
 #include "../cool_client.h"
 #include "../general_handlers.h"

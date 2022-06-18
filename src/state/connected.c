@@ -109,7 +109,7 @@ unsigned connected_read_handler(struct selector_key * key){
 
     buffer_read_adv(current_buffer, write_amount);
 
-     if(available_write == write_amount){
+     if( (ssize_t)available_write ==  write_amount){
          if(client_information->close_after_write)
              return CLOSING_CONNECTION;
          else

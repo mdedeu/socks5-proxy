@@ -110,7 +110,7 @@ void process_request_message(struct sock_request_message * data, struct selector
 void generate_positive_request_answer(struct sock_request_message * data, struct selector_key * key){
     sock_client * client_information = (sock_client *) key->data;
     buffer * answer_buffer = client_information->write_buffer;
-    uint8_t  * port_pointer;
+    uint8_t  * port_pointer = calloc(1,2*sizeof(uint8_t));
 
     buffer_reset(answer_buffer);
     buffer_write(answer_buffer, CURRENT_SOCK_VERSION);
@@ -134,7 +134,10 @@ void generate_positive_request_answer(struct sock_request_message * data, struct
         memcpy(writing_direction, &client_info_ipv4.sin_addr.s_addr, IPV4SIZE);
         buffer_write_adv(answer_buffer, IPV4SIZE);
 //        client_information->origin_port = ntohs(client_info_ipv4.sin_port);
-        port_pointer = (uint8_t * ) &client_info_ipv4.sin_port;
+        memcpy(port_pointer,&client_info_ipv4.sin_port, sizeof(uint16_t));
+//        port_pointer = (uint8_t * ) &client_info_ipv4.sin_port;
+
+
 
     }else{
         buffer_write(answer_buffer, IPV6ADDRESS);
@@ -144,15 +147,14 @@ void generate_positive_request_answer(struct sock_request_message * data, struct
         memcpy(writing_direction, client_info_ipv6.sin6_addr.__in6_u.__u6_addr8, IPV6SIZE);
         buffer_write_adv(answer_buffer, IPV6SIZE);
 //        client_information->origin_port = ntohs(client_info_ipv6.sin6_port);
-        port_pointer = (uint8_t * ) &client_info_ipv6.sin6_port;
+        memcpy(port_pointer,&client_info_ipv6.sin6_port, sizeof(uint16_t));
+
+//        port_pointer = (uint8_t * ) &client_info_ipv6.sin6_port;
 
     }
 
-    uint8_t significant =port_pointer[0];
-    buffer_write(answer_buffer, significant);
-
-    uint8_t insignificant = port_pointer[1];
-    buffer_write(answer_buffer, insignificant);
+    buffer_write(answer_buffer, (uint8_t)port_pointer[0]);
+    buffer_write(answer_buffer, (uint8_t)port_pointer[1]);
 
 
 }

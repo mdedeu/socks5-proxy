@@ -130,42 +130,42 @@ void process_cool_request_message(struct general_request_message * data, struct 
                 result = get_total_connections();
                 header[3] = 0x08;
                 number_len = sizeof(result)/sizeof(uint8_t);
-                for(int i = 0; i < number_len; i++)
+                for(size_t i = 0; i < number_len; i++)
                     buffer_write(client_data->write_buffer, (uint8_t) (result >> (8*(number_len - i - 1))));
                 break;
             case GET_CURRENT_CONNECTIONS:
                 result = get_current_connections();
                 header[3] = 0x08;
                 number_len = sizeof(result)/sizeof(uint8_t);
-                for(int i = 0; i < number_len; i++)
+                for(size_t i = 0; i < number_len; i++)
                     buffer_write(client_data->write_buffer, (uint8_t) (result >> (8*(number_len - i - 1))));
                 break;
             case GET_MAX_CURRENT_CONNECTIONS:
                 result = get_max_current_connections();
                 header[3] = 0x08;
                 number_len = sizeof(result)/sizeof(uint8_t);
-                for(int i = 0; i < number_len; i++)
+                for(size_t i = 0; i < number_len; i++)
                     buffer_write(client_data->write_buffer, (uint8_t) (result >> (8*(number_len - i - 1))));
                 break;
             case GET_TOTAL_BYTES_SENT:
                 result = get_total_bytes_sent();
                 header[3] = 0x08;
                 number_len = sizeof(result)/sizeof(uint8_t);
-                for(int i = 0; i < number_len; i++)
+                for(size_t i = 0; i < number_len; i++)
                     buffer_write(client_data->write_buffer, (uint8_t) (result >> (8*(number_len - i - 1))));
                 break;
             case GET_TOTAL_BYTES_RECV:
                 result = get_total_bytes_recv();
                 header[3] = 0x08;
                 number_len = sizeof(result)/sizeof(uint8_t);
-                for(int i = 0; i < number_len; i++)
+                for(size_t i = 0; i < number_len; i++)
                     buffer_write(client_data->write_buffer, (uint8_t) (result >> (8*(number_len - i - 1))));
                 break;
             case GET_CONNECTED_USERS:
                 result = get_connected_users();
                 header[3] = 0x08;
                 number_len = sizeof(result)/sizeof(uint8_t);
-                for(int i = 0; i < number_len; i++)
+                for(size_t i = 0; i < number_len; i++)
                     buffer_write(client_data->write_buffer, (uint8_t) (result >> (8*(number_len - i - 1))));
                 break;
             case GET_USER_LIST:

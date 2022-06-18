@@ -27,7 +27,7 @@ unsigned cool_authenticate_write_handler(struct selector_key *key){
     buffer_read_adv(client_data->write_buffer, written_bytes);
     buffer_compact(client_data->write_buffer);
 
-    if(written_bytes < write_amount)
+    if(written_bytes < (ssize_t)write_amount)
         return COOL_AUTHENTICATE_WRITING;
     else if(*reading_since==0x4B && *(reading_since+1)==0x1D)
         return COOL_AUTHENTICATE_READING;

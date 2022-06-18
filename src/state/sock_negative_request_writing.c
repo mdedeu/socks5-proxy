@@ -43,7 +43,7 @@ unsigned sock_negative_request_write_handler(struct selector_key * key){
     buffer_read_adv(client_data->write_buffer, written_bytes);
     buffer_compact(client_data->write_buffer);
 
-    if(written_bytes < write_amount) // check if not connected
+    if(written_bytes < (ssize_t)write_amount) // check if not connected
         return SOCK_NEGATIVE_REQUEST_WRITING;
     else{
         print_connection_data(key);

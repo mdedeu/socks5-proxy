@@ -110,7 +110,7 @@ static struct parser_definition pop3_parser_definition={
 };
 
 
-struct pop3_data_message * init_pop3_data_parser(char * prefix_received,ssize_t prefix_received_length){
+struct pop3_data_message * init_pop3_data_parser(char * prefix_received,size_t prefix_received_length){
     struct pop3_data_message * new_pop3_data_message = malloc(sizeof (struct pop3_data_message));
     struct parser * pop3_data_parser = parser_init(parser_no_classes(),&pop3_parser_definition);
     new_pop3_data_message->using_parser = pop3_data_parser;

@@ -20,6 +20,7 @@
 
 #define ERROR_DEFAULT_MSG "something failed"
 
+
 struct fd_status{
     int inactivity_count;
     bool blocked_by_server;
@@ -326,9 +327,10 @@ selector_destroy(fd_selector s) {
                 }
             }
             pthread_mutex_destroy(&s->resolution_mutex);
-            for(struct blocking_job *j = s->resolution_jobs; j != NULL;
-                j = j->next) {
+            for(struct blocking_job *j = s->resolution_jobs; j != NULL; ) {
+                struct blocking_job * aux = j->next;
                 free(j);
+                j=aux;
             }
             free(s->fds);
             s->fds     = NULL;

@@ -12,7 +12,7 @@
 
 
 struct pop3_data_message{
-    uint8_t data_characters_read;
+    uint16_t data_characters_read;
     char data[PARSER_BUFFER_SIZE];
     uint8_t prefix_len;
     uint8_t check_characters_read;
@@ -21,7 +21,7 @@ struct pop3_data_message{
     bool connected;
 };
 
-struct pop3_data_message * init_pop3_data_parser(char * prefix_received,ssize_t prefix_received_length);
+struct pop3_data_message * init_pop3_data_parser(char * prefix_received,size_t prefix_received_length);
 bool feed_pop3_data_parser(struct pop3_data_message * sock_data, char * input,int input_size);
 void close_pop3_data_parser(struct pop3_data_message *  current_data);
 

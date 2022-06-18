@@ -56,8 +56,8 @@ bool remove_user_handler(uint8_t ulen, uint8_t * username){
                 free(volatile_metrics.client_users[i]->password);
             if(volatile_metrics.client_users[i])
                 free(volatile_metrics.client_users[i]);
-            if(volatile_metrics.registered_clients-- >= 0)
-                volatile_metrics.client_users[i] = volatile_metrics.client_users[volatile_metrics.registered_clients];
+//            if(volatile_metrics.registered_clients-- >= 0)
+            volatile_metrics.client_users[i] = volatile_metrics.client_users[volatile_metrics.registered_clients];
             return true;
         }
     }
@@ -93,13 +93,13 @@ void decrement_current_connections(){
 }
 
 void increment_data_sent(uint64_t data_quantity){
-    if(data_quantity < 0) return;
+//    if(data_quantity < 0) return;
     volatile_metrics.bytes_sent += data_quantity ;
 }
 
 
 void increment_data_received(uint64_t data_quantity){
-    if(data_quantity < 0) return;
+//    if(data_quantity < 0) return;
     volatile_metrics.bytes_received += data_quantity ;
 }
 
