@@ -36,7 +36,7 @@ unsigned sock_negative_request_write_handler(struct selector_key * key){
 
     size_t write_amount;
     uint8_t *reading_since = buffer_read_ptr(client_data->write_buffer, &write_amount);
-    ssize_t written_bytes = send(client_data->client_fd, reading_since, write_amount, MSG_DONTWAIT| MSG_NOSIGNAL);
+    ssize_t written_bytes = send(client_data->client_fd, reading_since, write_amount, MSG_DONTWAIT);
     if(written_bytes < 0 )
         return CLOSING_CONNECTION;
 

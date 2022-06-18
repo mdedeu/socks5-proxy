@@ -15,7 +15,7 @@ unsigned cool_request_read_handler(struct selector_key *key){
 
     char temp_buffer[MAX_READ_LENGTH];
 
-    int received_amount = recv(key->fd, temp_buffer, MAX_READ_LENGTH, MSG_DONTWAIT| MSG_NOSIGNAL);
+    int received_amount = recv(key->fd, temp_buffer, MAX_READ_LENGTH, MSG_DONTWAIT);
 
     bool finished = feed_general_request_parser(
         (struct general_request_message *) (client_data->parsed_message),

@@ -373,8 +373,8 @@ selector_register(fd_selector        s,
         item->data     = data;
 
         //set as  active
-        clients_status->inactivity_count = 0;
-        clients_status->blocked_by_server = false;
+        clients_status[item->fd].inactivity_count = 0;
+        clients_status[item->fd].blocked_by_server = false;
 
         // actualizo colaterales
         if(fd > s->max_fd) {
@@ -620,10 +620,8 @@ selector_select(fd_selector s) {
 
     if(ret == SELECTOR_SUCCESS) {
         handle_block_notifications(s);
+        handle_timeout(s);
     }
-
-    handle_timeout(s);
-
 
 
 finally:
@@ -647,7 +645,7 @@ selector_fd_set_nio(const int fd) {
 
 static void
 increment_no_participation_count(fd_selector s){
-    for(int i = 0 ; i < initial_elements_global ; i++){
+    for(int i = 0 ; i < s->max_fd ; i++){
         struct item *item = s->fds + i;
         if(ITEM_USED(item) && !clients_status[i].blocked_by_server) {
             clients_status[i].inactivity_count++;

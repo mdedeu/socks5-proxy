@@ -17,7 +17,7 @@
 
 
 
-#define MAX_PENDING_CONNECTIONS 20
+#define MAX_PENDING_CONNECTIONS 100
 #define OTHER_PORT 9090
 #define TRUE 1
 #define RW_AMOUNT 30
@@ -75,13 +75,19 @@ void tcpConnectionHandler(struct selector_key *key){
     struct sockaddr  new_client_information;
     socklen_t  new_client_information_size =  sizeof(new_client_information);
 
-    int new_client_fd = accept(key->fd,  &new_client_information, &new_client_information_size);
-    if(new_client_fd > 0 ){
+    int new_client_fd;
+    do{
+        new_client_fd = accept(key->fd,  &new_client_information, &new_client_information_size);
+    }while(new_client_fd < 0 && (errno == EINTR) );
+
         struct sock_client * new_client_data = init_new_client_connection(new_client_fd,&new_client_information);
         if(new_client_data != NULL)
-            if( SELECTOR_SUCCESS != selector_register(key->s, new_client_fd, &active_handlers, OP_READ, new_client_data) )
+            if( SELECTOR_SUCCESS != selector_register(key->s, new_client_fd, &active_handlers, OP_READ, new_client_data) ){
                 destroy_sock_client(new_client_data);
-    }
+                close(new_client_fd);
+            }
+
+
 }
 
 void coolTcpConnectionHandler(struct selector_key *key){
