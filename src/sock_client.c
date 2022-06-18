@@ -46,6 +46,26 @@ struct sock_client * init_new_client_connection(int fd,struct sockaddr * client_
 void destroy_sock_client(struct sock_client * sock_client){
     if(sock_client == NULL )
         return ;
+
+    switch (sock_client->client_state) { //only if timeout expires.
+        case HELLO:
+            if(sock_client->using_parser != NULL) close_sock_hello_parser(sock_client->using_parser);
+            if(sock_client->parsed_message != NULL ) close_sock_hello_message((struct sock_hello_message * ) sock_client->parsed_message);
+            break;
+        case AUTHENTICATING:
+            if(sock_client->using_parser != NULL) close_sock_authentication_parser(sock_client->using_parser);
+            if(sock_client->parsed_message != NULL ) close_sock_authentication_message((struct sock_authentication_message * ) sock_client->parsed_message);
+            break;
+        case REQUESTING:
+            if(sock_client->using_parser != NULL) close_sock_request_parser(sock_client->using_parser);
+            if(sock_client->parsed_message != NULL ) close_sock_request_message((struct sock_request_message * ) sock_client->parsed_message);
+            break;
+        case ESTABLISHED:
+            if(sock_client->origin_port == POP_PORT)
+                destroy_dissector(sock_client->dissector);
+        break ;
+    }
+
     if(sock_client->origin_resolutions != NULL)
         freeaddrinfo(sock_client->origin_resolutions);
     else if(sock_client->origin_address != NULL )free(sock_client->origin_address);

@@ -11,6 +11,7 @@ void request_reading_arrival(const unsigned state , struct selector_key * key ){
         sock_client *client_data = (sock_client *) key->data;
         client_data->using_parser = init_sock_request_parser();
         client_data->parsed_message = init_sock_request_message();
+        client_data->client_state = REQUESTING;
         selector_set_interest_key(key,OP_READ);
     }
 }
@@ -82,6 +83,7 @@ void request_reading_departure(const unsigned state , struct selector_key * key 
     if(key!=NULL && key->data !=NULL){
         sock_client *client_data = (sock_client *) key->data;
         close_sock_request_parser(client_data->using_parser);
+        client_data->using_parser = NULL;
         selector_set_interest_key(key,OP_NOOP);
     }
 }

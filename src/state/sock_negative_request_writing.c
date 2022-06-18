@@ -56,6 +56,7 @@ void sock_negative_request_writing_departure(unsigned state, struct selector_key
         return;
     struct sock_client *client_information = (struct sock_client *) key->data;
     close_sock_request_message((struct sock_request_message *) client_information->parsed_message);
+    client_information->parsed_message = NULL;
     selector_set_interest(key->s, client_information->client_fd, OP_NOOP);
     selector_set_interest(key->s, client_information->client_fd, OP_NOOP);
 }

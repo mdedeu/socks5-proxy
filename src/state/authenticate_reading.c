@@ -7,6 +7,7 @@ void authenticate_reading_arrival(const unsigned int leaving_state, struct selec
         sock_client *client_data = (sock_client *) key->data;
         client_data->using_parser = init_sock_authentication_parser();
         client_data->parsed_message = init_sock_authentication_message();
+        client_data->client_state = AUTHENTICATING;
         selector_set_interest_key(key, OP_READ);
     }
 }
@@ -46,6 +47,8 @@ void authenticate_reading_departure(const unsigned int leaving_state, struct sel
         sock_client *client_data = (sock_client *) key->data;
         close_sock_authentication_parser(client_data->using_parser);
         close_sock_authentication_message((struct sock_authentication_message *) client_data->parsed_message);
+        client_data->parsed_message = NULL;
+        client_data->using_parser = NULL;
         selector_set_interest_key(key, OP_NOOP);
     }
 }
