@@ -13,7 +13,7 @@
 #define BUFFER_SIZE 2048
 
 typedef struct sock_client{
-    uint8_t client_fd;
+    uint16_t client_fd;
     struct sockaddr_storage * client_information;
     uint8_t raw_read_buffer[BUFFER_SIZE];
     uint8_t raw_write_buffer[BUFFER_SIZE];

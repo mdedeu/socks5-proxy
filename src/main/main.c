@@ -18,7 +18,7 @@
 
 
 
-#define MAX_PENDING_CONNECTIONS 500
+#define MAX_PENDING_CONNECTIONS 100
 #define OTHER_PORT 9090
 #define TRUE 1
 #define RW_AMOUNT 30
@@ -45,21 +45,24 @@ fd_handler passive_handlers = {
         .handle_read = &tcpConnectionHandler,
         .handle_write = NULL,
         .handle_block = NULL,
-        .handle_close = NULL
+        .handle_close = NULL,
+        .handle_timeout = NULL
 };
 
 fd_handler active_handlers = {
     .handle_read = &socks5_read,
     .handle_write = &socks5_write,
     .handle_block = &socks5_block,
-    .handle_close = NULL/*&socks5_close*/
+    .handle_close = NULL/*&socks5_close*/,
+    .handle_timeout=&socks5_timeout
 };
 
 fd_handler cool_passive_handlers = {
         .handle_read = &coolTcpConnectionHandler,
         .handle_write = NULL,
         .handle_block = NULL,
-        .handle_close = NULL
+        .handle_close = NULL,
+        .handle_timeout = NULL
 };
 
 fd_handler cool_active_handlers = {
@@ -74,12 +77,19 @@ void tcpConnectionHandler(struct selector_key *key){
     struct sockaddr  new_client_information;
     socklen_t  new_client_information_size =  sizeof(new_client_information);
 
-    int new_client_fd = accept(key->fd,  &new_client_information, &new_client_information_size);
-    if(new_client_fd > 0 ){
+    int new_client_fd;
+    do{
+        new_client_fd = accept(key->fd,  &new_client_information, &new_client_information_size);
+    }while(new_client_fd < 0 && (errno == EINTR) );
+
         struct sock_client * new_client_data = init_new_client_connection(new_client_fd,&new_client_information);
         if(new_client_data != NULL)
-            selector_register(key->s, new_client_fd, &active_handlers, OP_READ, new_client_data);
-    }
+            if( SELECTOR_SUCCESS != selector_register(key->s, new_client_fd, &active_handlers, OP_READ, new_client_data) ){
+                destroy_sock_client(new_client_data);
+                close(new_client_fd);
+            }
+
+
 }
 
 void coolTcpConnectionHandler(struct selector_key *key){
@@ -90,7 +100,8 @@ void coolTcpConnectionHandler(struct selector_key *key){
     if(new_client_fd > 0 ){
         struct cool_client * new_client_data = init_cool_client_connection(new_client_fd);
         if(new_client_data != NULL)
-            selector_register(key->s, new_client_fd, &cool_active_handlers, OP_READ, new_client_data);
+            if(SELECTOR_SUCCESS != selector_register(key->s, new_client_fd, &cool_active_handlers, OP_READ, new_client_data) )
+                destroy_cool_client(new_client_data);
     }
 }
 
@@ -274,7 +285,7 @@ int main(const int argc,  char **argv){
     const struct selector_init conf = {
         .signal = SIGALRM,
         .select_timeout = {
-                .tv_sec  = 10,
+                .tv_sec  = 1,
                 .tv_nsec = 0,
         },
     };
@@ -284,7 +295,7 @@ int main(const int argc,  char **argv){
         goto finally;
     }
 
-    selector = selector_new(1024);
+    selector = selector_new(FD_SETSIZE);
     if(selector == NULL) {
         err_msg = "unable to create selector";
         goto finally;

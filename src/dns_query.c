@@ -27,12 +27,14 @@ void * request_resolving_blocking(void * data){
     char buff[16];
     snprintf(buff, sizeof (buff), "%d", port);
 
-    getaddrinfo(
+   if (  getaddrinfo(
         (char *) request_message->address,
         buff,
         &hints,
         &sock_client_information->origin_resolutions
-    ) ;
+    ) < 0 ) {
+       sock_client_information->origin_resolutions = NULL ;
+   }
 
 
     selector_notify_block(key->s, key->fd);

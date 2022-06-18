@@ -151,5 +151,6 @@ static bool  create_resolution_thread( struct selector_key *key){
     pthread_t tid;
    if(0!= pthread_create(&tid, 0, &request_resolving_blocking, thread_copy))
        return false;
+    set_as_blocked_by_server(key);
    return true;
 }
