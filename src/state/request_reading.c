@@ -82,7 +82,6 @@ void request_reading_departure(const unsigned state , struct selector_key * key 
     if(key!=NULL && key->data !=NULL){
         sock_client *client_data = (sock_client *) key->data;
         close_sock_request_parser(client_data->using_parser);
-        close_sock_request_message(client_data->parsed_message);
         selector_set_interest_key(key,OP_NOOP);
     }
 }
