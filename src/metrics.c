@@ -33,12 +33,12 @@ bool add_user_handler(uint8_t ulen, uint8_t * username, uint8_t plen, uint8_t * 
         adding_user_info->username = malloc(ulen+1);
         if(adding_user_info->username == NULL )
             return false;
-        memcpy(adding_user_info->username,(char*)username,ulen);
+        memcpy(adding_user_info->username,(char*)username,ulen+1);
         adding_user_info->username[ulen] = 0;
         adding_user_info->password = malloc(plen+1);
         if(adding_user_info->password == NULL )
             return false;
-        memcpy(adding_user_info->password,password, plen);
+        memcpy(adding_user_info->password,password, plen+1);
         adding_user_info->password[plen] = 0;
         adding_user_info->connected = false;
         volatile_metrics.client_users[volatile_metrics.registered_clients++] = adding_user_info;
