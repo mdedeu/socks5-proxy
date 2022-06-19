@@ -10,6 +10,7 @@
 #include <inttypes.h>
 #include "../parsing/cool_client_parsing/simpleResponseParser.h"
 #include "../parsing/cool_client_parsing/generalResponseParser.h"
+#include "client_args.h"
 
 #define COOL_PORT 8080
 #define RECV_BUFFER_SIZE 512
@@ -56,8 +57,8 @@ static void handle_quit(int sock_fd);
 static int close_connection(int socket_fd);
 static void print_welcome();
 static int resolve_command(char * command, uint8_t * action, uint8_t * method, uint8_t * parameters);
-static int connect_to_ipv4(struct sockaddr_in * ipv4_address, char * port);
-static int connect_to_ipv6(struct sockaddr_in6 * ipv6_address, char * port);
+static int connect_to_ipv4(struct sockaddr_in * ipv4_address, unsigned short port, char * address);
+static int connect_to_ipv6(struct sockaddr_in6 * ipv6_address, unsigned short port,char * address);
 
 #define BUILTIN_TOTAL 2
 #define QUERIES_TOTAL 7
@@ -95,32 +96,27 @@ int main(int argc, char * argv[]){
     int read_amount, is_builtin;
     struct sockaddr_in6 ipv6_address;
     struct sockaddr_in ipv4_address;
-    char * port = NULL;
+    unsigned short port;
 
-    if(argc < 2){
-        printf("You should enter the address family as a parameter, 4 for ipv4 and 6 for ipv6.\n");
-        return -1;
-    }
+    struct client_args args ;
+    client_parse_args(argc,argv,&args);
 
-    errno = 0;
-    int address_family = strtol(argv[1], NULL, 10);
 
-    if(errno != 0)
-        return -1;
+    int address_family = args.version;
+
 
     if(address_family != 4 && address_family != 6){
         printf("You should enter the address family as a parameter, 4 for ipv4 and 6 for ipv6.\n");
         return -1;
     }
 
-    if(argc == 3)
-        port = argv[2];
+    port = args.socks_port;
 
     int sock_fd;
     if(address_family == 4)
-        sock_fd = connect_to_ipv4(&ipv4_address, port);
+        sock_fd = connect_to_ipv4(&ipv4_address, port,args.socks_addr);
     else
-        sock_fd = connect_to_ipv6(&ipv6_address, port);
+        sock_fd = connect_to_ipv6(&ipv6_address, port,args.socks_addr);
     
     if(sock_fd < 0)
         return -1;
@@ -507,29 +503,15 @@ static int resolve_command(char * command, uint8_t * action, uint8_t * method, u
     return -1;
 }
 
-static int connect_to_ipv4(struct sockaddr_in * ipv4_address, char * port){
+static int connect_to_ipv4(struct sockaddr_in * ipv4_address, unsigned short port , char * address){
     int sock_fd = socket(AF_INET , SOCK_STREAM , 0);
-    unsigned short port_number;
     if(sock_fd < 0)
         return -1;
 
     memset(ipv4_address, 0, sizeof(*ipv4_address));
     ipv4_address->sin_family = AF_INET;
-    ipv4_address->sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-
-    if(port == NULL)
-        ipv4_address->sin_port = htons(COOL_PORT);
-    else{
-        errno = 0;
-        char * endptr = 0;
-        port_number = strtol(port, &endptr, 0);
-        if(errno || *endptr){
-        printf("Invalid port\n");
-            return -1;
-        }
-        ipv4_address->sin_port = htons(port_number);
-    }
-
+    ipv4_address->sin_port = htons(port);
+    inet_pton(AF_INET, address, &ipv4_address->sin_addr.s_addr);
 
     if(connect(sock_fd, (struct sockaddr *) ipv4_address, sizeof(*ipv4_address)) < 0){
         printf("Unable to connect\n");
@@ -540,29 +522,16 @@ static int connect_to_ipv4(struct sockaddr_in * ipv4_address, char * port){
     return sock_fd;
 }
 
-static int connect_to_ipv6(struct sockaddr_in6 * ipv6_address, char * port){
+static int connect_to_ipv6(struct sockaddr_in6 * ipv6_address, unsigned short port,char * address){
     int sock_fd = socket(AF_INET6, SOCK_STREAM , 0);
-    unsigned short port_number;
     if(sock_fd < 0)
         return -1;
 
     ipv6_address->sin6_family = AF_INET6;
     ipv6_address->sin6_flowinfo = 0;
     ipv6_address->sin6_scope_id = 0;
-    inet_pton(AF_INET6, "::1", &ipv6_address->sin6_addr);
-
-    if(port == NULL)
-        ipv6_address->sin6_port = htons(COOL_PORT);
-    else{
-        errno = 0;
-        char * endptr = 0;
-        port_number = strtol(port, &endptr, 0);
-        if(errno || *endptr){
-        printf("Invalid port\n");
-            return -1;
-        }
-        ipv6_address->sin6_port = htons(port_number);
-    }
+    inet_pton(AF_INET6, address, &ipv6_address->sin6_addr);
+    ipv6_address->sin6_port= htons(port);
 
     if(connect(sock_fd, (struct sockaddr *) ipv6_address, sizeof(*ipv6_address)) < 0){
         printf("Unable to connect\n");
