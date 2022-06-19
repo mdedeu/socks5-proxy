@@ -49,8 +49,10 @@ unsigned request_reading_read_handler(struct selector_key *key){
     }
 
     if(received_message->atyp == DOMAIN_NAME){
-        if(create_resolution_thread(key))
+        if(create_resolution_thread(key)){
+            selector_set_interest_key(key,OP_NOOP);
             return SOCK_REQUEST_READING;
+        }
         else{
             struct sock_request_message * message = (struct sock_request_message * )client_data->parsed_message;
             message->connection_result = status_general_socks_server_failure;

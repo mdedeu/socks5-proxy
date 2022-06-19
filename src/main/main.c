@@ -35,18 +35,29 @@ sigterm_handler(const int signal) {
 }
 
 
-
-void tcpConnectionHandler(struct selector_key *key);
+static void tcpConnectionHandler(struct selector_key * key,struct sockaddr * client_address , socklen_t *client_address_len,bool ipv4);
+void tcpConnectionHandlerIpv4(struct selector_key *key);
+void tcpConnectionHandlerIpv6(struct selector_key *key);
 void coolTcpConnectionHandler(struct selector_key *key);
 
 
-fd_handler passive_handlers = {
-        .handle_read = &tcpConnectionHandler,
+const fd_handler passive_handlers_ipv4 = {
+        .handle_read = &tcpConnectionHandlerIpv4,
         .handle_write = NULL,
         .handle_block = NULL,
         .handle_close = NULL,
         .handle_timeout = NULL
 };
+
+const fd_handler passive_handlers_ipv6 = {
+        .handle_read = &tcpConnectionHandlerIpv6,
+        .handle_write = NULL,
+        .handle_block = NULL,
+        .handle_close = NULL,
+        .handle_timeout = NULL
+};
+
+const fd_handler passive_handlers[2] = {passive_handlers_ipv4,passive_handlers_ipv6};
 
 fd_handler active_handlers = {
     .handle_read = &socks5_read,
@@ -72,24 +83,32 @@ fd_handler cool_active_handlers = {
 };
 
 
-void tcpConnectionHandler(struct selector_key *key){
-    struct sockaddr  new_client_information;
-    socklen_t  new_client_information_size =  sizeof(new_client_information);
 
+void tcpConnectionHandlerIpv4(struct selector_key *key){
+    struct sockaddr_in  new_client_information;
+    socklen_t  new_client_information_size =  sizeof(new_client_information);
+    tcpConnectionHandler(key,(struct sockaddr*)&new_client_information , &new_client_information_size,true);
+}
+
+void tcpConnectionHandlerIpv6(struct selector_key *key){
+    struct sockaddr_in6  new_client_information;
+    socklen_t  new_client_information_size =  sizeof(new_client_information);
+    tcpConnectionHandler(key,(struct sockaddr*)&new_client_information , &new_client_information_size,false);
+}
+
+static void tcpConnectionHandler(struct selector_key * key,struct sockaddr * client_address , socklen_t * client_address_len,bool ipv4){
     int new_client_fd;
     do{
-        new_client_fd = accept(key->fd,  &new_client_information, &new_client_information_size);
+        new_client_fd = accept(key->fd,  client_address, client_address_len);
     }while(new_client_fd < 0 && (errno == EINTR) );
-
-        struct sock_client * new_client_data = init_new_client_connection(new_client_fd,&new_client_information);
-        if(new_client_data != NULL)
-            if( SELECTOR_SUCCESS != selector_register(key->s, new_client_fd, &active_handlers, OP_READ, new_client_data) ){
-                destroy_sock_client(new_client_data);
-                close(new_client_fd);
-            }
-
-
+    struct sock_client * new_client_data = init_new_client_connection(new_client_fd,client_address,ipv4);
+    if(new_client_data != NULL)
+        if( SELECTOR_SUCCESS != selector_register(key->s, new_client_fd, &active_handlers, OP_READ, new_client_data) ){
+            destroy_sock_client(new_client_data);
+            close(new_client_fd);
+        }
 }
+
 
 void coolTcpConnectionHandler(struct selector_key *key){
     struct sockaddr  new_client_information;
@@ -339,7 +358,7 @@ int main(const int argc,  char **argv){
     }
 
     for(long unsigned int  i = 0 ; i < N(master_socket) ; i++){
-        selector_status_returned = selector_register(selector, master_socket[i], &passive_handlers, OP_READ, NULL);
+        selector_status_returned = selector_register(selector, master_socket[i], &passive_handlers[i], OP_READ, NULL);
         if(SELECTOR_SUCCESS != selector_status_returned ){
             err_msg = "registering fd";
             goto finally;

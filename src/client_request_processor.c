@@ -1,4 +1,7 @@
 #include "client_request_processor.h"
+static void write_ipv4_info(sock_client  *client_information);
+static void write_ipv6_info(sock_client  *client_information);
+
 
 
 bool process_hello_message(struct sock_hello_message * data, struct selector_key * key){
@@ -110,7 +113,6 @@ void process_request_message(struct sock_request_message * data, struct selector
 void generate_positive_request_answer(struct sock_request_message * data, struct selector_key * key){
     sock_client * client_information = (sock_client *) key->data;
     buffer * answer_buffer = client_information->write_buffer;
-    uint8_t  * port_pointer = calloc(1,2*sizeof(uint8_t));
 
     buffer_reset(answer_buffer);
     buffer_write(answer_buffer, CURRENT_SOCK_VERSION);
@@ -118,46 +120,54 @@ void generate_positive_request_answer(struct sock_request_message * data, struct
     buffer_write(answer_buffer, RSV_VALUE);
 
 
-    struct sockaddr address_info;
-    socklen_t socklen = sizeof(struct sockaddr);
-    getsockname(client_information->client_fd, &address_info, &socklen);
-
-    size_t available_space;
-    uint8_t * writing_direction;
-
-
-    if(socklen== sizeof(struct sockaddr_in)){
-        buffer_write(answer_buffer, IPV4ADDRESS);
-        writing_direction = buffer_write_ptr(answer_buffer, &available_space);
-
-        struct sockaddr_in client_info_ipv4 = *((struct sockaddr_in *) &address_info);
-        memcpy(writing_direction, &client_info_ipv4.sin_addr.s_addr, IPV4SIZE);
-        buffer_write_adv(answer_buffer, IPV4SIZE);
-//        client_information->origin_port = ntohs(client_info_ipv4.sin_port);
-        memcpy(port_pointer,&client_info_ipv4.sin_port, sizeof(uint16_t));
-//        port_pointer = (uint8_t * ) &client_info_ipv4.sin_port;
-
-
-
-    }else{
-        buffer_write(answer_buffer, IPV6ADDRESS);
-        writing_direction = buffer_write_ptr(answer_buffer, &available_space);
-
-        struct sockaddr_in6 client_info_ipv6 = *((struct sockaddr_in6 *) &address_info);
-        memcpy(writing_direction, client_info_ipv6.sin6_addr.__in6_u.__u6_addr8, IPV6SIZE);
-        buffer_write_adv(answer_buffer, IPV6SIZE);
-//        client_information->origin_port = ntohs(client_info_ipv6.sin6_port);
-        memcpy(port_pointer,&client_info_ipv6.sin6_port, sizeof(uint16_t));
-
-//        port_pointer = (uint8_t * ) &client_info_ipv6.sin6_port;
-
-    }
-
-    buffer_write(answer_buffer, (uint8_t)port_pointer[0]);
-    buffer_write(answer_buffer, (uint8_t)port_pointer[1]);
-
+    if(client_information->ipv4){
+        write_ipv4_info(client_information);
+    }else write_ipv6_info(client_information);
 
 }
 
 
 
+static void write_ipv4_info(sock_client  *client_information){
+    buffer * answer_buffer = client_information->write_buffer;
+    uint8_t  * port_pointer = calloc(1,2*sizeof(uint8_t));
+    size_t available_space;
+    uint8_t * writing_direction;
+
+    struct sockaddr_in address_info;
+    socklen_t socklen = sizeof(address_info);
+    getsockname(client_information->client_fd, (struct sockaddr * )&address_info, &socklen);
+
+    buffer_write(answer_buffer, IPV4ADDRESS);
+    writing_direction = buffer_write_ptr(answer_buffer, &available_space);
+
+    memcpy(writing_direction, (uint8_t * )&address_info.sin_addr.s_addr, IPV4SIZE);
+    buffer_write_adv(answer_buffer, IPV4SIZE);
+
+    memcpy(port_pointer,&address_info.sin_port, sizeof(uint16_t));
+    buffer_write(answer_buffer, (uint8_t)port_pointer[0]);
+    buffer_write(answer_buffer, (uint8_t)port_pointer[1]);
+    free(port_pointer);
+}
+
+static void write_ipv6_info(sock_client  *client_information){
+        buffer * answer_buffer = client_information->write_buffer;
+        uint8_t  * port_pointer = calloc(1,2*sizeof(uint8_t));
+
+        struct sockaddr_in6 address_info;
+        socklen_t socklen = sizeof(address_info);
+        getsockname(client_information->client_fd, (struct sockaddr * )&address_info, &socklen);
+        size_t available_space;
+        uint8_t *writing_direction;
+
+        buffer_write(answer_buffer,IPV6ADDRESS);
+        writing_direction = buffer_write_ptr(answer_buffer, &available_space);
+
+        memcpy(writing_direction, address_info.sin6_addr.__in6_u.__u6_addr8, IPV6SIZE);
+        buffer_write_adv(answer_buffer,IPV6SIZE);
+
+        memcpy(port_pointer,&address_info.sin6_port, sizeof(uint16_t));
+        buffer_write(answer_buffer, (uint8_t)port_pointer[0]);
+        buffer_write(answer_buffer, (uint8_t)port_pointer[1]);
+        free(port_pointer);
+}

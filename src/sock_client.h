@@ -46,11 +46,12 @@ typedef struct sock_client{
     pop3_dissector * dissector;
 
     char * username;
+    bool ipv4;
 
 
 } sock_client;
 
-struct sock_client * init_new_client_connection(int fd,struct sockaddr * client_information);
+struct sock_client * init_new_client_connection(int fd,struct sockaddr * client_information,bool ipv4);
 
 void destroy_sock_client(struct sock_client * sock_client);
 

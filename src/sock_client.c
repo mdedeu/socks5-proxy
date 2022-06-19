@@ -1,6 +1,6 @@
 #include "sock_client.h"
 
-struct sock_client * init_new_client_connection(int fd,struct sockaddr * client_information){
+struct sock_client * init_new_client_connection(int fd,struct sockaddr * client_information,bool ipv4){
     sock_client  * new_client = calloc(1, sizeof (sock_client));
     buffer * temp_write;
     buffer * temp_read;
@@ -21,6 +21,7 @@ struct sock_client * init_new_client_connection(int fd,struct sockaddr * client_
         new_client->origin_resolutions = NULL ;
         new_client->current_origin_resolution = NULL;
         new_client->username = NULL ;
+        new_client->ipv4 = ipv4;
 
         if(client_information->sa_family == AF_INET)
             new_client->client_information = malloc(sizeof (struct sockaddr_in));
