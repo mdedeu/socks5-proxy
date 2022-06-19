@@ -316,6 +316,7 @@ selector_new(const size_t initial_elements) {
     return ret;
 }
 
+/*
 void
 selector_destroy(fd_selector s) {
     // lean ya que se llama desde los casos fallidos de _new.
@@ -324,6 +325,38 @@ selector_destroy(fd_selector s) {
             for(size_t i = 0; i < s->fd_size ; i++) {
                 if(ITEM_USED(s->fds + i)) {
                     selector_unregister_fd(s, i);
+                }
+            }
+            pthread_mutex_destroy(&s->resolution_mutex);
+            for(struct blocking_job *j = s->resolution_jobs; j != NULL; ) {
+                struct blocking_job * aux = j->next;
+                free(j);
+                j=aux;
+            }
+            free(s->fds);
+            s->fds     = NULL;
+            s->fd_size = 0;
+        }
+        free(s);
+    }
+}
+*/
+
+void
+selector_destroy(fd_selector s) {
+    // lean ya que se llama desde los casos fallidos de _new.
+    if(s != NULL) {
+        if(s->fds != NULL) {
+            struct selector_key key ={
+                    .s= s
+            };
+            for(size_t i = 0; i < s->fd_size ; i++) {
+                struct item * item = (s->fds + i); 
+                if(ITEM_USED(item)) {
+                    key.fd = item->fd; 
+                    key.data = item->data; 
+                    if(item->handler->handle_timeout != NULL)
+                        item->handler->handle_timeout(&key);
                 }
             }
             pthread_mutex_destroy(&s->resolution_mutex);

@@ -11,7 +11,9 @@
 
     process_cool_authentication_message((struct cool_protocol_authentication_message * ) client_data->parsed_message, key);
     close_cool_protocol_authentication_parser(client_data->using_parser);
+    client_data->using_parser = NULL;
     close_cool_protocol_authentication_message((struct cool_protocol_authentication_message * ) client_data->parsed_message);
+    client_data->parsed_message = NULL;
     selector_set_interest_key(key, OP_NOOP);
 
 }
@@ -51,6 +53,7 @@ void cool_authenticate_reading_arrival(const unsigned int leaving_state, struct 
     cool_client *client_data = (cool_client *) key->data;
     client_data->using_parser = init_cool_protocol_authentication_parser();
     client_data->parsed_message= init_cool_protocol_authentication_message();
+    client_data->state = COOL_AUTHENTICATING;
     selector_set_interest_key(key,OP_READ);
 }
 

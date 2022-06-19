@@ -10,5 +10,6 @@ void cool_read(struct selector_key * key);
 void cool_write(struct selector_key * key);
 void cool_block(struct selector_key * key);
 void cool_close(struct selector_key * key);
+void cool_timeout(struct selector_key * key);
 
 #endif

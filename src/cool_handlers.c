@@ -24,3 +24,28 @@ void cool_close(struct selector_key * key){
     stm_handler_close(associated_state_machine,key);
 }
 
+void cool_timeout(struct selector_key * key){
+    if(key != NULL && key->s != NULL)
+        selector_unregister_fd(key->s,key->fd);
+
+    if(key->data == NULL)
+        return;
+
+    cool_client * client_information = (cool_client*) key->data;
+    selector_unregister_fd(key->s,client_information->client_fd);
+
+    if(client_information->parsed_message != NULL && client_information->state == COOL_CONNECTED)
+        destroy_general_request_message((struct general_request_message * ) client_information->parsed_message);
+    
+    if(client_information->parsed_message != NULL && client_information->state == COOL_AUTHENTICATING)
+        close_cool_protocol_authentication_message((struct cool_protocol_authentication_message * ) client_information->parsed_message);
+
+    if(client_information->using_parser != NULL)
+        close_cool_protocol_authentication_parser(client_information->using_parser);
+    
+
+    if(client_information->client_fd > 0 )
+        close(client_information->client_fd);
+    destroy_cool_client(client_information);
+}
+

@@ -10,6 +10,7 @@ void cool_request_reading_departure(const unsigned int leaving_state, struct sel
         return;
     process_cool_request_message((struct general_request_message * ) client_data->parsed_message, key);
     destroy_general_request_message((struct general_request_message * ) client_data->parsed_message);
+    client_data->parsed_message = NULL;
     selector_set_interest_key(key, OP_NOOP);
 }
 
@@ -41,8 +42,8 @@ void cool_request_reading_arrival(const unsigned int leaving_state, struct selec
     if(key == NULL || key->data == NULL)
         return;
     cool_client *client_data = (cool_client *) key->data;
-    //client_data->current_parser.request_message = init_general_parser();
     client_data->parsed_message = init_general_parser();
+    client_data->state = COOL_CONNECTED;
     selector_set_interest_key(key,OP_READ);
 }
 

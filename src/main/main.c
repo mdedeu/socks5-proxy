@@ -63,7 +63,7 @@ fd_handler active_handlers = {
     .handle_read = &socks5_read,
     .handle_write = &socks5_write,
     .handle_block = &socks5_block,
-    .handle_close = NULL/*&socks5_close*/,
+    .handle_close = NULL,
     .handle_timeout=&socks5_timeout
 };
 
@@ -79,7 +79,8 @@ fd_handler cool_active_handlers = {
     .handle_read = &cool_read,
     .handle_write = &cool_write,
     .handle_block = &cool_block,
-    .handle_close = &cool_close
+    .handle_close = NULL,
+    .handle_timeout=&cool_timeout
 };
 
 
