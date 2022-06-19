@@ -63,7 +63,7 @@ parser_feed(struct parser *p, const uint8_t c) {
 }
 
 
-static const unsigned classes[0xFF] = {0x00};
+static const unsigned classes[256] = {0x00};
 
 const unsigned *
 parser_no_classes(void) {
