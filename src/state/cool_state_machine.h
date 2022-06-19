@@ -6,19 +6,19 @@
 #define REQUEST_CONNECT_ANSWER 20
 #define READ_AMOUNT 512
 #include <errno.h>
-#include "stm.h"
 #include <string.h>
-#include "../parsing/sock_hello_parser.h"
-#include "../selector.h"
 #include <sys/types.h>
 #include <sys/socket.h>
-#include "../cool_request_processor.h"
-#include "../cool_client.h"
-#include "../general_handlers.h"
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+
+#include "stm.h"
+#include "../parsing/sock_hello_parser.h"
+#include "../selector.h"
+#include "../cool_request_processor.h"
+#include "../cool_client.h"
 
 #include "../parsing/parserCoolProtocolAuth.h"
 #include "../parsing/cool_request_parser.h"

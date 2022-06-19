@@ -66,15 +66,14 @@ const char *
 selector_error(const selector_status status);
 
 /** opciones de inicialización del selector */
-//struct selector_init {
-//    /** señal a utilizar para notificaciones internas */
-//    const int signal;
-//
-//    /** tiempo máximo de bloqueo durante `selector_iteratate' */
-//    struct timespec select_timeout;
-//};
+struct selector_init {
+    /** señal a utilizar para notificaciones internas */
+    const int signal;
 
-typedef  struct selector_init selector_init ;
+    /** tiempo máximo de bloqueo durante `selector_iteratate' */
+    struct timespec select_timeout;
+};
+
 
 
 /** inicializa la librería */
@@ -115,34 +114,32 @@ typedef enum {
 /**
  * Argumento de todas las funciones callback del handler
  */
-//struct selector_key {
-//    /** el selector que dispara el evento */
-//    fd_selector s;
-//    /** el file descriptor en cuestión */
-//    int         fd;
-//    /** dato provisto por el usuario */
-//    void *      data;
-//};
-typedef struct selector_key  selector_key;
+struct selector_key {
+    /** el selector que dispara el evento */
+    fd_selector s;
+    /** el file descriptor en cuestión */
+    int         fd;
+    /** dato provisto por el usuario */
+    void *      data;
+};
 
 /**
  * Manejador de los diferentes eventos..
  */
-//typedef struct fd_handler {
-//  void (*handle_read)      (struct selector_key *key);
-//  void (*handle_write)     (struct selector_key *key);
-//  void (*handle_block)     (struct selector_key *key);
-//  void (*handle_timeout) (struct selector_key * key);
-//
-//  /**
-//   * llamado cuando se se desregistra el fd
-//   * Seguramente deba liberar los recusos alocados en data.
-//   */
-//  void (*handle_close)     (struct selector_key *key);
-//
-//} fd_handler;
+typedef struct fd_handler {
+  void (*handle_read)      (struct selector_key *key);
+  void (*handle_write)     (struct selector_key *key);
+  void (*handle_block)     (struct selector_key *key);
+  void (*handle_timeout) (struct selector_key * key);
 
-typedef  struct fd_handler fd_handler;
+  /**
+   * llamado cuando se se desregistra el fd
+   * Seguramente deba liberar los recusos alocados en data.
+   */
+  void (*handle_close)     (struct selector_key *key);
+
+} fd_handler;
+
 
 
 /**

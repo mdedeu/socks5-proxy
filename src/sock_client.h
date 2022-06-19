@@ -1,14 +1,15 @@
 #ifndef SOCK_CLIENT_H
 #define SOCK_CLIENT_H
-#include "buffer.h"
 #include <stdlib.h>
-#include "state/proxy_state_machine.h"
 #include <stdint.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+
+#include "buffer.h"
 #include "./state/pop3_dissector.h"
+#include "state/proxy_state_machine.h"
 
 #define BUFFER_SIZE 2048
 

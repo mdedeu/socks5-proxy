@@ -7,23 +7,25 @@
 #define READ_AMOUNT 512
 #define POP_PORT 110
 #include <errno.h>
-#include "stm.h"
-#include <string.h>
-#include "../parsing/sock_hello_parser.h"
-#include "../selector.h"
-#include <sys/types.h>
-#include <sys/socket.h>
-#include "../client_request_processor.h"
-#include "../sock_client.h"
-#include "../parsing/sock_authentication_parser.h"
-#include "../parsing/sock_request_parser.h"
-#include "../general_handlers.h"
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <time.h>
+
+#include "stm.h"
+#include "../selector.h"
+#include "../sock_client.h"
+#include "../client_request_processor.h"
+#include "../parsing/sock_hello_parser.h"
+#include "../parsing/sock_authentication_parser.h"
+#include "../parsing/sock_request_parser.h"
+#include "../general_handlers.h"
 #include "../metrics.h"
-#include "time.h"
+#include "../dns_query.h"
 
 //states handlers
 #include "sock_hello_reading.h"

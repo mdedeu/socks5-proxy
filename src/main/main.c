@@ -6,22 +6,16 @@
 #include <signal.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include "../selector.h"
+
 #include "../sock_client.h"
 #include "../cool_client.h"
-#include "../general_handlers.h"
 #include "../cool_handlers.h"
-#include "../parsing/sock_request_parser.h"
-#include <limits.h>
 #include "../args.h"
-#include "../metrics.h"
 
 
 
 #define MAX_PENDING_CONNECTIONS 100
-#define OTHER_PORT 9090
 #define TRUE 1
-#define RW_AMOUNT 30
 #define SOCKS_PASSIVE_SOCKET_SIZE 2
 #define SOCKS_COOL_PASSIVE_SOCKET_SIZE 2
 #define DEFAULT_SOCK_PORT 1080

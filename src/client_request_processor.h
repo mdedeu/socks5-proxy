@@ -1,12 +1,11 @@
 #ifndef CLIENT_REQUEST_PROCESSOR_H
 #define CLIENT_REQUEST_PROCESSOR_H
 
-#include "selector.h"
-#include "buffer.h"
-#include "string.h"
+#include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include "buffer.h"
 #include "dns_query.h"
 #include "sock_client.h"
 #include "parsing/sock_authentication_parser.h"

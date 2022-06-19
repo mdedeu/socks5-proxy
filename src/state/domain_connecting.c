@@ -27,7 +27,7 @@ unsigned domain_connecting_write_handler(struct selector_key * key){
     }
 
     if(error != 0){
-        if(client_information->current_origin_resolution!= NULL &&client_information->current_origin_resolution->ai_next != NULL){
+        if(client_information->current_origin_resolution!= NULL && client_information->current_origin_resolution->ai_next != NULL){
             selector_unregister_fd(key->s,client_information->origin_fd);
             close(client_information->origin_fd);
             client_information->origin_fd = -1;
