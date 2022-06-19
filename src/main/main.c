@@ -30,7 +30,7 @@
 #define IPV4_LOOPBACK_STRING "127.0.0.1"
 #define IPV6_LOOPBACK_STRING "::1"
 #define IPV4_ADDR_ANY_STRING "0.0.0.0"
-#define IPV6_ADDR_ANY_STRING "::1"
+#define IPV6_ADDR_ANY_STRING "::"
 
 static bool done = false;
 
@@ -115,7 +115,8 @@ int main(const int argc,  char **argv){
     signal(SIGTERM, sigterm_handler);
     signal(SIGINT,  sigterm_handler);
     int ret ;
-    unsigned port = DEFAULT_SOCK_PORT;
+    unsigned port;
+    bool could_bind = false;
 
     struct socks5args received_args;
     parse_args(argc, argv, &received_args);
@@ -159,23 +160,27 @@ int main(const int argc,  char **argv){
 
     if( (master_socket[current_sock_passive_socket] = socket(AF_INET , SOCK_STREAM , IPPROTO_TCP)) < 0)
     {
-        err_msg = "unable to create socket for ipv4";
+        err_msg = "Unable to create socket for ipv4 socks5";
         goto finally;
     }
 
     int opt = TRUE;
     setsockopt(master_socket[current_sock_passive_socket], SOL_SOCKET, SO_REUSEADDR, (char *)&opt, sizeof(opt)) ;
-    fprintf(stdout, "Listening on TCP port %d\n", port);
 
 
     if (bind(master_socket[current_sock_passive_socket], (struct sockaddr *)&server_address_4, sizeof(server_address_4))<0)
         {
-            err_msg = "unable to bind socket for ipv4";
-            goto finally;
+            err_msg = "Unable to bind socket for ipv4 socks5";
+            fprintf(stdout, "%s\n", err_msg);
+            could_bind = could_bind || false;
         }
+    else{
+        could_bind = could_bind || true;
+        fprintf(stdout, "Listening on TCP port %d for ipv4 socks5\n", port);
+    }
 
     if (listen(master_socket[0], MAX_PENDING_CONNECTIONS) < 0){
-        err_msg = "unable to listen for ipv4";
+        err_msg = "Unable to listen for ipv4 socks5";
         goto finally;
     }
 
@@ -189,7 +194,7 @@ int main(const int argc,  char **argv){
 
 	if ((master_socket[current_sock_passive_socket] = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP)) < 0)
 	{
-        err_msg = "unable to create socket for ipv6";
+        err_msg = "Unable to create socket for ipv6 socks5";
         goto finally;
 	}
     setsockopt(master_socket[current_sock_passive_socket], SOL_SOCKET, SO_REUSEADDR, (char *) &opt, sizeof(opt));
@@ -199,19 +204,32 @@ int main(const int argc,  char **argv){
 	server_address_6.sin6_family = AF_INET6;
 	server_address_6.sin6_port = htons(port);
     if(!strcmp(received_args.socks_addr, IPV4_ADDR_ANY_STRING) || !strcmp(received_args.socks_addr, IPV6_ADDR_ANY_STRING))
-        received_args.socks_addr = IPV6_ADDR_ANY_STRING;
-    inet_pton(AF_INET6, received_args.socks_addr, &server_address_6.sin6_addr);
+        //server_address_6.sin6_addr = in6addr_any;
+        inet_pton(AF_INET6, "::1", &server_address_6.sin6_addr);
+    else
+        inet_pton(AF_INET6, received_args.socks_addr, &server_address_6.sin6_addr);
 
 
     if (bind(master_socket[current_sock_passive_socket], (struct sockaddr *) &server_address_6, sizeof(server_address_6)) < 0)
 	{
-        err_msg = "unable to bind  for ipv6";
-        goto finally;
+        err_msg = "Unable to bind for ipv6 socks5";
+        fprintf(stdout, "%s\n", err_msg);
+        could_bind = could_bind || false;
 	}
+    else{
+        could_bind = could_bind || true;
+        fprintf(stdout, "Listening on TCP port %d for ipv6 socks5\n", port);
+    }
+    
+    if(!could_bind){
+        err_msg = "Unable to bind for socks5";
+        goto finally;
+    }
+
 
     if (listen(master_socket[current_sock_passive_socket], MAX_PENDING_CONNECTIONS) < 0)
 		{
-            err_msg = "unable to listen  for ipv6";
+            err_msg = "Unable to listen for ipv6 socks5";
             goto finally;
 		}
 
@@ -223,6 +241,7 @@ int main(const int argc,  char **argv){
 
     //=======================COOL_IPV4==============================
 
+    could_bind = false;
     memset(&server_address_4, 0, sizeof(server_address_4));
     server_address_4.sin_family = AF_INET;
     if(!strcmp(received_args.mng_addr, IPV4_LOOPBACK_STRING) || !strcmp(received_args.mng_addr, IPV6_LOOPBACK_STRING))
@@ -232,23 +251,27 @@ int main(const int argc,  char **argv){
 
     if( (cool_master_socket[current_sock_cool_passive_socket] = socket(AF_INET , SOCK_STREAM , IPPROTO_TCP)) < 0)
     {
-        err_msg = "unable to create socket for cool_ipv4";
+        err_msg = "Unable to create socket for ipv4 management";
         goto finally;
     }
 
     setsockopt(cool_master_socket[current_sock_cool_passive_socket], SOL_SOCKET, SO_REUSEADDR, (char *)&opt, sizeof(opt)) ;
-    fprintf(stdout, "Listening on TCP port %d\n", received_args.mng_port);
 
     if (bind(cool_master_socket[current_sock_cool_passive_socket], (struct sockaddr *)&server_address_4, sizeof(server_address_4))<0)
         {
-            err_msg = "unable to bind socket for cool_ipv4";
-            goto finally;
+            err_msg = "Unable to bind socket for ipv4 management";
+            fprintf(stdout, "%s\n", err_msg);
+            could_bind = could_bind || false;
         }
+    else
+        could_bind = could_bind || true;
 
     if (listen(cool_master_socket[0], MAX_PENDING_CONNECTIONS) < 0){
-        err_msg = "unable to listen for cool_ipv4";
+        err_msg = "Unable to listen for ipv4 management";
         goto finally;
     }
+    else
+        fprintf(stdout, "Listening on TCP port %d for ipv4 management\n", received_args.mng_port);
 
     if(selector_fd_set_nio(cool_master_socket[current_sock_cool_passive_socket]) == -1) {
         err_msg = "getting server socket flags";
@@ -260,7 +283,7 @@ int main(const int argc,  char **argv){
 
 	if ((cool_master_socket[current_sock_cool_passive_socket] = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP)) < 0)
 	{
-        err_msg = "unable to create socket for cool_ipv6";
+        err_msg = "Unable to create socket for ipv6 management";
         goto finally;
 	}
     setsockopt(cool_master_socket[current_sock_cool_passive_socket], SOL_SOCKET, SO_REUSEADDR, (char *) &opt, sizeof(opt));
@@ -274,15 +297,26 @@ int main(const int argc,  char **argv){
 
 	if (bind(cool_master_socket[current_sock_cool_passive_socket], (struct sockaddr *) &server_address_6, sizeof(server_address_6)) < 0)
 	{
-        err_msg = "unable to bind for cool_ipv6";
-        goto finally;
+        err_msg = "Unable to bind for ipv6 management";
+        fprintf(stdout, "%s\n", err_msg);
+        could_bind = could_bind || false;
 	}
+    else{
+        could_bind = could_bind || true;
+    }
+
+    if(!could_bind){
+        err_msg = "Unable to bind for management";
+        goto finally;
+    }
 
     if (listen(cool_master_socket[current_sock_cool_passive_socket], MAX_PENDING_CONNECTIONS) < 0)
 		{
-            err_msg = "unable to listen for cool_ipv6";
+            err_msg = "Unable to listen for ipv6 management";
             goto finally;
 		}
+    else
+        fprintf(stdout, "Listening on TCP port %d for ipv6 management\n", received_args.mng_port);
 
     if(selector_fd_set_nio(cool_master_socket[current_sock_cool_passive_socket]) == -1) {
         err_msg = "getting server socket flags";
@@ -306,7 +340,7 @@ int main(const int argc,  char **argv){
 
     selector = selector_new(FD_SETSIZE);
     if(selector == NULL) {
-        err_msg = "unable to create selector";
+        err_msg = "Unable to create selector";
         goto finally;
     }
 
