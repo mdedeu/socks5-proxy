@@ -17,23 +17,15 @@ client \-  Aplicación cliente para coolProtocol según superCoolProtocol
 
 .SH OPCIONES
 
-.\".IP "\fB\-d\fB"
-.\"Establece que debe ejecutar con la configuración predeterminada.
-.\".IP
-.\"Aquellos servidores donde la configuración sea persistente (el enunciado
-.\"no lo requiere) presentan un desafío a la hora de realizar pruebas ya que
-.\"se debe conocer la configuración actual.
-.\".IP
-.\"En esos casos esta opción olvida toda configuración previa y establece
-.\"la configuración predeterminada.
-.\".IP
-.\"La configuración predeterminada consiste en tener apagada las transformaciones.
-
 .IP "\fB-h\fR"
 Imprime la ayuda y termina.
 
-.IP "\fB\[-4 | -6]\fB \fIserver_address\fR"
-Indica la version de ip que debe usarse.
+.IP "\fB\-4\fB"
+Indica que se debe usar ipv4.
+
+.IP "\fB\-6\fB"
+Indica que se debe usar ipv6.
+
 
 .IP "\fB\-L\fB \fIserver_address\fR"
 Indica la dirección según la versión ip indicada a la cuál se conectará.
