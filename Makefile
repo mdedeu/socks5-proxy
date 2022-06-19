@@ -1,4 +1,4 @@
-CC= gcc #TODO: deshardcodear el compilador
+#CC= gcc #TODO: deshardcodear el compilador
 CFLAGS= --std=c11  -pedantic -pedantic-errors -Wall -Wextra -Werror  -Wno-unused-parameter -Wno-implicit-fallthrough -D_POSIX_C_SOURCE=200112L -fsanitize=address -g
 LDFLAGS= -pthread
 
