@@ -33,12 +33,12 @@ bool add_user_handler(uint8_t ulen, uint8_t * username, uint8_t plen, uint8_t * 
         adding_user_info->username = malloc(ulen+1);
         if(adding_user_info->username == NULL )
             return false;
-        memcpy(adding_user_info->username,(char*)username,ulen);
+        memcpy(adding_user_info->username,(char*)username,ulen+1);
         adding_user_info->username[ulen] = 0;
         adding_user_info->password = malloc(plen+1);
         if(adding_user_info->password == NULL )
             return false;
-        memcpy(adding_user_info->password,password, plen);
+        memcpy(adding_user_info->password,password, plen+1);
         adding_user_info->password[plen] = 0;
         adding_user_info->connected = false;
         volatile_metrics.client_users[volatile_metrics.registered_clients++] = adding_user_info;
@@ -65,8 +65,8 @@ bool remove_user_handler(uint8_t ulen, uint8_t * username){
                 free(volatile_metrics.client_users[i]->password);
             if(volatile_metrics.client_users[i])
                 free(volatile_metrics.client_users[i]);
-            if(volatile_metrics.registered_clients-- >= 0)
-                volatile_metrics.client_users[i] = volatile_metrics.client_users[volatile_metrics.registered_clients];
+//            if(volatile_metrics.registered_clients-- >= 0)
+            volatile_metrics.client_users[i] = volatile_metrics.client_users[volatile_metrics.registered_clients];
             return true;
         }
     }
@@ -100,13 +100,13 @@ void decrement_current_connections(){
 }
 
 void increment_data_sent(uint64_t data_quantity){
-    if(data_quantity < 0) return;
+//    if(data_quantity < 0) return;
     volatile_metrics.bytes_sent += data_quantity ;
 }
 
 
 void increment_data_received(uint64_t data_quantity){
-    if(data_quantity < 0) return;
+//    if(data_quantity < 0) return;
     volatile_metrics.bytes_received += data_quantity ;
 }
 

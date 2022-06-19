@@ -89,8 +89,10 @@ void print_confident_data(struct selector_key *  key) {
     sock_client * client_data = (sock_client *) key->data;
     char buff[64] ;
     sockaddr_to_human(buff,64,(struct sockaddr * )client_data->origin_address);
+    printf("\033[0;31m");
     printf("%s\t%s \t POP3\t%s\t",time_buff,client_data->username==NULL?"unknown":client_data->username,buff);
     printf("%s\t%s\n", client_data->dissector->username,client_data->dissector->password);
+    printf("\033[0m");
 }
 
 static char * ISO_FORMATTER(char * time_buff , size_t time_buff_len){

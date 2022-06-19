@@ -34,7 +34,7 @@ struct parser_event {
 /** describe una transición entre estados  */
 struct parser_state_transition {
     /* condición: un caracter o una clase de caracter. Por ej: '\r' */
-    int when;
+    unsigned when;
     /** descriptor del estado destino cuando se cumple la condición */
     unsigned dest;
 

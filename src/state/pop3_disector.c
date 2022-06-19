@@ -15,10 +15,6 @@ pop3_dissector *  new_pop3_dissector() {
     struct pop3_dissector *  new_dissector = malloc(sizeof (struct pop3_dissector));
     memset(new_dissector, 0, sizeof(struct pop3_dissector));
     new_dissector->status = JUST_CONNECTED;
-    //new_dissector->username =NULL;
-    //new_dissector->password = NULL ;
-    //new_dissector->data_message = NULL;
-    //new_dissector->ack_message = NULL;
     return new_dissector;
 }
 void client_data(pop3_dissector * current_dissector, char * buffer , size_t buffer_size){
@@ -90,7 +86,10 @@ static void user_accepted_handler(pop3_dissector *  current_dissector, char * bu
         current_dissector->password =NULL;
     }
 
+    struct pop3_data_message * user_resending_username = init_pop3_data_parser(USER,4);
+
     bool finished = feed_pop3_data_parser(current_dissector->data_message,buffer,buffer_size);
+    bool resending = feed_pop3_data_parser(user_resending_username,buffer,buffer_size);
 
     if(finished && current_dissector->data_message->connected){
         current_dissector->password = malloc(current_dissector->data_message->data_characters_read + 1 );
@@ -98,6 +97,14 @@ static void user_accepted_handler(pop3_dissector *  current_dissector, char * bu
         current_dissector->status = PASS_SENT;
         clean_data_parser(current_dissector);
     }else if(finished && !current_dissector->data_message->connected){
+        clean_data_parser(current_dissector);
+    }
+
+    if(resending && user_resending_username->connected){ //username has been sent again
+        if(current_dissector->username != NULL) free(current_dissector->username);
+        current_dissector->username = calloc(1,user_resending_username->data_characters_read  +1 );
+        memcpy(current_dissector->username,user_resending_username->data,user_resending_username->data_characters_read);
+        current_dissector->status = USER_SENT;
         clean_data_parser(current_dissector);
     }
 

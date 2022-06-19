@@ -24,7 +24,7 @@ unsigned sock_hello_write_handler(struct selector_key *key) {
     buffer_read_adv(client_data->write_buffer, written_bytes);
     buffer_compact(client_data->write_buffer);
 
-    if(written_bytes < write_amount)
+    if(written_bytes < (ssize_t)write_amount)
         return SOCK_HELLO_WRITING;
     else if(client_data->close_after_write)
         return CLOSING_CONNECTION;

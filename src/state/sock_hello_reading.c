@@ -6,6 +6,7 @@ void sock_hello_reading_on_arrival(const unsigned state, struct selector_key *ke
         sock_client *client_data = (sock_client *) key->data;
         client_data->using_parser = init_sock_hello_parser();
         client_data->parsed_message = init_sock_hello_message();
+        client_data->client_state = HELLO;
         selector_set_interest_key(key,OP_READ);
     }
 }
@@ -47,6 +48,8 @@ void sock_hello_reading_on_departure(const unsigned state , struct selector_key 
         sock_client *client_data = (sock_client *) key->data;
         close_sock_hello_message((struct sock_hello_message *) client_data->parsed_message);
         close_sock_hello_parser(client_data->using_parser);
+        client_data->parsed_message = NULL;
+        client_data->using_parser = NULL;
         selector_set_interest_key(key, OP_NOOP);
     }
 }

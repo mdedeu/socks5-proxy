@@ -1,7 +1,6 @@
 #ifndef COOL_HANDLERS_H
 #define COOL_HANDLERS_H
 
-#include "selector.h"
 #include "cool_client.h"
 #include "state/cool_state_machine.h"
 #include "cool_request_processor.h"

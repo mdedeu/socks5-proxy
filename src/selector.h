@@ -74,6 +74,8 @@ struct selector_init {
     struct timespec select_timeout;
 };
 
+
+
 /** inicializa la librería */
 selector_status
 selector_init(const struct selector_init *c);
@@ -137,6 +139,8 @@ typedef struct fd_handler {
   void (*handle_close)     (struct selector_key *key);
 
 } fd_handler;
+
+
 
 /**
  * registra en el selector `s' un nuevo file descriptor `fd'.

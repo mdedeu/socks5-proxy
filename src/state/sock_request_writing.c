@@ -28,7 +28,7 @@ unsigned sock_request_writing_write_handler(struct selector_key * key){
     buffer_read_adv(client_data->write_buffer, written_bytes);
     buffer_compact(client_data->write_buffer);
 
-    if(written_bytes < write_amount)
+    if(written_bytes < (ssize_t)write_amount)
         return SOCK_REQUEST_WRITING;
     else{
         print_connection_data(key);
@@ -43,6 +43,7 @@ void sock_request_writing_departure(unsigned state, struct selector_key * key){
         return;
     struct sock_client * client_information = (struct sock_client *) key->data;
     close_sock_request_message((struct sock_request_message * )client_information->parsed_message);
+    client_information->parsed_message = NULL;
     selector_set_interest(key->s, client_information->client_fd, OP_NOOP);
     selector_set_interest(key->s, client_information->origin_fd, OP_NOOP);
 }

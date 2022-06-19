@@ -4,6 +4,7 @@ void connected_on_arrival(unsigned state, struct selector_key * key){
     if(key== NULL || key->data ==NULL)
         return ;
     struct sock_client * client_information = (struct sock_client *) key->data;
+    client_information->client_state = ESTABLISHED;
 
     if(client_information->write_buffer ==NULL && client_information->read_buffer ==NULL )
         return;
@@ -108,7 +109,7 @@ unsigned connected_read_handler(struct selector_key * key){
 
     buffer_read_adv(current_buffer, write_amount);
 
-     if(available_write == write_amount){
+     if( (ssize_t)available_write ==  write_amount){
          if(client_information->close_after_write)
              return CLOSING_CONNECTION;
          else
@@ -121,8 +122,9 @@ unsigned connected_read_handler(struct selector_key * key){
 void connected_on_departure(unsigned state, struct selector_key * key){
     if(key!=NULL && key->data!=NULL){
         struct sock_client * client_information = (struct sock_client *) key->data;
-        if(client_information->origin_port == POP_PORT)
+        if(client_information->origin_port == POP_PORT){
             destroy_dissector(client_information->dissector);
-        decrement_current_connections();
+            client_information->dissector = NULL;
+        }
     }
 }

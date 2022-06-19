@@ -28,6 +28,10 @@ void socks5_timeout(struct selector_key * key){
         return;
 
     sock_client * client_information = (sock_client*) key->data;
+
+    if(client_information->client_state == ESTABLISHED)
+        decrement_current_connections();
+
     bool already_closed = false;
 
     if( client_information->origin_fd > 0){

@@ -1,18 +1,28 @@
 #ifndef SOCK_CLIENT_H
 #define SOCK_CLIENT_H
-#include "buffer.h"
 #include <stdlib.h>
-#include "state/proxy_state_machine.h"
 #include <stdint.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+
+#include "buffer.h"
 #include "./state/pop3_dissector.h"
+#include "state/proxy_state_machine.h"
 
 #define BUFFER_SIZE 2048
 
+enum connection_client_state{
+    HELLO,
+    AUTHENTICATING,
+    REQUESTING,
+    ESTABLISHED
+};
+
 typedef struct sock_client{
+    uint8_t  client_state; //just for freeing memory
+
     uint16_t client_fd;
     struct sockaddr_storage * client_information;
     uint8_t raw_read_buffer[BUFFER_SIZE];

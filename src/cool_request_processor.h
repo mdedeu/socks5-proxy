@@ -1,14 +1,13 @@
 #ifndef COOL_REQUEST_PROCESSOR_H
 #define COOL_REQUEST_PROCESSOR_H
 
-#include "selector.h"
-#include "cool_client.h"
-#include "buffer.h"
-#include "string.h"
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include "dns_query.h"
+#include <string.h>
+
+#include "cool_client.h"
+#include "buffer.h"
 #include "metrics.h"
 
 #include "parsing/parserCoolProtocolAuth.h"

@@ -1,13 +1,14 @@
 #ifndef COOL_CLIENT_H
 #define COOL_CLIENT_H
-#include "buffer.h"
 #include <stdlib.h>
-#include "state/cool_state_machine.h"
 #include <stdint.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+
+#include "state/cool_state_machine.h"
+#include "buffer.h"
 
 #define BUFFER_SIZE 2048
 

@@ -1,10 +1,7 @@
 #ifndef GENERAL_HANDLERS_H
 #define GENERAL_HANDLERS_H
 
-#include "selector.h"
 #include "sock_client.h"
-#include "state/proxy_state_machine.h"
-#include "client_request_processor.h"
 #include <stddef.h>
 
 void socks5_read(struct selector_key * key);
