@@ -1,17 +1,5 @@
 #include "cool_request_processor.h"
 
-struct user_info{
-    char username[30];
-    char password[30];
-};
-
-static struct user_info users[10]={
-    {.username="shadad", .password="shadad"},
-    {.username="mdedeu", .password="mdedeu"},
-    {.username="scastagnino", .password="scastagnino"},
-    {.username="gbeade", .password="gbeade"},
-};
-
 static void write_error_response(buffer * buff, uint8_t * header);
 
 void process_cool_authentication_message(struct cool_protocol_authentication_message * data, struct selector_key * key){
@@ -22,10 +10,8 @@ void process_cool_authentication_message(struct cool_protocol_authentication_mes
         return;
     }
 
-    for(int i = 0; i < 10; i++){
-            if(!strcmp(data->username, users[i].username) && !strcmp(data->password, users[i].password))
-                valid_user = true;
-    }
+    if(is_admin(data->username, data->password))
+        valid_user = true;
 
     if(key == NULL || key->data == NULL)
         return;

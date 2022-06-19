@@ -20,6 +20,9 @@
 
 bool add_user_handler(uint8_t ulen, uint8_t * username, uint8_t plen, uint8_t * password){
     bool already_included = false;
+    if(volatile_metrics.registered_clients >= MAX_USERS)
+        return false;
+
     for(int i = 0 ; i < volatile_metrics.registered_clients ; i++){
         if( strcmp(volatile_metrics.client_users[i]->username,(char*)username) == 0){
             already_included = true;
@@ -66,7 +69,7 @@ bool remove_user_handler(uint8_t ulen, uint8_t * username){
             if(volatile_metrics.client_users[i])
                 free(volatile_metrics.client_users[i]);
 //            if(volatile_metrics.registered_clients-- >= 0)
-            volatile_metrics.client_users[i] = volatile_metrics.client_users[volatile_metrics.registered_clients];
+            volatile_metrics.client_users[i] = volatile_metrics.client_users[--volatile_metrics.registered_clients];
             return true;
         }
     }
@@ -184,4 +187,12 @@ void disconnect(char * username){
             volatile_metrics.client_users[i]->connected=false;
         }
     }
+}
+
+bool is_admin(char * username, char * password){
+    for(int i = 0; i < ADMIN_NUMBERS; i++){
+        if(!strcmp(username, volatile_metrics.admin_users[i].username) && !strcmp(password, volatile_metrics.admin_users[i].password))
+            return true;
+    }
+    return false;
 }

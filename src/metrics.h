@@ -49,6 +49,7 @@ uint64_t get_total_bytes_recv();
 uint64_t get_connected_users();
 uint8_t get_registered_clients();
 bool set_clients_need_authentication(bool boolean);
+bool is_admin(char * username, char * password);
 
 bool connect_user(char * username , char * password);
 void disconnect(char * username);
