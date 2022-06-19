@@ -3,7 +3,6 @@
 static void write_error_response(buffer * buff, uint8_t * header);
 
 void process_cool_authentication_message(struct cool_protocol_authentication_message * data, struct selector_key * key){
-    //TODO: hace la comprarcion con un metodo del sistema de metricas
     bool valid_user = false;
     if(data->username == NULL || data->password == NULL){
         valid_user = false;
@@ -25,13 +24,12 @@ void process_cool_authentication_message(struct cool_protocol_authentication_mes
         buffer_write(client_data->write_buffer, 0xC0);
         buffer_write(client_data->write_buffer, 0x01);
     }
-    else{         //TODO: close the connection as the rfc said.
+    else{
         buffer_write(client_data->write_buffer, 0x4B);
         buffer_write(client_data->write_buffer, 0x1D);
     }
 }
 
-//TODO: para ver como se implementan los metodos haca falta ver si se necesita un buffer auxiliar
 void process_cool_request_message(struct general_request_message * data, struct selector_key * key){
     if(key == NULL || key->data == NULL)
         return;
