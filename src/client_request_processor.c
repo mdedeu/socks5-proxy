@@ -60,6 +60,7 @@ bool process_authentication_message(struct sock_authentication_message * data, s
     if(valid_user){
         buffer_write(client_data->write_buffer, VALID_USER);
         client_data->username = malloc(data->username_length + 1);
+        client_data->username[data->username_length] = 0;
         if(client_data->username ==NULL)
             return false;
         memcpy(client_data->username, data->username,data->username_length);
