@@ -300,7 +300,7 @@ int main(const int argc,  char **argv){
         err_msg = "Unable to create socket for ipv6 management";
         goto finally;
 	}
-    setsockopt(cool_master_socket[current_sock_cool_passive_socket], SOL_IPV6, IPV6_V6ONLY, (char *) &opt, sizeof(opt));
+    setsockopt(cool_master_socket[current_sock_cool_passive_socket], SOL_SOCKET, SO_REUSEADDR, (char *) &opt, sizeof(opt));
 
     memset(&server_address_6, 0, sizeof(server_address_6));
 	server_address_6.sin6_family = AF_INET6;
