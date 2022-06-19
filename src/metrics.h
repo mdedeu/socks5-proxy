@@ -34,6 +34,7 @@ bool disable_spoofing_handler(/*uint8_t protocol*/);
 void increment_current_connections();
 void decrement_current_connections();
 bool clients_need_authentication();
+bool is_password_spoofing_enabled();
 
 void increment_data_sent(uint64_t data_quantity);
 void increment_data_received(uint64_t data_quantity);

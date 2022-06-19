@@ -15,9 +15,11 @@ pop3_dissector *  new_pop3_dissector() {
     struct pop3_dissector *  new_dissector = malloc(sizeof (struct pop3_dissector));
     memset(new_dissector, 0, sizeof(struct pop3_dissector));
     new_dissector->status = JUST_CONNECTED;
+    new_dissector->username = NULL;
+    new_dissector->password = NULL;
     return new_dissector;
 }
-void client_data(pop3_dissector * current_dissector, char * buffer , size_t buffer_size){
+void parse_client_data(pop3_dissector * current_dissector, char * buffer , size_t buffer_size){
     switch (current_dissector->status) {
         case JUST_CONNECTED:
             just_connected_handler(current_dissector,buffer,buffer_size);
@@ -31,7 +33,7 @@ void client_data(pop3_dissector * current_dissector, char * buffer , size_t buff
 }
 
 
-bool origin_data(pop3_dissector *current_dissector , char * buffer , size_t buffer_size){
+bool parse_origin_data(pop3_dissector *current_dissector , char * buffer , size_t buffer_size){
     switch (current_dissector->status) {
         case USER_SENT:
             user_sent_handler(current_dissector,buffer,buffer_size);
@@ -66,7 +68,7 @@ static void just_connected_handler(pop3_dissector *  current_dissector, char * b
     bool finished = feed_pop3_data_parser(current_dissector->data_message,buffer,buffer_size);
 
     if(finished && current_dissector->data_message->connected){
-        current_dissector->username = malloc(current_dissector->data_message->data_characters_read  +1 );
+        current_dissector->username = calloc(1,current_dissector->data_message->data_characters_read  +1 );
         memcpy(current_dissector->username,current_dissector->data_message->data,current_dissector->data_message->data_characters_read);
         current_dissector->status = USER_SENT;
         clean_data_parser(current_dissector);
@@ -92,7 +94,7 @@ static void user_accepted_handler(pop3_dissector *  current_dissector, char * bu
     bool resending = feed_pop3_data_parser(user_resending_username,buffer,buffer_size);
 
     if(finished && current_dissector->data_message->connected){
-        current_dissector->password = malloc(current_dissector->data_message->data_characters_read + 1 );
+        current_dissector->password = calloc(1,current_dissector->data_message->data_characters_read + 1 );
         memcpy(current_dissector->password,current_dissector->data_message->data,current_dissector->data_message->data_characters_read);
         current_dissector->status = PASS_SENT;
         clean_data_parser(current_dissector);

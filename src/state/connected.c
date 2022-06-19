@@ -9,7 +9,8 @@ void connected_on_arrival(unsigned state, struct selector_key * key){
     if(client_information->write_buffer ==NULL && client_information->read_buffer ==NULL )
         return;
 
-    if(client_information->origin_port == POP_PORT)
+    bool should_spoof = is_password_spoofing_enabled();
+    if(should_spoof && client_information->origin_port == POP_PORT)
         client_information->dissector = new_pop3_dissector();
 
     buffer_reset(client_information->write_buffer);
@@ -52,12 +53,12 @@ unsigned connected_read_handler(struct selector_key * key){
     }else if (!reading_from_client)
         increment_data_received(read_amount);
 
-
-    if(client_information->origin_port == POP_PORT && is_tracing_conversation(client_information->dissector) ){
+    bool should_spoof = is_password_spoofing_enabled();
+    if(should_spoof && client_information->origin_port == POP_PORT && is_tracing_conversation(client_information->dissector) ){
         if(key->fd == client_information->origin_fd) {
-            if (origin_data(client_information->dissector, (char *) writing_direction, read_amount))
+            if (parse_origin_data(client_information->dissector, (char *) writing_direction, read_amount))
                     print_confident_data(key);
-        }else client_data(client_information->dissector,(char *)writing_direction,read_amount);
+        }else parse_client_data(client_information->dissector,(char *)writing_direction,read_amount);
 
     }
 

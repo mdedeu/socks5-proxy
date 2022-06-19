@@ -108,7 +108,7 @@ int main(const int argc,  char **argv){
 
     signal(SIGTERM, sigterm_handler);
     signal(SIGINT,  sigterm_handler);
-    int ret ;
+    int ret = 0;
     unsigned port;
     bool could_bind = false;
 
@@ -170,7 +170,7 @@ int main(const int argc,  char **argv){
         }
     else{
         could_bind = could_bind || true;
-        fprintf(stdout, "Listening on TCP port %d for ipv4 socks5\n", port);
+        fprintf(stdout, "Listening on TCP port %u for ipv4 socks5\n", port);
     }
 
     if (listen(master_socket[0], MAX_PENDING_CONNECTIONS) < 0){
@@ -212,7 +212,7 @@ int main(const int argc,  char **argv){
 	}
     else{
         could_bind = could_bind || true;
-        fprintf(stdout, "Listening on TCP port %d for ipv6 socks5\n", port);
+        fprintf(stdout, "Listening on TCP port %u for ipv6 socks5\n", port);
     }
     
     if(!could_bind){
@@ -265,7 +265,7 @@ int main(const int argc,  char **argv){
         goto finally;
     }
     else
-        fprintf(stdout, "Listening on TCP port %d for ipv4 management\n", received_args.mng_port);
+        fprintf(stdout, "Listening on TCP port %u for ipv4 management\n", received_args.mng_port);
 
     if(selector_fd_set_nio(cool_master_socket[current_sock_cool_passive_socket]) == -1) {
         err_msg = "getting server socket flags";
@@ -310,7 +310,7 @@ int main(const int argc,  char **argv){
             goto finally;
 		}
     else
-        fprintf(stdout, "Listening on TCP port %d for ipv6 management\n", received_args.mng_port);
+        fprintf(stdout, "Listening on TCP port %u for ipv6 management\n", received_args.mng_port);
 
     if(selector_fd_set_nio(cool_master_socket[current_sock_cool_passive_socket]) == -1) {
         err_msg = "getting server socket flags";

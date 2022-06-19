@@ -4,13 +4,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-#include <signal.h>
-#include <errno.h>
 #include <netinet/in.h>
-#include <netinet/ip.h>
 #include <inttypes.h>
 #include "../parsing/cool_client_parsing/simpleResponseParser.h"
 #include "../parsing/cool_client_parsing/generalResponseParser.h"
@@ -59,7 +55,7 @@ static void handle_help(int sock_fd);
 static void handle_quit(int sock_fd);
 static int close_connection(int socket_fd);
 static void print_welcome();
-static int resolve_command(char * command, uint8_t * method, uint8_t * action, uint8_t * parameters);
+static int resolve_command(char * command, uint8_t * action, uint8_t * method, uint8_t * parameters);
 static int connect_to_ipv4(struct sockaddr_in * ipv4_address, char * port);
 static int connect_to_ipv6(struct sockaddr_in6 * ipv6_address, char * port);
 
@@ -203,7 +199,6 @@ static int ask_method_and_parameters(int sock_fd, int * skip, uint8_t * action, 
     char command[COMMAND_MAX_LEN];
     printf("> ");
     fflush(stdout);
-    int len;
 
     if(!fgets(command, COMMAND_MAX_LEN, stdin)){
         return -1;
@@ -236,6 +231,7 @@ static int ask_method_and_parameters(int sock_fd, int * skip, uint8_t * action, 
 
     
     if(*parameters){
+        int len;
         len = ask_parameters(method, parameters);
         if(len < 0){
             printf("Invalid parameter\n");
@@ -417,8 +413,8 @@ static int send_method_and_parameters(int sock_fd, uint8_t action, uint8_t metho
 }
 
 static int send_array(uint8_t socket_fd, uint8_t len, uint8_t * array){
-    int ret;
     while(len > 0){
+        int ret;
         if((ret = send(socket_fd, array, len, 0)) <= 0)
             return -1;
         len -= ret;

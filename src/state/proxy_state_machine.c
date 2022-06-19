@@ -7,7 +7,7 @@ static const struct state_definition authenticate_reading_state = {.state=SOCK_A
 static const struct state_definition authenticate_writing_state= {.state=SOCK_AUTHENTICATE_WRITING, .on_arrival = authenticate_writing_arrival,.on_write_ready=authenticate_write_handler,.on_departure=authenticate_writing_departure};
 static const struct state_definition sock_request_reading = {.state=SOCK_REQUEST_READING, .on_arrival=request_reading_arrival,.on_read_ready=request_reading_read_handler,.on_block_ready=request_reading_block_handler,.on_departure=request_reading_departure};
 static const struct state_definition domain_connecting = {.state=DOMAIN_CONNECTING, .on_arrival=domain_connecting_arrival,.on_write_ready=domain_connecting_write_handler};
-static const struct state_definition address_connecting = {.state=ADDRESS_CONNECTING,.on_write_ready=address_connecting_write_handler};
+static const struct state_definition address_connecting = {.state=ADDRESS_CONNECTING,.on_write_ready=address_connecting_write_handler,.on_departure=address_connecting_departure};
 static const struct state_definition sock_request_writing = {.state=SOCK_REQUEST_WRITING, .on_write_ready=sock_request_writing_write_handler,.on_arrival=sock_request_writing_arrival,.on_departure=sock_request_writing_departure};
 static const struct state_definition sock_negative_request_writing = {.state=SOCK_NEGATIVE_REQUEST_WRITING, .on_write_ready=sock_negative_request_write_handler,.on_arrival=sock_negative_request_writing_arrival,.on_departure=sock_negative_request_writing_departure};
 static const struct state_definition connected = {.state=CONNECTED, .on_write_ready=connected_write_handler,.on_arrival=connected_on_arrival,.on_read_ready=connected_read_handler,.on_departure=connected_on_departure};
@@ -74,6 +74,8 @@ void print_connection_data(struct selector_key *  key){
     struct sock_request_message * message = (struct sock_request_message *  ) client_data->parsed_message;
 
     char buff[64] ;
+    memset(buff,0,64);
+
     sockaddr_to_human(buff,64,(struct sockaddr *) client_data->client_information);
     printf("%s\t%s \t %s\t",time_buff,client_data->username==NULL?"unknown":client_data->username,buff);
 
@@ -88,6 +90,7 @@ void print_confident_data(struct selector_key *  key) {
     ISO_FORMATTER(time_buff,time_buff_len);
     sock_client * client_data = (sock_client *) key->data;
     char buff[64] ;
+    memset(buff,0,64);
     sockaddr_to_human(buff,64,(struct sockaddr * )client_data->origin_address);
     printf("\033[0;31m");
     printf("%s\t%s \t POP3\t%s\t",time_buff,client_data->username==NULL?"unknown":client_data->username,buff);

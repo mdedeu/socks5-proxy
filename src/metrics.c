@@ -196,3 +196,8 @@ bool is_admin(char * username, char * password){
     }
     return false;
 }
+
+
+bool is_password_spoofing_enabled(){
+    return volatile_metrics.password_dissector_enable;
+}

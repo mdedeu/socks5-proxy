@@ -24,7 +24,7 @@ unsigned address_connecting_write_handler(struct selector_key * key){
 
 }
 
-void address_connecting_departure(struct selector_key * key){
+void address_connecting_departure(const unsigned int leaving_state, struct selector_key * key){
     if(key == NULL || key->data == NULL )
         return;
     struct sock_client * client_information = (struct sock_client *) key->data;
