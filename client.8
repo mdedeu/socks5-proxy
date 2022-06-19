@@ -1,0 +1,53 @@
+.\" Macros
+.ds PX \s-1POSIX\s+1
+.de EXAMPLE .\" Format de los ejemplos
+.RS 10
+.BR "\\$1"
+.RE
+..
+
+.TH client 0.0.0 "Junio de 2022"
+.LO
+.SH NAME
+client \-  Aplicación cliente para coolProtocol según superCoolProtocol
+
+.SHSINOPSIS
+.HP 10
+.B  client [-L \fIserverAddress\fR] [\fI -4 | -6\fR] [-P \fIportNumber\fR]
+
+.SH OPCIONES
+
+.\".IP "\fB\-d\fB"
+.\"Establece que debe ejecutar con la configuración predeterminada.
+.\".IP
+.\"Aquellos servidores donde la configuración sea persistente (el enunciado
+.\"no lo requiere) presentan un desafío a la hora de realizar pruebas ya que
+.\"se debe conocer la configuración actual.
+.\".IP
+.\"En esos casos esta opción olvida toda configuración previa y establece
+.\"la configuración predeterminada.
+.\".IP
+.\"La configuración predeterminada consiste en tener apagada las transformaciones.
+
+.IP "\fB-h\fR"
+Imprime la ayuda y termina.
+
+.IP "\fB\[-4 | -6]\fB \fIserver_address\fR"
+Indica la version de ip que debe usarse.
+
+.IP "\fB\-L\fB \fIserver_address\fR"
+Indica la dirección según la versión ip indicada a la cuál se conectará.
+
+.IP "\fB\-P\fB \flserver-port\fR"
+Puerto al cuál se intentará conectar. Por defecto el valor es \fI8080\fR.
+
+
+
+
+
+
+
+
+
+
+
