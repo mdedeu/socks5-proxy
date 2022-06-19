@@ -46,7 +46,6 @@ static void handle_pop3_check_event(struct pop3_data_message * current_data, uin
 
 static void handle_data_read_event(struct pop3_data_message * current_data, uint8_t c){
     if(current_data->data_characters_read >= PARSER_BUFFER_SIZE-2){
-        //TODO: mirar si aca habria que tirar un error o algo
         current_data->connected = false;
         current_data->using_parser->state = END;
         return;
@@ -61,7 +60,6 @@ static void handle_close_event(struct pop3_data_message * current_data, uint8_t 
         return;
     }
     if(current_data->data_characters_read >= PARSER_BUFFER_SIZE-1){
-        //TODO: mirar si aca habria que tirar un error o algo
         current_data->connected = false;
         current_data->using_parser->state = END;
         return;
