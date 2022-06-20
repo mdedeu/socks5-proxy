@@ -196,7 +196,7 @@ The keywords MUST, MUST NOT, SHOULD, SHOULD NOT, MAY in this document will be in
             |  X'BE'  |   1    | X'00'X'01'|    X'01'   |
             +---------+--------+-----------+------------+
             
-            where METHOD is the same value received by server. Otherwise, on failure packet is as described on section 4.
+            where METHOD is the same value received by server. On failure packet is as described on section 4.
 
 6. Querying
 
@@ -234,6 +234,7 @@ The keywords MUST, MUST NOT, SHOULD, SHOULD NOT, MAY in this document will be in
         If method equals X'07'. The RESPONSE MUST have the following format: A byte as an unsigned int representing the length of the following 
         name. Only ASCII charset is supported. The RLEN MUST consider the whole answer (i.e the bytes indicating the usernames length, and the 
         usernames characters).
+        On failure packet is as described on section 4.
         
         
 
