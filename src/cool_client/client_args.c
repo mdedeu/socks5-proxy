@@ -32,7 +32,7 @@ usage(const char *progname) {
             "Usage: %s [OPTION]...\n"
             "\n"
             "   -h               Print some help information.\n"
-            "   -L              Specify address to connect.\n"
+            "   -L              Specify address to connect. This field is not optional\n"
             "   -P              Specify port to connect.\n"
             "   [-4 | -6]              Specify which ip version use.\n"
             "\n",
@@ -44,7 +44,7 @@ void
 client_parse_args(const int argc, char **argv, struct client_args *args) {
     memset(args, 0, sizeof(*args));
 
-    args->socks_addr = "127.0.0.1";
+    args->socks_addr = NULL;
     args->socks_port = 8080;
 
 

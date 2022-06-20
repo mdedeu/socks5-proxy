@@ -101,8 +101,15 @@ int main(int argc, char * argv[]){
     struct client_args args ;
     client_parse_args(argc,argv,&args);
 
+    if(args.socks_addr == NULL ){
+        printf("The ip address is obligatory. Specify it with -L <address>.\n");
+        exit(-1);
+    }
+
 
     int address_family = args.version;
+
+
 
 
     if(address_family != 4 && address_family != 6){
