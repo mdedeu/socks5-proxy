@@ -1,5 +1,5 @@
 #include "sock_hello_reading.h"
-#define SOCK_HELLO_MAX_LENGTH 2
+#define SOCK_HELLO_MAX_LENGTH 512
 
 void sock_hello_reading_on_arrival(const unsigned state, struct selector_key *key){
     if(key != NULL &&key->data != NULL){

@@ -160,6 +160,8 @@ uint64_t get_connected_users(){
 }
 
 bool connect_user(char * username , char * password){
+    if(username == NULL || password == NULL )
+        return false;
     for(int i = 0; i < volatile_metrics.registered_clients ; i++){
         if(strcmp(volatile_metrics.client_users[i]->username, username)==0 &&
         0==strcmp(volatile_metrics.client_users[i]->password, password)){

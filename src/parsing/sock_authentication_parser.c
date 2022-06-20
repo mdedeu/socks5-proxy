@@ -45,11 +45,18 @@ enum states_and_events{
     event->n=1;
 }
 
-static void handle_version_read_event(struct sock_authentication_message * current_data,uint8_t version ){
-    current_data->version = version;
+static void handle_version_read_event(struct parser * using_parser, struct sock_authentication_message * current_data,uint8_t version ){
+     current_data->version = version;
+    if(version != 5){
+        using_parser->state = END;
+    }
 }
 
-static void handle_ulen_read_event(struct sock_authentication_message * current_data,uint8_t username_length ){
+static void handle_ulen_read_event(struct parser * using_parser, struct sock_authentication_message * current_data,uint8_t username_length ){
+    if(username_length == 0 ){
+        using_parser->state = END;
+        return;
+    }
     current_data->username_length = username_length;
     current_data->username= malloc(current_data->username_length + 1 );
 }
@@ -63,7 +70,11 @@ static void handle_username_read_event(struct parser * using_parser, struct sock
     }
 }
 
-static void handle_plen_read_event(struct sock_authentication_message * current_data,uint8_t password_length ){
+static void handle_plen_read_event(struct parser * using_parser,struct sock_authentication_message * current_data,uint8_t password_length ){
+    if(password_length == 0 ){
+        using_parser->state = END;
+        return;
+    }
     current_data->password_length = password_length;
     current_data->password= malloc(current_data->password_length + 1);
 }
@@ -141,16 +152,16 @@ struct sock_authentication_message * init_sock_authentication_message(){
         uint8_t  current_character = current_event->data[0];
         switch (current_event->type) {
             case VERSION_READ_EVENT:
-                handle_version_read_event(sock_data,current_character);
+                handle_version_read_event(using_parser,sock_data,current_character);
                 break;
             case ULEN_READ_EVENT:
-                handle_ulen_read_event(sock_data,current_character);
+                handle_ulen_read_event(using_parser,sock_data,current_character);
                 break;
             case USERNAME_READ_EVENT:
                 handle_username_read_event(using_parser,sock_data, current_character);
                 break;
             case PLEN_READ_EVENT:
-                handle_plen_read_event(sock_data,current_character);
+                handle_plen_read_event(using_parser,sock_data,current_character);
                 break;
             case READING_PASSWORD_EVENT:
                 handle_password_read_event(using_parser,sock_data,current_character);

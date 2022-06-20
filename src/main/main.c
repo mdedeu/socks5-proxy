@@ -14,7 +14,7 @@
 
 
 
-#define MAX_PENDING_CONNECTIONS 100
+#define MAX_PENDING_CONNECTIONS 20
 #define TRUE 1
 #define SOCKS_PASSIVE_SOCKET_SIZE 2
 #define SOCKS_COOL_PASSIVE_SOCKET_SIZE 2
@@ -99,15 +99,23 @@ void tcpConnectionHandlerIpv6(struct selector_key *key){
 
 static void tcpConnectionHandler(struct selector_key * key,struct sockaddr * client_address , socklen_t * client_address_len,bool ipv4){
     int new_client_fd;
-    do{
+    int i = 0 ;
+    while(i < MAX_PENDING_CONNECTIONS){
         new_client_fd = accept(key->fd,  client_address, client_address_len);
-    }while(new_client_fd < 0 && (errno == EINTR) );
-    struct sock_client * new_client_data = init_new_client_connection(new_client_fd,client_address,ipv4);
-    if(new_client_data != NULL)
-        if( SELECTOR_SUCCESS != selector_register(key->s, new_client_fd, &active_handlers, OP_READ, new_client_data) ){
-            destroy_sock_client(new_client_data);
-            close(new_client_fd);
+        if(new_client_fd  < 0 &&  errno == EWOULDBLOCK)
+            break; //no more pending connections
+        else if(new_client_fd >= 0 ){
+            struct sock_client * new_client_data = init_new_client_connection(new_client_fd,client_address,ipv4);
+            if(new_client_data != NULL){
+                if( SELECTOR_SUCCESS != selector_register(key->s, new_client_fd, &active_handlers, OP_READ, new_client_data) ){
+                    //no more capacity on select
+                    destroy_sock_client(new_client_data);
+                    close(new_client_fd);
+                };
+            }else break; //no more memory
         }
+        else i++;
+    }
 }
 
 
@@ -141,9 +149,10 @@ int main(const int argc,  char **argv){
     if(!received_args.disectors_enabled)
        disable_spoofing_handler();
 
-    set_clients_need_authentication(received_args.disectors_enabled);
+    //by default asking for authentication
+    set_clients_need_authentication(true);
 
-    for(int i = 0 ; i < 10 ; i ++){
+    for(int i = 0 ; i < MAX_USERS ; i ++){
         if(received_args.users[i].name != NULL && received_args.users[i].pass != NULL )
         add_user_handler(strlen(received_args.users[i].name),(uint8_t * )received_args.users[i].name,
                          strlen(received_args.users[i].pass),(uint8_t*)received_args.users[i].pass);
