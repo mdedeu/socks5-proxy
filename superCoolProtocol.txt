@@ -115,7 +115,7 @@ The keywords MUST, MUST NOT, SHOULD, SHOULD NOT, MAY in this document will be in
 5. Modification:
         5.1 Requests
 
-        Methods associated with the Modification ACTION are meant to modify the Server configuration.  
+        Methods associated with the Modification ACTION are meant to modify the Server configuration. The general packet for modification is:   
         
             +--------+--------+----------+
             | ACTION | METHOD |  PARAMS  |
@@ -193,31 +193,47 @@ The keywords MUST, MUST NOT, SHOULD, SHOULD NOT, MAY in this document will be in
             +---------+--------+-----------+------------+
             | ACTION  | METHOD |  RLEN     |  RESPONSE  | 
             +---------+--------+-----------+------------+
-            |    1    |   1    | X'00'X'01'|    X'01'   |
+            |  X'BE'  |   1    | X'00'X'01'|    X'01'   |
             +---------+--------+-----------+------------+
             
-            where ACTION and METHOD are the same received by server. Otherwise, on failure packet is as described on section 4.
+            where METHOD is the same value received by server. Otherwise, on failure packet is as described on section 4.
 
 6. Querying
 
     6.1 Requests
 
-         Each ACTION has a set of methods associated with it. 
+        Methods associated with the Query ACTION are meant as data retrieval methods, meaning they won't affect the state of the server. These methods do not take any parameters, so the general packet is:
+        
+            +--------+--------+
+            | ACTION | METHOD |
+            +--------+--------+
+            |  X'DO' |    1   |
+            +--------+--------+
+        
+        The METHODS field can take the following values:
 
-        Methods associated with the Query ACTION are meant as data retrieval methods, meaning they won't affect the state of the server. These methods do not take any parameters, they are merely getters.
-
-        The associated METHODS for the Query ACTION (X'D0') are:
-
-            o   X'01'   Get Total Historic Connections - returns value on success, in 8 bytes that should be interpreted as an unsigned int of 64 bits.
-            o   X'02'   Get Current Connections - returns value on success, in 8 bytes that should be interpreted as an unsigned int of 64 bits.
-            o   X'03'   Get Max. Concurrent Connections - returns value on success, in 8 bytes that should be interpreted as an unsigned int of 64 bits.
-            o   X'04'   Get Total Bytes Sent - returns value on success, in 8 bytes that should be interpreted as an unsigned int of 64 bits.
-            o   X'05'   Get Total Bytes Received - returns value on success, in 8 bytes that should be interpreted as an unsigned int of 64 bits.
-            o   X'06'   Get Number of Users Connected - returns value on success, in 8 bytes that should be interpreted as an unsigned int of 64 bits.
-            o   X'07'   Get User List - returns the list of all registered unames, each uname preceded by a byte (unsigned int of 8 bits) containing
-                             it's length. Only the ASCII charset is supported.
+            o   X'01'   Get Total Historic Connections  
+            o   X'02'   Get Current Connections         
+            o   X'03'   Get Max. Concurrent Connections 
+            o   X'04'   Get Total Bytes Sent            
+            o   X'05'   Get Total Bytes Received        
+            o   X'06'   Get Number of Users Connected   
+            o   X'07'   Get User List                   
 
     6.2 Response
 
         The Querying requests follow the General Response Structure detailed in Section 4.2.
+        If method takes a value between X'01' - X'06'. The general response is: 
+            +---------+--------+-----------+------------+
+            | ACTION  | METHOD |  RLEN     |  RESPONSE  | 
+            +---------+--------+-----------+------------+
+            |  X'D0'  |   1    |    2      |    X'01'   |
+            +---------+--------+-----------+------------+
+        Where METHOD field is the same received by the server. The RESPONSE MUST be interpreted as an unsigned int of n bits, where n is the 
+        value of the RLEN field.
+        If method equals X'07'. The RESPONSE MUST have the following format: A byte as an unsigned int representing the length of the following 
+        name. Only ASCII charset is supported. The RLEN MUST consider the whole answer (i.e the bytes indicating the usernames length, and the 
+        usernames characters).
+        
+        
 
