@@ -69,8 +69,13 @@ static void handle_version_read_event(struct cool_protocol_authentication_messag
 	current_data->version = version;
 }
 
-static void handle_ulen_read_event(struct cool_protocol_authentication_message * current_data, uint8_t username_length ) {
-	current_data->username_length = username_length;
+static void handle_ulen_read_event(struct parser * using_parser , struct cool_protocol_authentication_message * current_data, uint8_t username_length ) {
+	if(username_length == 0 ){
+        using_parser->state = END;
+        return ;
+    }
+
+    current_data->username_length = username_length;
 	current_data->username = malloc(current_data->username_length + 1 );
 }
 
@@ -83,8 +88,12 @@ static void handle_username_read_event(struct parser * using_parser, struct cool
 	}
 }
 
-static void handle_plen_read_event(struct cool_protocol_authentication_message * current_data, uint8_t password_length ) {
-	current_data->password_length = password_length;
+static void handle_plen_read_event(struct parser * using_parser ,struct cool_protocol_authentication_message * current_data, uint8_t password_length ) {
+    if(password_length == 0 ){
+        using_parser->state = END;
+        return ;
+    }
+    current_data->password_length = password_length;
 	current_data->password = malloc(current_data->password_length + 1);
 }
 
@@ -177,13 +186,13 @@ bool feed_cool_protocol_authentication_parser(struct parser * using_parser, stru
 			handle_version_read_event(cool_protocol_data, current_character);
 			break;
 		case ULEN_READ_EVENT:
-			handle_ulen_read_event(cool_protocol_data, current_character);
+			handle_ulen_read_event(using_parser,cool_protocol_data, current_character);
 			break;
 		case USERNAME_READ_EVENT:
 			handle_username_read_event(using_parser, cool_protocol_data, current_character);
 			break;
 		case PASSLEN_READ_EVENT:
-			handle_plen_read_event(cool_protocol_data, current_character);
+			handle_plen_read_event(using_parser,cool_protocol_data, current_character);
 			break;
 		case READING_PASSWORD_EVENT:
 			handle_password_read_event(using_parser, cool_protocol_data, current_character);
