@@ -14,18 +14,25 @@ The keywords MUST, MUST NOT, SHOULD, SHOULD NOT, MAY in this document will be in
     The goal of this protocol is to provide an interface for interacting with a running Socks5d Server. The client MAY ask for:
         o The total number of historical connections
         o The total number of concurrent connections
-        o Amounts of bytes transferred
+        o Amounts of bytes received by  server
+        o Amounts of bytes sent by  server
+        o The number of users connected
         o The list of all registered users
     The client SHOULD also be able to modify information or properties of the server on runtime, such as adding or deleting users, setting up password sniffing for at least POP3 protocol and activating or deactivating authentication for the socks5 proxy.
     In order to maintain security, authentication with the server upon connection is required. 
     Once authenticated, the connection follows a Request/Response structure, where the client makes the requests, and the Server processes and responds.
-    All bytes on this RFC are interpreted as Big Endian.
+    Note:
+       Unless otherwise noted, the decimal numbers appearing in packet-format diagrams represent the length of the corresponding field, in
+       octets.  Where a given octet must take on a specific value, the syntax X'hh' is used to denote the value of the single octet in that
+       field. When the word 'Variable' is used, it indicates that the  corresponding field has a variable length defined either by an
+       associated (one or two octet) length field, or by a data type field. Every Octet MUST be interpreted as an unsigned int of 8 bits.
+
 
 3. Connection and Authentication
 
    3.1. Connection
         When a TCP-based Client wishes to establish a connection to the socks5d Server it MUST open a TCP connection to the appropriate port on the server system. The Socks5d Administration service is conventionally located on port 8080.
-        
+
    3.2. Authentication
         Once the connection with the socks5d server has started, the client produces an authentication request:
 
@@ -49,8 +56,8 @@ The keywords MUST, MUST NOT, SHOULD, SHOULD NOT, MAY in this document will be in
                                 |   2    |
                                 +--------+
 
-        A STATUS field of X'C001' indicates the authentication was successful.
-        A STATUS field of X'4B1D' indicates the authentication failed.
+        A STATUS field of X'C0' X'01' indicates the authentication was successful.
+        A STATUS field of X'4B' X'1D' indicates the authentication failed.
         
         If the server returns a failure status, it will wait for another authentication request.
 
@@ -61,7 +68,7 @@ The keywords MUST, MUST NOT, SHOULD, SHOULD NOT, MAY in this document will be in
     Once the client is authenticated, the following messages will follow Request/Response structure.
     The client sends a Request and the server answers with a corresponding Response message.
 
-    All messages from now on include the fields ACTION and METHOD which are 1 byte long. All bytes are interpreted as Big Endian.
+    All messages from now on include the fields ACTION and METHOD which are 1 byte long. All bytes are interpreted as unsigned int of 8 bits.
 
     4.1. General Request Structure
 
@@ -84,27 +91,30 @@ The keywords MUST, MUST NOT, SHOULD, SHOULD NOT, MAY in this document will be in
 
         The associated METHODS for the Query ACTION (X'D0') are:
 
-            o   X'01'   Get Total Historic Connections - returns value on success, in 8 bytes. 
-            o   X'02'   Get Current Connections - returns value on success, in 8 bytes.
-            o   X'03'   Get Max. Concurrent Connections - returns value on success, in 8 bytes. 
-            o   X'04'   Get Total Bytes Sent - returns value on success, in 8 bytes. 
-            o   X'05'   Get Total Bytes Received - returns value on success, in 8 bytes. 
-            o   X'06'   Get Number of Users Connected - returns value on success, in 8 bytes. 
-            o   X'07'   Get User List - returns the list of all registered unames, each uname preceded by a byte containing it's length.
+            o   X'01'   Get Total Historic Connections - returns value on success, in 8 bytes that should be interpreted as an unsigned int of 64 bits.
+            o   X'02'   Get Current Connections - returns value on success, in 8 bytes that should be interpreted as an unsigned int of 64 bits.
+            o   X'03'   Get Max. Concurrent Connections - returns value on success, in 8 bytes that should be interpreted as an unsigned int of 64 bits.
+            o   X'04'   Get Total Bytes Sent - returns value on success, in 8 bytes that should be interpreted as an unsigned int of 64 bits.
+            o   X'05'   Get Total Bytes Received - returns value on success, in 8 bytes that should be interpreted as an unsigned int of 64 bits.
+            o   X'06'   Get Number of Users Connected - returns value on success, in 8 bytes that should be interpreted as an unsigned int of 64 bits.
+            o   X'07'   Get User List - returns the list of all registered unames, each uname preceded by a byte (unsigned int of 8 bits) containing
+                             it's length. Only the ASCII charset is supported.
           
         On the other hand, methods associated with the Modification ACTION are meant to modify the Server configuration. These methods do take parameters, whose syntax is described on Section 5. 
 
         The associated METHODS for the Modification ACTION (X'BE') are:
 
-            o   X'00'   Add User - returns 1 on success in 1 byte.
-            o   X'01'   Remove User - returns 1 on success in 1 byte.
-            o   X'02'   Enable Password Spoofing - returns 1 on success in 1 byte.
-            o   X'03'   Disable Password Spoofing - returns 1 on success in 1 byte.
-            o   X'04'   Modify Proxy Authentication - returns 1 on success in 1 byte.
+            o   X'00'   Add User - server returns X'01' on success.
+            o   X'01'   Remove User - server returns X'01' on success.
+            o   X'02'   Enable Password Spoofing - server returns X'01' on success.
+            o   X'03'   Disable Password Spoofing - server returns X'01' on success.
+            o   X'04'   Modify Proxy Authentication - server returns X'01' on success.
 
     4.2 General Response Structure
 
-        In the Response, the ACTION and METHOD fields MUST match the ones from their corresponding Request. The RLEN field is a byte representing the length of the response or 0 in case of error. 
+        In the Response, the ACTION and METHOD fields MUST match the ones from their corresponding Request.
+        The RLEN field are two bytes that should be interpreted as unsigned int of 16 bits in network order representing the length of the response.
+         On failure X'00'X'01' is returned.
             
             +--------+--------+--------+-------------+
             | ACTION | METHOD |  RLEN  |  RESPONSE   | 
@@ -120,13 +130,13 @@ The keywords MUST, MUST NOT, SHOULD, SHOULD NOT, MAY in this document will be in
             |  X'FF'  |  X'FF' |   2    | 1 to 65535 |
             +---------+--------+--------+------------+
 
-            Where ACTION and METHOD are set to X'FF' and RESPONSE takes the value of 1 in 1 byte.  
+            Where ACTION and METHOD are set to X'FF' and RESPONSE takes the value X'01'.
             The values X'FF' for ACTION and METHOD SHOULD never be included in a Request message, as they are reserved to notify errors.
 
         If a valid ACTION and METHOD is sent to the Server, the Server MUST respond with the following structure:
 
             o The fields ACTION and METHOD are those of the orginal request.
-            o The field RLEN is set to the length of the response. 
+            o The field RLEN is set to the length (as unsigned int of 16 bits in network order) of the response.
             o The field RESPONSE is set to the specified return value. 
 
 5. Modification
