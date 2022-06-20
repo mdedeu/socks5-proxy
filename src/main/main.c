@@ -15,16 +15,10 @@
 
 
 #define MAX_PENDING_CONNECTIONS 20
-#define TRUE 1
 #define SOCKS_PASSIVE_SOCKET_SIZE 2
 #define SOCKS_COOL_PASSIVE_SOCKET_SIZE 2
-#define DEFAULT_SOCK_PORT 1080
-#define COOL_PORT 42069
-
 #define IPV4_LOOPBACK_STRING "127.0.0.1"
 #define IPV6_LOOPBACK_STRING "::1"
-#define IPV4_ADDR_ANY_STRING "0.0.0.0"
-#define IPV6_ADDR_ANY_STRING "::"
 
 static bool done = false;
 
@@ -148,7 +142,6 @@ int main(const int argc,  char **argv){
     signal(SIGTERM, sigterm_handler);
     signal(SIGINT,  sigterm_handler);
     int ret = 0;
-//    bool could_bind = false;
 
     struct socks5args received_args;
     parse_args(argc, argv, &received_args);
@@ -169,6 +162,8 @@ int main(const int argc,  char **argv){
 
 
     close(STDIN_FILENO);
+    selector_fd_set_nio(STDOUT_FILENO);
+    selector_fd_set_nio(STDERR_FILENO);
 
     fd_selector selector      = NULL;
     selector_status   selector_status_returned      = SELECTOR_SUCCESS;

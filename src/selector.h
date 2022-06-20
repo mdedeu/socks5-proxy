@@ -199,7 +199,7 @@ selector_notify_block(fd_selector s,
 void set_as_blocked_by_server(struct selector_key * key );
 
 
-#define INACTIVITY_TOLERATION 1000
+#define INACTIVITY_TOLERATION 500
 
 
 #endif
