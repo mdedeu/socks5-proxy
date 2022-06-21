@@ -47,7 +47,7 @@ enum states_and_events{
 
 static void handle_version_read_event(struct parser * using_parser, struct sock_authentication_message * current_data,uint8_t version ){
      current_data->version = version;
-    if(version != 5){
+    if(version != 1){
         using_parser->state = END;
     }
 }
